@@ -13,7 +13,8 @@
         }
     ],
     "require": {
-        "php": ">=8.0.0",
+        "php": ">=8.2",
+        "ext-libxml": "*",
         "josemmo/verifactu-php": "^0.3"
     },
     "autoload": {
