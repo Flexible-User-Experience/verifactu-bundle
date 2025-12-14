@@ -1,0 +1,29 @@
+{
+    "name": "flux/verifactu-php-bundle",
+    "type": "symfony-bundle",
+    "description": "Symfony bundle to deal with Veri*Factu Spanish digital invoicing law",
+    "keywords": ["verifactu", "aeat", "sii", "symfony", "bundle"],
+    "homepage": "https://github.com/Flexible-User-Experience/verifactu-php-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Romaní",
+            "email": "david@flux.cat",
+            "homepage": "https://github.com/davidromani"
+        }
+    ],
+    "require": {
+        "php": ">=8.0.0",
+        "josemmo/verifactu-php": "^0.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Flux\\VerifactuBundle\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Flux\\VerifactuBundle\\Tests\\": "tests"
+        }
+    }
+}
