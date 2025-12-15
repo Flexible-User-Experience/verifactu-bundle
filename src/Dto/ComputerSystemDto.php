@@ -11,19 +11,31 @@ final readonly class ComputerSystemDto implements ComputerSystemInterface
 {
     public function __construct(
         #[Assert\NotBlank]
+        #[Assert\Length(max: 120)]
         private string $vendorName,
         #[Assert\NotBlank]
-        private string $vendorNif,
+        #[Assert\Length(exactly: 9)]
+        private string $vendorNif, // TODO apply a better assert "A00000000" | "00000000A"
         #[Assert\NotBlank]
+        #[Assert\Length(max: 30)]
         private string $name,
         #[Assert\NotBlank]
+        #[Assert\Length(max: 2)]
         private string $id,
         #[Assert\NotBlank]
+        #[Assert\Length(max: 50)]
         private string $version,
         #[Assert\NotBlank]
+        #[Assert\Length(max: 100)]
         private string $installationNumber,
+        #[Assert\NotNull]
+        #[Assert\Type('boolean')]
         private bool $onlySupportsVerifactu,
+        #[Assert\NotNull]
+        #[Assert\Type('boolean')]
         private bool $supportsMultipleTaxpayers,
+        #[Assert\NotNull]
+        #[Assert\Type('boolean')]
         private bool $hasMultipleTaxpayers
     ) {
     }

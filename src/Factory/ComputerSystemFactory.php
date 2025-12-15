@@ -24,15 +24,20 @@ final readonly class ComputerSystemFactory
         }
 
         return new ComputerSystemDto(
-            vendorName: $input->getVendorName(),
-            vendorNif: $input->getVendorNif(),
-            name: $input->getName(),
-            id: $input->getId(),
-            version: $input->getVersion(),
-            installationNumber: $input->getInstallationNumber(),
+            vendorName: $this->tt($input->getVendorName()),
+            vendorNif: $this->tt($input->getVendorNif(), 9),
+            name: $this->tt($input->getName(), 30),
+            id: $this->tt($input->getId(), 2),
+            version: $this->tt($input->getVersion(), 50),
+            installationNumber: $this->tt($input->getInstallationNumber(), 100),
             onlySupportsVerifactu: $input->isOnlySupportsVerifactu(),
             supportsMultipleTaxpayers: $input->isSupportsMultipleTaxpayers(),
             hasMultipleTaxpayers: $input->isHasMultipleTaxpayers(),
         );
+    }
+
+    private function tt(string $value, int $maxLength = 120): string
+    {
+        return mb_substr(trim($value), 0, $maxLength);
     }
 }
