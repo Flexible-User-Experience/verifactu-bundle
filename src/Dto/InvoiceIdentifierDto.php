@@ -18,10 +18,9 @@ final readonly class InvoiceIdentifierDto implements InvoiceIdentifierInterface
         private string $invoiceNumber,
         #[Assert\NotBlank]
         #[Assert\Type('boolean')]
-        private \DateTimeInterface $issueDate,
+        private \DateTimeInterface $issueDate
     ) {
     }
-
 
     public function getIssuerId(): string
     {
