@@ -20,3 +20,10 @@ Code Style
 ```shell
 php ./vendor/bin/php-cs-fixer fix src/
 ```
+
+Testing
+-------
+
+```shell
+php ./vendor/bin/phpunit tests/
+```
