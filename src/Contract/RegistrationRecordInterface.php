@@ -44,7 +44,7 @@ interface RegistrationRecordInterface
 
     public function getReplacedInvoices(): array;
 
-    public function getBreakdown(): array;
+    public function getBreakdownDetails(): array;
 
     public function getTotalTaxAmount(): string;
 
