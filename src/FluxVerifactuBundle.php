@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle;
 
+use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
@@ -13,7 +14,14 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
  */
 final class FluxVerifactuBundle extends AbstractBundle
 {
-    public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
+    public function configure(DefinitionConfigurator $definition): void
+    {
+        $definition->import('../config/definition.php');
+        // you can also use glob patterns
+        //$definition->import('../config/definition/*.php');
+    }
+
+    public function loadExtension(array $config, ContainerConfigurator $container): void
     {
         $container->import('../config/services.php');
     }
