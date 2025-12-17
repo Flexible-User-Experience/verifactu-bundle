@@ -9,13 +9,13 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 final class TestHandler
 {
     public function __construct(
-        #[Autowire(param: '%app.is_prod_environment%')]
-        private readonly bool $isProdEnvironment
+        #[Autowire(param: '%kernel.default_locale%')]
+        private readonly string $isProdEnvironment
     ) {
     }
 
     public function getTest(): string
     {
-        return $this->isProdEnvironment ? 'prod' : 'test';
+        return $this->isProdEnvironment;
     }
 }
