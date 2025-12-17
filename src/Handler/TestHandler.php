@@ -7,7 +7,7 @@ namespace Flux\VerifactuBundle\Handler;
 final class TestHandler
 {
     public function __construct(
-        private readonly bool $isProdEnvironment
+        private readonly bool $isProdEnvironment,
     ) {
     }
 
