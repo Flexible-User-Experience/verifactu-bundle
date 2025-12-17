@@ -14,6 +14,8 @@ use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
  */
 final class FluxVerifactuBundle extends AbstractBundle
 {
+    public const IS_PROD_ENVIRONMENT_CONFIG_KEY = 'is_prod_environment';
+
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->import('../config/definition.php');
@@ -23,7 +25,7 @@ final class FluxVerifactuBundle extends AbstractBundle
     {
         $container->import('../config/services.php');
         $builder->getDefinition('flux_verifactu.test_handler')
-            ->setArgument(0, $config['is_prod_environment'])
+            ->setArgument(0, $config[self::IS_PROD_ENVIRONMENT_CONFIG_KEY])
         ;
     }
 }
