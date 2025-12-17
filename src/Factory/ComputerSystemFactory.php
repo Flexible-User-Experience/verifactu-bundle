@@ -6,16 +6,10 @@ namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\ComputerSystemInterface;
 use Flux\VerifactuBundle\Dto\ComputerSystemDto;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
-final readonly class ComputerSystemFactory
+final readonly class ComputerSystemFactory extends BaseFactory
 {
-    public function __construct(
-        private ValidatorInterface $validator,
-    ) {
-    }
-
     public function create(ComputerSystemInterface $input): ComputerSystemInterface
     {
         $violations = $this->validator->validate($input);
@@ -34,10 +28,5 @@ final readonly class ComputerSystemFactory
             supportsMultipleTaxpayers: $input->isSupportsMultipleTaxpayers(),
             hasMultipleTaxpayers: $input->isHasMultipleTaxpayers(),
         );
-    }
-
-    private function tt(string $value, int $maxLength = 120): string
-    {
-        return mb_substr(trim($value), 0, $maxLength);
     }
 }

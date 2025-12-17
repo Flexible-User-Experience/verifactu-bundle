@@ -36,7 +36,7 @@ final readonly class ComputerSystemDto implements ComputerSystemInterface
         private bool $supportsMultipleTaxpayers,
         #[Assert\NotNull]
         #[Assert\Type('boolean')]
-        private bool $hasMultipleTaxpayers
+        private bool $hasMultipleTaxpayers,
     ) {
     }
 
