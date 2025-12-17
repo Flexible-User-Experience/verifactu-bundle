@@ -11,7 +11,7 @@ final class TestHandlerTest extends TestCase
 {
     public function testGetTestReturnsTest(): void
     {
-        $handler = new TestHandler();
-        $this->assertSame('test', $handler->getTest());
+        $handler = new TestHandler(true);
+        $this->assertSame('true', $handler->getTest());
     }
 }
