@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Handler;
 
-final class TestHandler
+final readonly class TestHandler
 {
     public function __construct(
-        private readonly bool $isProdEnvironment,
+        private bool $isProdEnvironment,
     ) {
     }
 
