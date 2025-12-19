@@ -16,6 +16,7 @@ final readonly class AeatClientHandler
     public function __construct(
         private array $computerSystemConfig,
         private ComputerSystemFactory $computerSystemFactory,
+        private array $fiscalIdentifierConfig,
         private FiscalIdentifierFactory $fiscalIdentifierFactory,
     ) {
     }
@@ -48,8 +49,8 @@ final readonly class AeatClientHandler
     private function getValidatedFiscalIdentifier(): FiscalIdentifierInterface
     {
         $validatedFiscalDto = new FiscalIdentifierDto(
-            name: $this->computerSystemConfig['vendor_name'],
-            nif: $this->computerSystemConfig['vendor_nif'],
+            name: $this->fiscalIdentifierConfig['name'],
+            nif: $this->fiscalIdentifierConfig['nif'],
         );
 
         return $this->fiscalIdentifierFactory->create($validatedFiscalDto);
