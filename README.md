@@ -72,6 +72,13 @@ Code Style
 php ./vendor/bin/php-cs-fixer fix src/
 ```
 
+Code Analysis
+-------------
+
+```shell
+php ./vendor/bin/phpstan analyse
+```
+
 Testing
 -------
 
