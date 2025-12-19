@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\FluxVerifactuBundle;
 use Flux\VerifactuBundle\Handler\AeatClientHandler;
 use Flux\VerifactuBundle\Handler\TestHandler;
@@ -13,6 +14,7 @@ return static function (ContainerConfigurator $container): void {
         ->set('flux_verifactu.aeat_client_handler', AeatClientHandler::class)
             ->args([
                 abstract_arg(FluxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
+                service(ComputerSystemFactory::class),
             ])
         ->alias(AeatClientHandler::class, 'flux_verifactu.aeat_client_handler')
         ->public()
