@@ -4,24 +4,32 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Handler;
 
+use Flux\VerifactuBundle\Dto\ComputerSystemDto;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 
-final class AeatClientHandler
+final readonly class AeatClientHandler
 {
-    private ComputerSystemFactory $computerSystemFactory;
-
     public function __construct(
-        private readonly array $computerSystemConfig,
+        private array $computerSystemConfig,
+        private ComputerSystemFactory $computerSystemFactory,
     ) {
-    }
-
-    public function __invoke(): void
-    {
-        $this->computerSystemFactory = new ComputerSystemFactory();
     }
 
     public function getTest(): string
     {
-        return $this->isProdEnvironment ? 'true' : 'false';
+        $computerSystemDto = new ComputerSystemDto(
+            vendorName: $this->computerSystemConfig['vendor_name'],
+            vendorNif: $this->computerSystemConfig['vendor_nif'],
+            name: $this->computerSystemConfig['name'],
+            id: $this->computerSystemConfig['id'],
+            version: $this->computerSystemConfig['version'],
+            installationNumber: $this->computerSystemConfig['installation_number'],
+            onlySupportsVerifactu: $this->computerSystemConfig['only_supports_verifactu'],
+            supportsMultipleTaxpayers: $this->computerSystemConfig['supports_multiple_taxpayers'],
+            hasMultipleTaxpayers: $this->computerSystemConfig['has_multiple_taxpayers'],
+        );
+        $validatedComputerSystem = $this->computerSystemFactory->create($computerSystemDto);
+
+        return $validatedComputerSystem->getName();
     }
 }
