@@ -6,6 +6,7 @@ namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\ComputerSystemInterface;
 use Flux\VerifactuBundle\Dto\ComputerSystemDto;
+use josemmo\Verifactu\Models\ComputerSystem;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 final readonly class ComputerSystemFactory extends BaseFactory
@@ -28,5 +29,21 @@ final readonly class ComputerSystemFactory extends BaseFactory
             supportsMultipleTaxpayers: $input->isSupportsMultipleTaxpayers(),
             hasMultipleTaxpayers: $input->isHasMultipleTaxpayers(),
         );
+    }
+
+    public function transformDtoToModel(ComputerSystemInterface $dto): ComputerSystem
+    {
+        $system = new ComputerSystem();
+        $system->vendorName = $dto->getVendorName();
+        $system->vendorNif = $dto->getVendorNif();
+        $system->name = $dto->getName();
+        $system->id = $dto->getId();
+        $system->version = $dto->getVersion();
+        $system->installationNumber = $dto->getInstallationNumber();
+        $system->onlySupportsVerifactu = $dto->isOnlySupportsVerifactu();
+        $system->supportsMultipleTaxpayers = $dto->isSupportsMultipleTaxpayers();
+        $system->hasMultipleTaxpayers = $dto->isHasMultipleTaxpayers();
+
+        return $system;
     }
 }

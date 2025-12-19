@@ -6,6 +6,7 @@ namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\FiscalIdentifierInterface;
 use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
+use josemmo\Verifactu\Models\Records\FiscalIdentifier;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 final readonly class FiscalIdentifierFactory extends BaseFactory
@@ -21,5 +22,14 @@ final readonly class FiscalIdentifierFactory extends BaseFactory
             name: $this->tt($input->getName(), 120),
             nif: $this->tt($input->getNif(), 9),
         );
+    }
+
+    public function transformDtoToModel(FiscalIdentifierInterface $dto): FiscalIdentifier
+    {
+        $taxpayer = new FiscalIdentifier();
+        $taxpayer->name = $dto->getName();
+        $taxpayer->nif = $dto->getNif();
+
+        return $taxpayer;
     }
 }

@@ -10,6 +10,7 @@ use Flux\VerifactuBundle\Dto\ComputerSystemDto;
 use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
+use josemmo\Verifactu\Services\AeatClient;
 
 final readonly class AeatClientHandler
 {
@@ -26,6 +27,7 @@ final readonly class AeatClientHandler
     {
         $validatedComputerSystem = $this->getValidatedComputerSystem();
         $validatedFiscalIdentifier = $this->getValidatedFiscalIdentifier();
+        $aeatClient = $this->buildAeatClientWithSystemAndTaxpayer($validatedComputerSystem, $validatedFiscalIdentifier);
 
         return $validatedComputerSystem->getName().' - '.$validatedFiscalIdentifier->getNif();
     }
@@ -55,5 +57,17 @@ final readonly class AeatClientHandler
         );
 
         return $this->fiscalIdentifierFactory->create($validatedFiscalDto);
+    }
+
+    private function buildAeatClientWithSystemAndTaxpayer(ComputerSystemInterface $system, FiscalIdentifierInterface $taxpayer): AeatClient
+    {
+        $client = new AeatClient(
+            $this->computerSystemFactory->transformDtoToModel($system),
+            $this->fiscalIdentifierFactory->transformDtoToModel($taxpayer),
+        );
+        $client->setCertificate($this->aeatClientConfig['pfx_certificate_filepath'], $this->aeatClientConfig['pfx_certificate_password']);
+        $client->setProduction($this->aeatClientConfig['is_prod_environment']);
+
+        return $client;
     }
 }
