@@ -22,7 +22,7 @@ return static function (ContainerConfigurator $container): void {
     $container->services()
         ->set('flux_verifactu.computer_system_factory', ComputerSystemFactory::class)
             ->args([
-                service('validator.builder'),
+                service('validator'),
             ])
         ->alias(ComputerSystemFactory::class, 'flux_verifactu.computer_system_factory')
     ;
