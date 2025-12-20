@@ -8,7 +8,7 @@ use josemmo\Verifactu\Models\Records\CorrectiveType;
 use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 use josemmo\Verifactu\Models\Records\InvoiceType;
 
-interface RegistrationRecordInterface
+interface RegistrationRecordInterface extends ValidatableInterface
 {
     public function getInvoiceIdentifier(): InvoiceIdentifier;
 

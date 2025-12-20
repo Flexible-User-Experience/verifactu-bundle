@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Contract;
 
-interface FiscalIdentifierInterface
+interface FiscalIdentifierInterface extends ValidatableInterface
 {
     public function getName(): string;
 

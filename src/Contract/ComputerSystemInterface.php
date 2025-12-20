@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Contract;
 
-interface ComputerSystemInterface
+interface ComputerSystemInterface extends ValidatableInterface
 {
     public function getVendorName(): string;
 

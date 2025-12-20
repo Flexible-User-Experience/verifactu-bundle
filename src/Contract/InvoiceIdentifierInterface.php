@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Contract;
 
-interface InvoiceIdentifierInterface
+interface InvoiceIdentifierInterface extends ValidatableInterface
 {
     public function getIssuerId(): string;
 

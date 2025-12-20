@@ -8,7 +8,7 @@ use josemmo\Verifactu\Models\Records\OperationType;
 use josemmo\Verifactu\Models\Records\RegimeType;
 use josemmo\Verifactu\Models\Records\TaxType;
 
-interface BreakdownDetailInterface
+interface BreakdownDetailInterface extends ValidatableInterface
 {
     public function getTaxType(): TaxType;
 
