@@ -11,6 +11,9 @@ use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 final readonly class RegistrationRecordFactory extends BaseFactory
 {
+    private const DEFAULT_COMPUTER_DATE_FORMAT = 'Y-m-d';
+    private const DEFAULT_COMPUTER_DATETIME_FORMAT = 'Y-m-d H:i:s';
+
     public function create(RegistrationRecordInterface $input): RegistrationRecordInterface
     {
         $violations = $this->validator->validate($input);
@@ -45,17 +48,26 @@ final readonly class RegistrationRecordFactory extends BaseFactory
     public function transformDtoToModel(RegistrationRecordInterface $dto): RegistrationRecord
     {
         $record = new RegistrationRecord();
+        $record->invoiceId = $dto->getInvoiceIdentifier();
+        $record->previousInvoiceId = $dto->getPreviousInvoiceIdentifier();
+        $record->previousHash = $dto->getPreviousHash();
+        $record->hash = $dto->getHash();
+        $record->hashedAt = \DateTimeImmutable::createFromFormat(self::DEFAULT_COMPUTER_DATETIME_FORMAT, $dto->getHashAt()->format(self::DEFAULT_COMPUTER_DATETIME_FORMAT));
         $record->isCorrection = $dto->getIsCorrection();
         $record->isPriorRejection = $dto->getIsPriorRejection();
         $record->issuerName = $dto->getIssuerName();
         $record->invoiceType = $dto->getInvoiceType();
-        $record->operationDate = \DateTimeImmutable::createFromFormat('Y-m-d', $dto->getOperationDate()?->format('Y-m-d'));
+        $record->operationDate = \DateTimeImmutable::createFromFormat(self::DEFAULT_COMPUTER_DATE_FORMAT, $dto->getOperationDate()?->format(self::DEFAULT_COMPUTER_DATE_FORMAT));
         $record->description = $dto->getDescription();
         $record->recipients = $dto->getRecipients();
         $record->correctiveType = $dto->getCorrectiveType();
         $record->correctedInvoices = $dto->getCorrectiveInvoices();
         $record->correctedBaseAmount = $dto->getCorrectedBaseAmount();
         $record->correctedTaxAmount = $dto->getCorrectedTaxAmount();
+        $record->replacedInvoices = $dto->getReplacedInvoices();
+        $record->breakdown = $dto->getBreakdownDetails();
+        $record->totalTaxAmount = $dto->getTotalTaxAmount();
+        $record->totalAmount = $dto->getTotalAmount();
 
         return $record;
     }
