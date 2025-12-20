@@ -48,18 +48,19 @@ flux_verifactu:
 
 ## Usage
 
-### `TestHandler` Service (WIP, for now is a Proof-Of-Concept)
+### `AeatClientHandler` Service (WIP, for now is only a Proof-Of-Concept)
 
-You can inject the `TestHandler` service in your app.
+You can inject the `AeatClientHandler` service in your app. Make `sendRegistrationRecordToAeatClient` method calls to send registration records to AEAT API. Your `Invoice` model (or entity) must implement `Flux\VerifactuBundle\Contract\RegistrationRecordInterface`.
 
 ```php
-use Flux\VerifactuBundle\Handler\TestHandler;
+use Flux\VerifactuBundle\Handler\AeatClientHandler;
 
 class AppTestController
 {
-    public function test(TestHandler $testHandler)
+    public function test(Invoice $invoice, AeatClientHandler $aeatClientHandler)
     {
-        $testHandler->getTest(); // returns 'true' or 'false' as string (depending on your is_prod_environment configuration)
+        $registrationRecord = $aeatClientHandler->buildRegistrationRecordDtoFromInterface($invoice);
+        $aeatClientHandler->sendRegistrationRecordToAeatClient($registrationRecord); // for now only returns 'OK' or 'KO' as string (please, `keep aeat_client.is_prod_environment` configuration as `false`)
         // ...
     }
 }
