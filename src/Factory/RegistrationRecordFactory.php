@@ -13,7 +13,7 @@ final readonly class RegistrationRecordFactory
     private const DEFAULT_COMPUTER_DATE_FORMAT = 'Y-m-d';
     private const DEFAULT_COMPUTER_DATETIME_FORMAT = 'Y-m-d H:i:s';
 
-    public function create(RegistrationRecordInterface $input): RegistrationRecordInterface
+    public function create(RegistrationRecordInterface $input): RegistrationRecordDto
     {
         return new RegistrationRecordDto(
             invoiceIdentifier: $input->getInvoiceIdentifier(),
