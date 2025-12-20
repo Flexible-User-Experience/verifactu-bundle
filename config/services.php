@@ -9,6 +9,7 @@ use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
 use Flux\VerifactuBundle\FluxVerifactuBundle;
 use Flux\VerifactuBundle\Handler\AeatClientHandler;
+use Flux\VerifactuBundle\Validator\ContractsValidator;
 
 return static function (ContainerConfigurator $container): void {
     $container->services()
@@ -20,29 +21,29 @@ return static function (ContainerConfigurator $container): void {
                 service(RegistrationRecordFactory::class),
                 service(ComputerSystemFactory::class),
                 service(FiscalIdentifierFactory::class),
+                service(ContractsValidator::class),
             ])
         ->alias(AeatClientHandler::class, 'flux_verifactu.aeat_client_handler')
         ->public()
     ;
     $container->services()
+        ->set('flux_verifactu.registration_record_factory', RegistrationRecordFactory::class)
+        ->alias(RegistrationRecordFactory::class, 'flux_verifactu.registration_record_factory')
+    ;
+    $container->services()
         ->set('flux_verifactu.computer_system_factory', ComputerSystemFactory::class)
-            ->args([
-                service('validator'),
-            ])
         ->alias(ComputerSystemFactory::class, 'flux_verifactu.computer_system_factory')
     ;
     $container->services()
         ->set('flux_verifactu.fiscal_identifier_factory', FiscalIdentifierFactory::class)
-            ->args([
-                service('validator'),
-            ])
         ->alias(FiscalIdentifierFactory::class, 'flux_verifactu.fiscal_identifier_factory')
     ;
+
     $container->services()
-        ->set('flux_verifactu.registration_record_factory', RegistrationRecordFactory::class)
+        ->set('flux_verifactu.contracts_validator', ContractsValidator::class)
             ->args([
                 service('validator'),
             ])
-        ->alias(RegistrationRecordFactory::class, 'flux_verifactu.registration_record_factory')
+        ->alias(ContractsValidator::class, 'flux_verifactu.contracts_validator')
     ;
 };

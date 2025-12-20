@@ -12,6 +12,7 @@ use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
+use Flux\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Responses\ResponseStatus;
 use josemmo\Verifactu\Services\AeatClient;
 
@@ -24,6 +25,7 @@ final readonly class AeatClientHandler
         private RegistrationRecordFactory $registrationRecordFactory,
         private ComputerSystemFactory $computerSystemFactory,
         private FiscalIdentifierFactory $fiscalIdentifierFactory,
+        private ContractsValidator $contractsValidator,
     ) {
     }
 
