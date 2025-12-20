@@ -44,7 +44,10 @@ final readonly class AeatClientHandler
 
     private function getValidatedRegistrationRecordFromDto(RegistrationRecordInterface $registrationRecord): RegistrationRecordInterface
     {
-        return $this->registrationRecordFactory->create($registrationRecord);
+        $validatedRegistrationRecord = $this->registrationRecordFactory->create($registrationRecord);
+        $this->contractsValidator->validate($validatedRegistrationRecord);
+
+        return $validatedRegistrationRecord;
     }
 
     private function getValidatedComputerSystem(): ComputerSystemInterface
@@ -60,8 +63,10 @@ final readonly class AeatClientHandler
             supportsMultipleTaxpayers: $this->computerSystemConfig['supports_multiple_taxpayers'],
             hasMultipleTaxpayers: $this->computerSystemConfig['has_multiple_taxpayers'],
         );
+        $validatedComputerSystem = $this->computerSystemFactory->create($computerSystemDto);
+        $this->contractsValidator->validate($validatedComputerSystem);
 
-        return $this->computerSystemFactory->create($computerSystemDto);
+        return $validatedComputerSystem;
     }
 
     private function getValidatedFiscalIdentifier(): FiscalIdentifierInterface
@@ -70,8 +75,10 @@ final readonly class AeatClientHandler
             name: $this->fiscalIdentifierConfig['name'],
             nif: $this->fiscalIdentifierConfig['nif'],
         );
+        $validatedFiscalIdentifier = $this->fiscalIdentifierFactory->create($validatedFiscalDto);
+        $this->contractsValidator->validate($validatedFiscalIdentifier);
 
-        return $this->fiscalIdentifierFactory->create($validatedFiscalDto);
+        return $validatedFiscalIdentifier;
     }
 
     private function buildAeatClientWithSystemAndTaxpayer(ComputerSystemInterface $system, FiscalIdentifierInterface $taxpayer): AeatClient
