@@ -10,7 +10,7 @@ use Flux\VerifactuBundle\Validator\ContractsValidator;
 
 final readonly class InvoiceIdentifierFactory
 {
-    public function create(InvoiceIdentifierInterface $input): InvoiceIdentifierInterface
+    public function create(InvoiceIdentifierInterface $input): InvoiceIdentifierDto
     {
         return new InvoiceIdentifierDto(
             issuerId: ContractsValidator::tt($input->getIssuerId(), 9),
