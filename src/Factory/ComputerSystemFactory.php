@@ -11,7 +11,7 @@ use josemmo\Verifactu\Models\ComputerSystem;
 
 final readonly class ComputerSystemFactory
 {
-    public function create(ComputerSystemInterface $input): ComputerSystemInterface
+    public function create(ComputerSystemInterface $input): ComputerSystemDto
     {
         return new ComputerSystemDto(
             vendorName: ContractsValidator::tt($input->getVendorName()),

@@ -1,5 +1,5 @@
 {
-    "name": "flux/verifactu-bundle",
+    "name": "flexible-ux/verifactu-bundle",
     "type": "symfony-bundle",
     "description": "Symfony bundle to deal with Veri*Factu Spanish digital invoicing law",
     "keywords": ["verifactu", "aeat", "sii", "symfony", "bundle"],

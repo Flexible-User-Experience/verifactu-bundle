@@ -9,6 +9,7 @@ use Flux\VerifactuBundle\Contract\FiscalIdentifierInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\ComputerSystemDto;
 use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
+use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
@@ -29,7 +30,12 @@ final readonly class AeatClientHandler
     ) {
     }
 
-    public function getTest(RegistrationRecordInterface $registrationRecord): string
+    public function buildRegistrationRecordDtoFromInterface(RegistrationRecordInterface $registrationRecord): RegistrationRecordDto
+    {
+        return $this->registrationRecordFactory->create($registrationRecord);
+    }
+
+    public function sendRegistrationRecordToAeatClient(RegistrationRecordInterface $registrationRecord): string
     {
         $validatedRegistrationRecord = $this->getValidatedRegistrationRecordFromDto($registrationRecord);
         $validatedComputerSystem = $this->getValidatedComputerSystem();
@@ -39,7 +45,7 @@ final readonly class AeatClientHandler
             $this->registrationRecordFactory->transformDtoToModel($validatedRegistrationRecord),
         ])->wait();
 
-        return ResponseStatus::Correct === $aeatResponse->status ? 'OK' : 'KO';
+        return ResponseStatus::Correct === $aeatResponse->status ? 'OK' : 'KO'; // TODO handle response content ('OK' => must return a CSV that needs to be stored somewhere)
     }
 
     private function getValidatedRegistrationRecordFromDto(RegistrationRecordInterface $registrationRecord): RegistrationRecordInterface

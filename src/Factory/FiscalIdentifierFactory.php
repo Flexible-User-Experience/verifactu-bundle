@@ -11,7 +11,7 @@ use josemmo\Verifactu\Models\Records\FiscalIdentifier;
 
 final readonly class FiscalIdentifierFactory
 {
-    public function create(FiscalIdentifierInterface $input): FiscalIdentifierInterface
+    public function create(FiscalIdentifierInterface $input): FiscalIdentifierDto
     {
         return new FiscalIdentifierDto(
             name: ContractsValidator::tt($input->getName()),

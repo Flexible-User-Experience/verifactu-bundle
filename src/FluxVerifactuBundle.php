@@ -18,6 +18,8 @@ final class FluxVerifactuBundle extends AbstractBundle
     public const COMPUTER_SYSTEM_CONFIG_KEY = 'computer_system';
     public const FISCAL_IDENTIFIER_CONFIG_KEY = 'fiscal_identifier';
 
+    protected string $extensionAlias = 'flux_verifactu';
+
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->import('../config/definition.php');

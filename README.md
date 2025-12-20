@@ -7,7 +7,7 @@ invoicing law. This bundle relies on `josemmo/verifactu-php` PHP library.
 ## Disclaimer
 
 This Symfony bundle is provided without a responsible declaration, as it is **not** an Invoicing Computer System ("Sistema Informático de Facturación" or "SIF" as known reference in Spain's law).
-This is a third-party tool to integrate your SIF with Veri*Factu API. It is **your responsibility** to audit its code and use it in accordance with the applicable regulations.
+This is a third-party tool to integrate into your SIF with Veri*Factu API. It is **your responsibility** to audit its code and use it in accordance with the applicable regulations.
 
 For more information, see [Artículo 13 del RD 1007/2023](https://www.boe.es/buscar/act.php?id=BOE-A-2023-24840#a1-5).
 
@@ -18,7 +18,7 @@ VerifactuBundle requires PHP 8.2 or higher and Symfony 6.4 or higher. Run the
 following command to install it in your application:
 
 ```shell
-composer require flux/verifactu-bundle
+composer require flexible-ux/verifactu-bundle
 ```
 
 ### Configure the bundle in your `config/packages/flux_verifactu.yaml` file:
@@ -48,18 +48,19 @@ flux_verifactu:
 
 ## Usage
 
-### `TestHandler` Service (WIP, for now is a Proof-Of-Concept)
+### `AeatClientHandler` Service (WIP, for now is only a Proof-Of-Concept)
 
-You can inject the `TestHandler` service in your app.
+You can inject the `AeatClientHandler` service in your app. Make `sendRegistrationRecordToAeatClient` method calls to send registration records to AEAT API. Your `Invoice` model (or entity) must implement `Flux\VerifactuBundle\Contract\RegistrationRecordInterface`.
 
 ```php
-use Flux\VerifactuBundle\Handler\TestHandler;
+use Flux\VerifactuBundle\Handler\AeatClientHandler;
 
 class AppTestController
 {
-    public function test(TestHandler $testHandler)
+    public function test(Invoice $invoice, AeatClientHandler $aeatClientHandler)
     {
-        $testHandler->getTest(); // returns 'true' or 'false' as string (depending on your is_prod_environment configuration)
+        $registrationRecord = $aeatClientHandler->buildRegistrationRecordDtoFromInterface($invoice);
+        $aeatClientHandler->sendRegistrationRecordToAeatClient($registrationRecord); // for now only returns 'OK' or 'KO' as string (please, `keep aeat_client.is_prod_environment` configuration as `false`)
         // ...
     }
 }

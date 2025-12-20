@@ -9,7 +9,7 @@ use Flux\VerifactuBundle\Dto\BreakdownDetailDto;
 
 final readonly class BreakdownDetailFactory
 {
-    public function create(BreakdownDetailInterface $input): BreakdownDetailInterface
+    public function create(BreakdownDetailInterface $input): BreakdownDetailDto
     {
         return new BreakdownDetailDto(
             taxType: $input->getTaxType(),
