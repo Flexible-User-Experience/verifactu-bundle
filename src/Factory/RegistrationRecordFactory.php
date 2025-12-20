@@ -45,6 +45,17 @@ final readonly class RegistrationRecordFactory extends BaseFactory
     public function transformDtoToModel(RegistrationRecordInterface $dto): RegistrationRecord
     {
         $record = new RegistrationRecord();
+        $record->isCorrection = $dto->getIsCorrection();
+        $record->isPriorRejection = $dto->getIsPriorRejection();
+        $record->issuerName = $dto->getIssuerName();
+        $record->invoiceType = $dto->getInvoiceType();
+        $record->operationDate = \DateTimeImmutable::createFromFormat('Y-m-d', $dto->getOperationDate()?->format('Y-m-d'));
+        $record->description = $dto->getDescription();
+        $record->recipients = $dto->getRecipients();
+        $record->correctiveType = $dto->getCorrectiveType();
+        $record->correctedInvoices = $dto->getCorrectiveInvoices();
+        $record->correctedBaseAmount = $dto->getCorrectedBaseAmount();
+        $record->correctedTaxAmount = $dto->getCorrectedTaxAmount();
 
         return $record;
     }
