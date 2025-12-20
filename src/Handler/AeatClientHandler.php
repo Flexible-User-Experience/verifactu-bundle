@@ -36,10 +36,10 @@ final readonly class AeatClientHandler
         $validatedFiscalIdentifier = $this->getValidatedFiscalIdentifier();
         $aeatClient = $this->buildAeatClientWithSystemAndTaxpayer($validatedComputerSystem, $validatedFiscalIdentifier);
         $aeatResponse = $aeatClient->send([
-            $this->registrationRecordFactory->transformDtoToModel($validatedRegistrationRecord)
+            $this->registrationRecordFactory->transformDtoToModel($validatedRegistrationRecord),
         ])->wait();
 
-        return $aeatResponse->status === ResponseStatus::Correct ? 'OK' : 'KO';
+        return ResponseStatus::Correct === $aeatResponse->status ? 'OK' : 'KO';
     }
 
     private function getValidatedRegistrationRecordFromDto(RegistrationRecordInterface $registrationRecord): RegistrationRecordInterface
