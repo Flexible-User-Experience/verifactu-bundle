@@ -60,7 +60,8 @@ class AppTestController
     public function test(Invoice $invoice, AeatClientHandler $aeatClientHandler)
     {
         $registrationRecord = $aeatClientHandler->buildRegistrationRecordDtoFromInterface($invoice);
-        $aeatClientHandler->sendRegistrationRecordToAeatClient($registrationRecord); // for now only returns 'OK' or 'KO' as string (please, `keep aeat_client.is_prod_environment` configuration as `false`)
+        $aeatClientHandler->sendRegistrationRecordToAeatClient($registrationRecord);
+        // for now this method only returns 'OK' or 'KO' as string (please, keep `aeat_client.is_prod_environment` configuration as `false`)
         // ...
     }
 }
