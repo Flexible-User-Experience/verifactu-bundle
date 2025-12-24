@@ -8,6 +8,7 @@ use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Models\Records\RegistrationRecord;
 
 final readonly class RegistrationRecordFactory
 {
@@ -23,5 +24,10 @@ final readonly class RegistrationRecordFactory
         $this->validator->validate($registrationRecordDto);
 
         return $registrationRecordDto;
+    }
+
+    public function makeValidatedRegistrationRecordModelFromDto(RegistrationRecordDto $input): RegistrationRecord
+    {
+        return $this->registrationRecordTransformer->transformDtoToModel($input);
     }
 }
