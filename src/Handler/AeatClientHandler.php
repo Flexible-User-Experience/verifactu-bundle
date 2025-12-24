@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Handler;
 
-use Flux\VerifactuBundle\Contract\ComputerSystemInterface;
 use Flux\VerifactuBundle\Contract\FiscalIdentifierInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
@@ -29,11 +28,11 @@ final readonly class AeatClientHandler
 
     public function sendRegistrationRecord(RegistrationRecordInterface $registrationRecord): string
     {
-        $validatedRegistrationRecord = $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($registrationRecord);
+        $validatedRegistrationRecordDto = $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($registrationRecord);
         $validatedFiscalIdentifier = $this->getValidatedFiscalIdentifier();
         $aeatClient = $this->buildAeatClientWithSystemAndTaxpayer($validatedFiscalIdentifier);
         $aeatResponse = $aeatClient->send([
-            $this->registrationRecordFactory->transformDtoToModel($validatedRegistrationRecord),
+            $this->registrationRecordFactory->makeValidatedRegistrationRecordModelFromDto($validatedRegistrationRecordDto),
         ])->wait();
 
         return ResponseStatus::Correct === $aeatResponse->status ? 'OK' : 'KO'; // TODO handle response content ('OK' => must return a CSV that needs to be stored somewhere)
@@ -51,10 +50,10 @@ final readonly class AeatClientHandler
         return $validatedFiscalIdentifier;
     }
 
-    private function buildAeatClientWithSystemAndTaxpayer(ComputerSystemInterface $system, FiscalIdentifierInterface $taxpayer): AeatClient
+    private function buildAeatClientWithSystemAndTaxpayer(FiscalIdentifierInterface $taxpayer): AeatClient
     {
         $client = new AeatClient(
-            $this->computerSystemFactory->transformDtoToModel($system),
+            $this->computerSystemFactory->makeValidatedComputerSystemModel(),
             $this->fiscalIdentifierFactory->transformDtoToModel($taxpayer),
         );
         $client->setCertificate($this->aeatClientConfig['pfx_certificate_filepath'], $this->aeatClientConfig['pfx_certificate_password']);
