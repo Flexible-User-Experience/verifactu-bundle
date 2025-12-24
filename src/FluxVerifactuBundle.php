@@ -30,10 +30,12 @@ final class FluxVerifactuBundle extends AbstractBundle
         $container->import('../config/services.php');
         $builder->getDefinition('flux_verifactu.aeat_client_handler')
             ->setArgument(0, $config[self::AEAT_CLIENT_KEY])
-            ->setArgument(1, $config[self::FISCAL_IDENTIFIER_CONFIG_KEY])
         ;
         $builder->getDefinition('flux_verifactu.computer_system_factory')
             ->setArgument(0, $config[self::COMPUTER_SYSTEM_CONFIG_KEY])
+        ;
+        $builder->getDefinition('flux_verifactu.fiscal_identifier_factory')
+            ->setArgument(0, $config[self::FISCAL_IDENTIFIER_CONFIG_KEY])
         ;
     }
 }

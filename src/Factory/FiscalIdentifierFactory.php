@@ -4,27 +4,40 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Factory;
 
-use Flux\VerifactuBundle\Contract\FiscalIdentifierInterface;
 use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
+use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\FiscalIdentifier;
 
 final readonly class FiscalIdentifierFactory
 {
-    public function create(FiscalIdentifierInterface $input): FiscalIdentifierDto
-    {
-        return new FiscalIdentifierDto(
-            name: ContractsValidator::tt($input->getName()),
-            nif: ContractsValidator::tt($input->getNif(), 9),
-        );
+    public function __construct(
+        private array $fiscalIdentifierConfig,
+        private FiscalIdentifierTransformer $fiscalIdentifierTransformer,
+        private ContractsValidator $validator,
+    ) {
     }
 
-    public function transformDtoToModel(FiscalIdentifierInterface $dto): FiscalIdentifier
+    public function makeValidatedFiscalIdentifierModel(): FiscalIdentifier
     {
-        $taxpayer = new FiscalIdentifier();
-        $taxpayer->name = $dto->getName();
-        $taxpayer->nif = $dto->getNif();
+        $validatedFiscalIdentifierDto = $this->makeValidatedeFiscalIdentifierDto();
 
-        return $taxpayer;
+        return $this->fiscalIdentifierTransformer->transformDtoToModel($validatedFiscalIdentifierDto);
+    }
+
+    private function makeValidatedeFiscalIdentifierDto(): FiscalIdentifierDto
+    {
+        $fiscalIdentifierDto = $this->makeFiscalIdentifierDto();
+        $this->validator->validate($fiscalIdentifierDto);
+
+        return $fiscalIdentifierDto;
+    }
+
+    private function makeFiscalIdentifierDto(): FiscalIdentifierDto
+    {
+        return new FiscalIdentifierDto(
+            name: $this->fiscalIdentifierConfig['name'],
+            nif: $this->fiscalIdentifierConfig['nif'],
+        );
     }
 }
