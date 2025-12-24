@@ -20,9 +20,4 @@ final readonly class ContractsValidator
             throw new ValidationFailedException($input, $violations);
         }
     }
-
-    public static function tt(string $value, int $maxLength = 120): string
-    {
-        return mb_substr(trim($value), 0, $maxLength);
-    }
 }
