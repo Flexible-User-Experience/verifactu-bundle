@@ -7,9 +7,7 @@ namespace Flux\VerifactuBundle\Handler;
 use Flux\VerifactuBundle\Contract\ComputerSystemInterface;
 use Flux\VerifactuBundle\Contract\FiscalIdentifierInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
-use Flux\VerifactuBundle\Dto\ComputerSystemDto;
 use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
-use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
@@ -21,7 +19,6 @@ final readonly class AeatClientHandler
 {
     public function __construct(
         private array $aeatClientConfig,
-        private array $computerSystemConfig,
         private array $fiscalIdentifierConfig,
         private RegistrationRecordFactory $registrationRecordFactory,
         private ComputerSystemFactory $computerSystemFactory,
@@ -30,49 +27,16 @@ final readonly class AeatClientHandler
     ) {
     }
 
-    public function buildRegistrationRecordDtoFromInterface(RegistrationRecordInterface $registrationRecord): RegistrationRecordDto
+    public function sendRegistrationRecord(RegistrationRecordInterface $registrationRecord): string
     {
-        return $this->registrationRecordFactory->create($registrationRecord);
-    }
-
-    public function sendRegistrationRecordToAeatClient(RegistrationRecordInterface $registrationRecord): string
-    {
-        $validatedRegistrationRecord = $this->getValidatedRegistrationRecordFromDto($registrationRecord);
-        $validatedComputerSystem = $this->getValidatedComputerSystem();
+        $validatedRegistrationRecord = $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($registrationRecord);
         $validatedFiscalIdentifier = $this->getValidatedFiscalIdentifier();
-        $aeatClient = $this->buildAeatClientWithSystemAndTaxpayer($validatedComputerSystem, $validatedFiscalIdentifier);
+        $aeatClient = $this->buildAeatClientWithSystemAndTaxpayer($validatedFiscalIdentifier);
         $aeatResponse = $aeatClient->send([
             $this->registrationRecordFactory->transformDtoToModel($validatedRegistrationRecord),
         ])->wait();
 
         return ResponseStatus::Correct === $aeatResponse->status ? 'OK' : 'KO'; // TODO handle response content ('OK' => must return a CSV that needs to be stored somewhere)
-    }
-
-    private function getValidatedRegistrationRecordFromDto(RegistrationRecordInterface $registrationRecord): RegistrationRecordInterface
-    {
-        $validatedRegistrationRecord = $this->registrationRecordFactory->create($registrationRecord);
-        $this->contractsValidator->validate($validatedRegistrationRecord);
-
-        return $validatedRegistrationRecord;
-    }
-
-    private function getValidatedComputerSystem(): ComputerSystemInterface
-    {
-        $computerSystemDto = new ComputerSystemDto(
-            vendorName: $this->computerSystemConfig['vendor_name'],
-            vendorNif: $this->computerSystemConfig['vendor_nif'],
-            name: $this->computerSystemConfig['name'],
-            id: $this->computerSystemConfig['id'],
-            version: $this->computerSystemConfig['version'],
-            installationNumber: $this->computerSystemConfig['installation_number'],
-            onlySupportsVerifactu: $this->computerSystemConfig['only_supports_verifactu'],
-            supportsMultipleTaxpayers: $this->computerSystemConfig['supports_multiple_taxpayers'],
-            hasMultipleTaxpayers: $this->computerSystemConfig['has_multiple_taxpayers'],
-        );
-        $validatedComputerSystem = $this->computerSystemFactory->create($computerSystemDto);
-        $this->contractsValidator->validate($validatedComputerSystem);
-
-        return $validatedComputerSystem;
     }
 
     private function getValidatedFiscalIdentifier(): FiscalIdentifierInterface

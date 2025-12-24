@@ -9,6 +9,7 @@ use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
 use Flux\VerifactuBundle\FluxVerifactuBundle;
 use Flux\VerifactuBundle\Handler\AeatClientHandler;
+use Flux\VerifactuBundle\Transformer\ComputerSystemTransformer;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
 
@@ -18,7 +19,6 @@ return static function (ContainerConfigurator $container): void {
         ->set('flux_verifactu.aeat_client_handler', AeatClientHandler::class)
             ->args([
                 abstract_arg(FluxVerifactuBundle::AEAT_CLIENT_KEY),
-                abstract_arg(FluxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
                 abstract_arg(FluxVerifactuBundle::FISCAL_IDENTIFIER_CONFIG_KEY),
                 service(RegistrationRecordFactory::class),
                 service(ComputerSystemFactory::class),
@@ -36,10 +36,18 @@ return static function (ContainerConfigurator $container): void {
             ->alias(RegistrationRecordFactory::class, 'flux_verifactu.registration_record_factory')
 
         ->set('flux_verifactu.computer_system_factory', ComputerSystemFactory::class)
+            ->args([
+                abstract_arg(FluxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
+                service(ComputerSystemTransformer::class),
+                service(ContractsValidator::class),
+            ])
             ->alias(ComputerSystemFactory::class, 'flux_verifactu.computer_system_factory')
 
         ->set('flux_verifactu.fiscal_identifier_factory', FiscalIdentifierFactory::class)
             ->alias(FiscalIdentifierFactory::class, 'flux_verifactu.fiscal_identifier_factory')
+
+        ->set('flux_verifactu.computer_system_transformer', ComputerSystemTransformer::class)
+            ->alias(ComputerSystemTransformer::class, 'flux_verifactu.computer_system_transformer')
 
         ->set('flux_verifactu.registration_record_transformer', RegistrationRecordTransformer::class)
             ->alias(RegistrationRecordTransformer::class, 'flux_verifactu.registration_record_transformer')
