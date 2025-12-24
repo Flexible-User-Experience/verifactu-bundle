@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+0.3.0
+-----
+ 
+ * Simplify AeatClientHandler
+ * Add transformers to better responsibility split
+
 0.2.0
 -----
  
