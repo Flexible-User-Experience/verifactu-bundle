@@ -1,13 +1,13 @@
 CHANGELOG
 =========
 
-0.3.0
+0.1.2
 -----
  
  * Simplify AeatClientHandler
  * Add transformers to better responsibility split
 
-0.2.0
+0.1.1
 -----
  
  * Add Validatable interface
