@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Dto;
 
+use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use josemmo\Verifactu\Models\Records\CorrectiveType;
 use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
@@ -15,9 +16,9 @@ final readonly class RegistrationRecordDto implements RegistrationRecordInterfac
     public function __construct(
         #[Assert\NotBlank]
         #[Assert\Valid]
-        private InvoiceIdentifier $invoiceIdentifier,
+        private InvoiceIdentifierInterface $invoiceIdentifier,
         #[Assert\Valid]
-        private ?InvoiceIdentifier $previousInvoiceIdentifier,
+        private ?InvoiceIdentifierInterface $previousInvoiceIdentifier,
         #[Assert\Regex(pattern: '/^[0-9A-F]{64}$/')]
         private ?string $previousHash,
         #[Assert\NotBlank]

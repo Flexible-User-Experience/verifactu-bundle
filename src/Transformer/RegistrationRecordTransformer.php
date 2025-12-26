@@ -13,10 +13,10 @@ final readonly class RegistrationRecordTransformer extends BaseTransformer
     public function transformInterfaceToModel(RegistrationRecordInterface $input): RegistrationRecordDto
     {
         return new RegistrationRecordDto(
-            invoiceIdentifier: $input->getInvoiceIdentifier(),
-            previousInvoiceIdentifier: $input->getPreviousInvoiceIdentifier(),
+            invoiceIdentifier: $input->getInvoiceIdentifier(), // TODO make interface validation before
+            previousInvoiceIdentifier: $input->getPreviousInvoiceIdentifier(), // TODO make interface validation before
             previousHash: $input->getPreviousHash(),
-            hash: $input->getHash(),
+            hash: $input->getHash(), // TODO must be set before send by wrapped library
             hashedAt: $input->getHashAt(),
             isCorrection: $input->getIsCorrection(),
             isPriorRejection: $input->getIsPriorRejection(),
@@ -30,7 +30,7 @@ final readonly class RegistrationRecordTransformer extends BaseTransformer
             correctedBaseAmount: $input->getCorrectedBaseAmount(),
             correctedTaxAmount: $input->getCorrectedTaxAmount(),
             replacedInvoices: $input->getReplacedInvoices(),
-            breakdownDetails: $input->getBreakdownDetails(),
+            breakdownDetails: $input->getBreakdownDetails(), // TODO make interface validation before
             totalTaxAmount: $input->getTotalTaxAmount(),
             totalAmount: $input->getTotalAmount(),
         );
@@ -43,12 +43,12 @@ final readonly class RegistrationRecordTransformer extends BaseTransformer
         $record->previousInvoiceId = $dto->getPreviousInvoiceIdentifier();
         $record->previousHash = $dto->getPreviousHash();
         $record->hash = $dto->getHash();
-        $record->hashedAt = \DateTimeImmutable::createFromFormat(self::DEFAULT_COMPUTER_DATETIME_FORMAT, $dto->getHashAt()->format(self::DEFAULT_COMPUTER_DATETIME_FORMAT));
+        $record->hashedAt = BaseTransformer::makeDateTimeImmutableFromDateTime($dto->getHashAt());
         $record->isCorrection = $dto->getIsCorrection();
         $record->isPriorRejection = $dto->getIsPriorRejection();
         $record->issuerName = $dto->getIssuerName();
         $record->invoiceType = $dto->getInvoiceType();
-        $record->operationDate = \DateTimeImmutable::createFromFormat(self::DEFAULT_COMPUTER_DATE_FORMAT, $dto->getOperationDate()?->format(self::DEFAULT_COMPUTER_DATE_FORMAT));
+        $record->operationDate = $dto->getOperationDate() ? BaseTransformer::makeDateTimeImmutableFromDate($dto->getOperationDate()) : null;
         $record->description = $dto->getDescription();
         $record->recipients = $dto->getRecipients();
         $record->correctiveType = $dto->getCorrectiveType();
