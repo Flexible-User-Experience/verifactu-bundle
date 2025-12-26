@@ -21,8 +21,10 @@ final readonly class FiscalIdentifierFactory
     public function makeValidatedFiscalIdentifierModel(): FiscalIdentifier
     {
         $validatedFiscalIdentifierDto = $this->makeValidatedFiscalIdentifierDto();
+        $fiscalIdentifierModel = $this->fiscalIdentifierTransformer->transformDtoToModel($validatedFiscalIdentifierDto);
+        $fiscalIdentifierModel->validate();
 
-        return $this->fiscalIdentifierTransformer->transformDtoToModel($validatedFiscalIdentifierDto);
+        return $fiscalIdentifierModel;
     }
 
     private function makeValidatedFiscalIdentifierDto(): FiscalIdentifierDto
