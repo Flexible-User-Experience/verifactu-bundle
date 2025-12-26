@@ -10,7 +10,7 @@ use josemmo\Verifactu\Models\ComputerSystem;
 
 final readonly class ComputerSystemTransformer extends BaseTransformer
 {
-    public function transformInterfaceToModel(ComputerSystemInterface $input): ComputerSystemDto
+    public function transformInterfaceToDto(ComputerSystemInterface $input): ComputerSystemDto
     {
         return new ComputerSystemDto(
             vendorName: self::tt($input->getVendorName()),

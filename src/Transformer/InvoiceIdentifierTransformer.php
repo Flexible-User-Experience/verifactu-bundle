@@ -10,7 +10,7 @@ use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 
 final readonly class InvoiceIdentifierTransformer extends BaseTransformer
 {
-    public function transformInterfaceToModel(InvoiceIdentifierInterface $input): InvoiceIdentifierDto
+    public function transformInterfaceToDto(InvoiceIdentifierInterface $input): InvoiceIdentifierDto
     {
         return new InvoiceIdentifierDto(
             issuerId: BaseTransformer::tt($input->getIssuerId(), 9),

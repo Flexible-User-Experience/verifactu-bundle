@@ -10,7 +10,7 @@ use josemmo\Verifactu\Models\Records\RegistrationRecord;
 
 final readonly class RegistrationRecordTransformer extends BaseTransformer
 {
-    public function transformInterfaceToModel(RegistrationRecordInterface $input): RegistrationRecordDto
+    public function transformInterfaceToDto(RegistrationRecordInterface $input): RegistrationRecordDto
     {
         return new RegistrationRecordDto(
             invoiceIdentifier: $input->getInvoiceIdentifier(), // TODO make interface validation before
