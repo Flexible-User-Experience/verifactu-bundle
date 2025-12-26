@@ -18,4 +18,14 @@ abstract readonly class BaseTransformer
     {
         return self::trimAndTruncate($value, $maxLength);
     }
+
+    public static function makeDateTimeImmutableFromDate(\DateTimeInterface $value): \DateTimeImmutable
+    {
+        return \DateTimeImmutable::createFromFormat(self::DEFAULT_COMPUTER_DATE_FORMAT, $value->format(self::DEFAULT_COMPUTER_DATE_FORMAT));
+    }
+
+    public static function makeDateTimeImmutableFromDateTime(\DateTimeInterface $value): \DateTimeImmutable
+    {
+        return \DateTimeImmutable::createFromFormat(self::DEFAULT_COMPUTER_DATETIME_FORMAT, $value->format(self::DEFAULT_COMPUTER_DATETIME_FORMAT));
+    }
 }
