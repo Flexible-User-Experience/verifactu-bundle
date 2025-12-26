@@ -32,7 +32,7 @@ flux_verifactu:
     # SIF (developer) credentials
     computer_system:
         vendor_name: '%your_vendor_name%'
-        vendor_nif: '%your_vendor_nif%' # 9 digits (Spanish NIF or CIF)
+        vendor_nif: '%your_vendor_nif%' # 9 digits (Spanish NIF[^nif] or CIF[^cif])
         name: '%your_name%'
         id: 'ID' # only 2 letters
         version: '%your_version%'
@@ -93,6 +93,12 @@ php ./vendor/bin/phpunit tests/
 
 [^sif]: **SIF** — *Sistema Informático de Facturación*.  
 Certified invoicing software compliant with Spanish tax regulations.
+
+[^nif]: **NIF** — *Número Identificación Fiscal*.  
+...
+
+[^cif]: **CIF** — *Código Identificación Fiscal*.  
+...
 
 [^csv]: **CSV** — *Código Seguro de Verificación*.  
 Unique verification code returned by the Veri*Factu API to identify a registered invoice.
