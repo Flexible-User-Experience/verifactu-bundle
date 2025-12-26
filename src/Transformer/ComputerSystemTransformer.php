@@ -25,7 +25,7 @@ final readonly class ComputerSystemTransformer extends BaseTransformer
         );
     }
 
-    public function transformDtoToModel(ComputerSystemInterface $dto): ComputerSystem
+    public function transformDtoToModel(ComputerSystemDto $dto): ComputerSystem
     {
         $system = new ComputerSystem();
         $system->vendorName = $dto->getVendorName();

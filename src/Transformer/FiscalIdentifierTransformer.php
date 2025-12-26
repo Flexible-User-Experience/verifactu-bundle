@@ -18,7 +18,7 @@ final readonly class FiscalIdentifierTransformer extends BaseTransformer
         );
     }
 
-    public function transformDtoToModel(FiscalIdentifierInterface $dto): FiscalIdentifier
+    public function transformDtoToModel(FiscalIdentifierDto $dto): FiscalIdentifier
     {
         $taxpayer = new FiscalIdentifier();
         $taxpayer->name = $dto->getName();
