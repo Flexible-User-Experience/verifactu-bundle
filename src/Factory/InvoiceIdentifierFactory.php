@@ -6,16 +6,28 @@ namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
 use Flux\VerifactuBundle\Dto\InvoiceIdentifierDto;
-use Flux\VerifactuBundle\Transformer\BaseTransformer;
+use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
+use Flux\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 
 final readonly class InvoiceIdentifierFactory
 {
-    public function create(InvoiceIdentifierInterface $input): InvoiceIdentifierDto
+    public function __construct(
+        private InvoiceIdentifierTransformer $invoiceIdentifierTransformer,
+        private ContractsValidator $validator,
+    ) {
+    }
+
+    public function makeInvoiceIdentifierDtoFromInterface(InvoiceIdentifierInterface $input): InvoiceIdentifierDto
     {
-        return new InvoiceIdentifierDto(
-            issuerId: BaseTransformer::tt($input->getIssuerId(), 9),
-            invoiceNumber: BaseTransformer::tt($input->getInvoiceNumber(), 60),
-            issueDate: $input->getIssueDate(),
-        );
+        $invoiceIdentifierDto = $this->invoiceIdentifierTransformer->transformInterfaceToModel($input);
+        $this->validator->validate($invoiceIdentifierDto);
+
+        return $invoiceIdentifierDto;
+    }
+
+    public function makeValidatedRegistrationRecordModelFromDto(InvoiceIdentifierDto $input): InvoiceIdentifier
+    {
+        return $this->invoiceIdentifierTransformer->transformDtoToModel($input);
     }
 }

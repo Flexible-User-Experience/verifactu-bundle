@@ -24,7 +24,7 @@ final readonly class InvoiceIdentifierTransformer extends BaseTransformer
         $invoiceIdentifier = new InvoiceIdentifier();
         $invoiceIdentifier->issuerId = $dto->getIssuerId();
         $invoiceIdentifier->invoiceNumber = $dto->getInvoiceNumber();
-        $invoiceIdentifier->issueDate = $dto->getIssueDate();
+        $invoiceIdentifier->issueDate = BaseTransformer::makeDateTimeImmutableFromDateTime($dto->getIssueDate());
 
         return $invoiceIdentifier;
     }
