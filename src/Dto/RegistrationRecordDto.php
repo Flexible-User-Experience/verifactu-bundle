@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Dto;
 
+use Flux\VerifactuBundle\Contract\BreakdownDetailInterface;
 use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use josemmo\Verifactu\Models\Records\CorrectiveType;
@@ -146,6 +147,9 @@ final readonly class RegistrationRecordDto implements RegistrationRecordInterfac
         return $this->replacedInvoices;
     }
 
+    /**
+     * @return BreakdownDetailInterface[]
+     */
     public function getBreakdownDetails(): array
     {
         return $this->breakdownDetails;

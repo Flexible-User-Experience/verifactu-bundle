@@ -7,7 +7,7 @@ invoicing law. This bundle relies on `josemmo/verifactu-php` library.
 ## Disclaimer
 
 This Symfony bundle is provided without a responsible declaration, as it is **not** an Invoicing Computer System ("Sistema Informático de Facturación" or "SIF"[^sif] as known reference in Spain's law).
-This is a third-party tool to integrate into your SIF with Veri*Factu API. It is **your responsibility** to audit its code and use it in accordance with the applicable regulations.
+This is a third-party tool to integrate your SIF[^sif] with the Veri*Factu API to comply with the Spanish state government's anti-fraud law. It is **your responsibility** to audit its code and use it in accordance with the applicable regulations.
 
 For more information, see [Artículo 13 del RD 1007/2023](https://www.boe.es/buscar/act.php?id=BOE-A-2023-24840#a1-5).
 
@@ -93,6 +93,12 @@ php ./vendor/bin/phpunit tests/
 
 [^sif]: **SIF** — *Sistema Informático de Facturación*.  
 Certified invoicing software compliant with Spanish tax regulations.
+
+[^nif]: **NIF** — *Número Identificación Fiscal*.  
+...
+
+[^cif]: **CIF** — *Código Identificación Fiscal*.  
+...
 
 [^csv]: **CSV** — *Código Seguro de Verificación*.  
 Unique verification code returned by the Veri*Factu API to identify a registered invoice.

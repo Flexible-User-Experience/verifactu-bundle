@@ -10,6 +10,14 @@ use josemmo\Verifactu\Models\Records\FiscalIdentifier;
 
 final readonly class FiscalIdentifierTransformer extends BaseTransformer
 {
+    public function transformFiscalIdentifierConfigToDto(array $input): FiscalIdentifierDto
+    {
+        return new FiscalIdentifierDto(
+            name: self::tt($input['name']),
+            nif: self::tt($input['nif'], 9),
+        );
+    }
+
     public function transformInterfaceToDto(FiscalIdentifierInterface $input): FiscalIdentifierDto
     {
         return new FiscalIdentifierDto(
@@ -18,7 +26,7 @@ final readonly class FiscalIdentifierTransformer extends BaseTransformer
         );
     }
 
-    public function transformDtoToModel(FiscalIdentifierInterface $dto): FiscalIdentifier
+    public function transformDtoToModel(FiscalIdentifierDto $dto): FiscalIdentifier
     {
         $taxpayer = new FiscalIdentifier();
         $taxpayer->name = $dto->getName();

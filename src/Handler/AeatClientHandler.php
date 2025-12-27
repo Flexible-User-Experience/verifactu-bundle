@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Flux\VerifactuBundle\Handler;
 
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
+use Flux\VerifactuBundle\Dto\AeatResponseDto;
+use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
-use josemmo\Verifactu\Models\Responses\ResponseStatus;
 use josemmo\Verifactu\Services\AeatClient;
 
 final readonly class AeatClientHandler
@@ -18,10 +19,11 @@ final readonly class AeatClientHandler
         private RegistrationRecordFactory $registrationRecordFactory,
         private ComputerSystemFactory $computerSystemFactory,
         private FiscalIdentifierFactory $fiscalIdentifierFactory,
+        private AeatResponseFactory $aeatResponseFactory,
     ) {
     }
 
-    public function sendRegistrationRecord(RegistrationRecordInterface $registrationRecord): string
+    public function sendRegistrationRecord(RegistrationRecordInterface $registrationRecord): AeatResponseDto
     {
         $validatedRegistrationRecordDto = $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($registrationRecord);
         $aeatClient = $this->buildAeatClient();
@@ -29,7 +31,7 @@ final readonly class AeatClientHandler
             $this->registrationRecordFactory->makeValidatedRegistrationRecordModelFromDto($validatedRegistrationRecordDto),
         ])->wait();
 
-        return ResponseStatus::Correct === $aeatResponse->status ? 'OK' : 'KO'; // TODO handle response content ('OK' => must return a CSV that needs to be stored somewhere)
+        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
     }
 
     private function buildAeatClient(): AeatClient

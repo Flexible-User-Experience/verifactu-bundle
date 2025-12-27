@@ -23,13 +23,13 @@ final readonly class BreakdownDetailDto implements BreakdownDetailInterface
         #[Assert\Regex(pattern: '/^-?\d{1,12}\.\d{2}$/')]
         private string $baseAmount,
         #[Assert\Regex(pattern: '/^\d{1,3}\.\d{2}$/')]
-        private ?string $taxRate,
+        private ?string $taxRate = null,
         #[Assert\Regex(pattern: '/^-?\d{1,12}\.\d{2}$/')]
-        private ?string $taxAmount,
+        private ?string $taxAmount = null,
         #[Assert\Regex(pattern: '/^\d{1,3}\.\d{2}$/')]
-        private ?string $surchargeRate,
+        private ?string $surchargeRate = null,
         #[Assert\Regex(pattern: '/^-?\d{1,12}\.\d{2}$/')]
-        private ?string $surchargeAmount,
+        private ?string $surchargeAmount = null,
     ) {
     }
 

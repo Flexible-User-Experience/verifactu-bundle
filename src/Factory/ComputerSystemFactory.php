@@ -29,24 +29,9 @@ final readonly class ComputerSystemFactory
 
     private function makeValidatedComputerSystemDto(): ComputerSystemDto
     {
-        $computerSystemDto = $this->makeComputerSystemDto();
+        $computerSystemDto = $this->computerSystemTransformer->transformComputerSystemConfigToDto($this->computerSystemConfig);
         $this->validator->validate($computerSystemDto);
 
         return $computerSystemDto;
-    }
-
-    private function makeComputerSystemDto(): ComputerSystemDto
-    {
-        return new ComputerSystemDto(
-            vendorName: $this->computerSystemConfig['vendor_name'],
-            vendorNif: $this->computerSystemConfig['vendor_nif'],
-            name: $this->computerSystemConfig['name'],
-            id: $this->computerSystemConfig['id'],
-            version: $this->computerSystemConfig['version'],
-            installationNumber: $this->computerSystemConfig['installation_number'],
-            onlySupportsVerifactu: $this->computerSystemConfig['only_supports_verifactu'],
-            supportsMultipleTaxpayers: $this->computerSystemConfig['supports_multiple_taxpayers'],
-            hasMultipleTaxpayers: $this->computerSystemConfig['has_multiple_taxpayers'],
-        );
     }
 }

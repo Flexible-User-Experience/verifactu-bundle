@@ -29,17 +29,9 @@ final readonly class FiscalIdentifierFactory
 
     private function makeValidatedFiscalIdentifierDto(): FiscalIdentifierDto
     {
-        $fiscalIdentifierDto = $this->makeFiscalIdentifierDto();
+        $fiscalIdentifierDto = $this->fiscalIdentifierTransformer->transformFiscalIdentifierConfigToDto($this->fiscalIdentifierConfig);
         $this->validator->validate($fiscalIdentifierDto);
 
         return $fiscalIdentifierDto;
-    }
-
-    private function makeFiscalIdentifierDto(): FiscalIdentifierDto
-    {
-        return new FiscalIdentifierDto(
-            name: $this->fiscalIdentifierConfig['name'],
-            nif: $this->fiscalIdentifierConfig['nif'],
-        );
     }
 }
