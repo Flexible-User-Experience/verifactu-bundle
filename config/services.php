@@ -67,7 +67,7 @@ return static function (ContainerConfigurator $container): void {
                 service(InvoiceIdentifierTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(InvoiceIdentifierFactory::class, 'invoice_identifier_factory.invoice_identifier_factory')
+            ->alias(InvoiceIdentifierFactory::class, 'flux_verifactu.invoice_identifier_factory')
         ->set('flux_verifactu.registration_record_factory', RegistrationRecordFactory::class)
             ->args([
                 service(InvoiceIdentifierFactory::class),
