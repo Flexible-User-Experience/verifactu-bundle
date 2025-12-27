@@ -53,7 +53,8 @@ final readonly class RegistrationRecordFactory
             $previousInvoiceIdentifier = $this->invoiceIdentifierTransformer->transformDtoToModel($previousInvoiceIdentifierDto);
         }
         $breakdownDetails = [];
-        foreach ($input->getBreakdownDetails() as $breakdownDetailDto) {
+        foreach ($input->getBreakdownDetails() as $breakdownDetailInterface) {
+            $breakdownDetailDto = $this->breakdownDetailTransformer->transformInterfaceToDto($breakdownDetailInterface);
             $breakdownDetails[] = $this->breakdownDetailTransformer->transformDtoToModel($breakdownDetailDto);
         }
         $registrationRecordModel = $this->registrationRecordTransformer->transformDtoToModel(
