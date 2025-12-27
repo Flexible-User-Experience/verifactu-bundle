@@ -28,6 +28,7 @@ final readonly class RegistrationRecordFactory
             $previousInvoiceIdentifierDto = $this->invoiceIdentifierTransformer->transformInterfaceToDto($input->getPreviousInvoiceIdentifier());
             $this->validator->validate($previousInvoiceIdentifierDto);
         }
+
         $registrationRecordDto = $this->registrationRecordTransformer->transformInterfaceToDto($input);
         $this->validator->validate($registrationRecordDto);
 
@@ -49,6 +50,7 @@ final readonly class RegistrationRecordFactory
         );
         $registrationRecordModel->hashedAt = new \DateTimeImmutable();
         $registrationRecordModel->hash = $registrationRecordModel->calculateHash();
+
         $registrationRecordModel->validate();
 
         return $registrationRecordModel;
