@@ -15,7 +15,8 @@ final readonly class FiscalIdentifierDto implements FiscalIdentifierInterface
         private string $name,
         #[Assert\NotBlank]
         #[Assert\Length(exactly: 9)]
-        private string $nif, // TODO apply a better assert "A00000000" | "00000000A"
+        private string $nif,
+        // TODO apply a better assert "A00000000" | "00000000A"
     ) {
     }
 

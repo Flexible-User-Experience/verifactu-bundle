@@ -9,6 +9,16 @@ abstract readonly class BaseTransformer
     protected const DEFAULT_COMPUTER_DATE_FORMAT = 'Y-m-d';
     protected const DEFAULT_COMPUTER_DATETIME_FORMAT = 'Y-m-d H:i:s';
 
+    public static function integerAsFormattedString(int $value): string
+    {
+        return sprintf('%d.00', $value);
+    }
+
+    public static function floatAsFormattedString(float $value): string
+    {
+        return sprintf('%.2F', $value);
+    }
+
     public static function trimAndTruncate(string $value, int $maxLength = 120): string
     {
         return mb_substr(trim($value), 0, $maxLength);
