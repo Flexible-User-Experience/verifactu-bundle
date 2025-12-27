@@ -10,6 +10,7 @@ use Flux\VerifactuBundle\Factory\InvoiceIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
 use Flux\VerifactuBundle\FluxVerifactuBundle;
 use Flux\VerifactuBundle\Handler\AeatClientHandler;
+use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
 use Flux\VerifactuBundle\Transformer\ComputerSystemTransformer;
 use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
@@ -32,6 +33,7 @@ return static function (ContainerConfigurator $container): void {
         ->set('flux_verifactu.registration_record_factory', RegistrationRecordFactory::class)
             ->args([
                 service(InvoiceIdentifierTransformer::class),
+                service(BreakdownDetailTransformer::class),
                 service(RegistrationRecordTransformer::class),
                 service(ContractsValidator::class),
             ])
@@ -60,6 +62,9 @@ return static function (ContainerConfigurator $container): void {
                 service(ContractsValidator::class),
             ])
             ->alias(InvoiceIdentifierFactory::class, 'invoice_identifier_factory.fiscal_identifier_factory')
+
+        ->set('flux_verifactu.breakdown_detail_transformer', BreakdownDetailTransformer::class)
+            ->alias(BreakdownDetailTransformer::class, 'flux_verifactu.breakdown_detail_transformer')
 
         ->set('flux_verifactu.computer_system_transformer', ComputerSystemTransformer::class)
             ->alias(ComputerSystemTransformer::class, 'flux_verifactu.computer_system_transformer')

@@ -6,6 +6,7 @@ namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
+use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
 use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
@@ -15,6 +16,7 @@ final readonly class RegistrationRecordFactory
 {
     public function __construct(
         private InvoiceIdentifierTransformer $invoiceIdentifierTransformer,
+        private BreakdownDetailTransformer $breakdownDetailTransformer,
         private RegistrationRecordTransformer $registrationRecordTransformer,
         private ContractsValidator $validator,
     ) {
@@ -22,13 +24,20 @@ final readonly class RegistrationRecordFactory
 
     public function makeValidatedRegistrationRecordDtoFromInterface(RegistrationRecordInterface $input): RegistrationRecordDto
     {
+        // validate invoiceIdentifier interface
         $invoiceIdentifierDto = $this->invoiceIdentifierTransformer->transformInterfaceToDto($input->getInvoiceIdentifier());
         $this->validator->validate($invoiceIdentifierDto);
+        // validate (if exists) previousInvoiceIdentifier interface
         if ($input->getPreviousInvoiceIdentifier()) {
             $previousInvoiceIdentifierDto = $this->invoiceIdentifierTransformer->transformInterfaceToDto($input->getPreviousInvoiceIdentifier());
             $this->validator->validate($previousInvoiceIdentifierDto);
         }
-
+        // validate breakdownDetails array interface
+        foreach ($input->getBreakdownDetails() as $breakdownDetail) {
+            $breakdownDetailDto = $this->breakdownDetailTransformer->transformInterfaceToDto($breakdownDetail);
+            $this->validator->validate($breakdownDetailDto);
+        }
+        // validate registrationRecord interface
         $registrationRecordDto = $this->registrationRecordTransformer->transformInterfaceToDto($input);
         $this->validator->validate($registrationRecordDto);
 
@@ -50,7 +59,6 @@ final readonly class RegistrationRecordFactory
         );
         $registrationRecordModel->hashedAt = new \DateTimeImmutable();
         $registrationRecordModel->hash = $registrationRecordModel->calculateHash();
-
         $registrationRecordModel->validate();
 
         return $registrationRecordModel;

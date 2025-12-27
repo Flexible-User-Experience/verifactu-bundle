@@ -43,6 +43,9 @@ interface RegistrationRecordInterface extends ValidatableInterface
 
     public function getReplacedInvoices(): array;
 
+    /**
+     * @return BreakdownDetailInterface[]
+     */
     public function getBreakdownDetails(): array;
 
     public function getTotalTaxAmount(): string;
