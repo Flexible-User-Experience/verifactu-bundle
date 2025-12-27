@@ -6,20 +6,31 @@ namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\BreakdownDetailInterface;
 use Flux\VerifactuBundle\Dto\BreakdownDetailDto;
+use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
+use Flux\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Models\Records\BreakdownDetails;
 
 final readonly class BreakdownDetailFactory
 {
-    public function create(BreakdownDetailInterface $input): BreakdownDetailDto
+    public function __construct(
+        private BreakdownDetailTransformer $breakdownDetailTransformer,
+        private ContractsValidator $validator,
+    ) {
+    }
+
+    public function makeValidatedBreakdownDetailDtoFromInterface(BreakdownDetailInterface $input): BreakdownDetailDto
     {
-        return new BreakdownDetailDto(
-            taxType: $input->getTaxType(),
-            regimeType: $input->getRegimeType(),
-            operationType: $input->getOperationType(),
-            baseAmount: $input->getBaseAmount(),
-            taxRate: $input->getTaxRate(),
-            taxAmount: $input->getTaxAmount(),
-            surchargeRate: $input->getSurchargeRate(),
-            surchargeAmount: $input->getSurchargeAmount(),
-        );
+        $breakdownDetailDto = $this->breakdownDetailTransformer->transformInterfaceToDto($input);
+        $this->validator->validate($breakdownDetailDto);
+
+        return $breakdownDetailDto;
+    }
+
+    public function makeValidatedBreakdownDetailModelFromDto(BreakdownDetailDto $dto): BreakdownDetails
+    {
+        $breakdownDetailModel = $this->breakdownDetailTransformer->transformDtoToModel($dto);
+        $breakdownDetailModel->validate();
+
+        return $breakdownDetailModel;
     }
 }

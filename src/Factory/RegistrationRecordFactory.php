@@ -6,7 +6,6 @@ namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
-use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\RegistrationRecord;
@@ -15,7 +14,7 @@ final readonly class RegistrationRecordFactory
 {
     public function __construct(
         private InvoiceIdentifierFactory $invoiceIdentifierFactory,
-        private BreakdownDetailTransformer $breakdownDetailTransformer,
+        private BreakdownDetailFactory $breakdownDetailFactory,
         private FiscalIdentifierFactory $fiscalIdentifierFactory,
         private RegistrationRecordTransformer $registrationRecordTransformer,
         private ContractsValidator $validator,
@@ -32,8 +31,7 @@ final readonly class RegistrationRecordFactory
         }
         // validate breakdownDetail interface array
         foreach ($input->getBreakdownDetails() as $breakdownDetail) {
-            $breakdownDetailDto = $this->breakdownDetailTransformer->transformInterfaceToDto($breakdownDetail);
-            $this->validator->validate($breakdownDetailDto);
+            $this->breakdownDetailFactory->makeValidatedBreakdownDetailDtoFromInterface($breakdownDetail);
         }
         // validate recipients interface array
         foreach ($input->getRecipients() as $recipient) {
@@ -57,8 +55,8 @@ final readonly class RegistrationRecordFactory
         }
         $breakdownDetails = [];
         foreach ($input->getBreakdownDetails() as $breakdownDetailInterface) {
-            $breakdownDetailDto = $this->breakdownDetailTransformer->transformInterfaceToDto($breakdownDetailInterface);
-            $breakdownDetails[] = $this->breakdownDetailTransformer->transformDtoToModel($breakdownDetailDto);
+            $breakdownDetailDto = $this->breakdownDetailFactory->makeValidatedBreakdownDetailDtoFromInterface($breakdownDetailInterface);
+            $breakdownDetails[] = $this->breakdownDetailFactory->makeValidatedBreakdownDetailModelFromDto($breakdownDetailDto);
         }
         $recipients = [];
         foreach ($input->getRecipients() as $recipientInterface) {

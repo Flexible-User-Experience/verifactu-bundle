@@ -70,7 +70,7 @@ return static function (ContainerConfigurator $container): void {
         ->set('flux_verifactu.registration_record_factory', RegistrationRecordFactory::class)
             ->args([
                 service(InvoiceIdentifierFactory::class),
-                service(BreakdownDetailTransformer::class),
+                service(BreakdownDetailFactory::class),
                 service(FiscalIdentifierFactory::class),
                 service(RegistrationRecordTransformer::class),
                 service(ContractsValidator::class),
