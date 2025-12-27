@@ -7,6 +7,7 @@ namespace Flux\VerifactuBundle\Factory;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
 use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
+use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
@@ -17,6 +18,7 @@ final readonly class RegistrationRecordFactory
     public function __construct(
         private InvoiceIdentifierTransformer $invoiceIdentifierTransformer,
         private BreakdownDetailTransformer $breakdownDetailTransformer,
+        private FiscalIdentifierTransformer $fiscalIdentifierTransformer,
         private RegistrationRecordTransformer $registrationRecordTransformer,
         private ContractsValidator $validator,
     ) {
@@ -36,6 +38,11 @@ final readonly class RegistrationRecordFactory
         foreach ($input->getBreakdownDetails() as $breakdownDetail) {
             $breakdownDetailDto = $this->breakdownDetailTransformer->transformInterfaceToDto($breakdownDetail);
             $this->validator->validate($breakdownDetailDto);
+        }
+        // validate recipients interface array
+        foreach ($input->getRecipients() as $recipient) {
+            $recipientDto = $this->fiscalIdentifierTransformer->transformInterfaceToDto($recipient);
+            $this->validator->validate($recipientDto);
         }
         // validate registrationRecord interface
         $registrationRecordDto = $this->registrationRecordTransformer->transformInterfaceToDto($input);
@@ -57,11 +64,17 @@ final readonly class RegistrationRecordFactory
             $breakdownDetailDto = $this->breakdownDetailTransformer->transformInterfaceToDto($breakdownDetailInterface);
             $breakdownDetails[] = $this->breakdownDetailTransformer->transformDtoToModel($breakdownDetailDto);
         }
+        $recipients = [];
+        foreach ($input->getRecipients() as $recipientInterface) {
+            $recipientDto = $this->fiscalIdentifierTransformer->transformInterfaceToDto($recipientInterface);
+            $recipients[] = $this->fiscalIdentifierTransformer->transformDtoToModel($recipientDto);
+        }
         $registrationRecordModel = $this->registrationRecordTransformer->transformDtoToModel(
             dto: $input,
             invoiceIdentifier: $this->invoiceIdentifierTransformer->transformDtoToModel($invoiceIdentifierDto),
             previousInvoiceIdentifier: $previousInvoiceIdentifier,
             breakdownDetails: $breakdownDetails,
+            recipients: $recipients,
         );
         $registrationRecordModel->hashedAt = new \DateTimeImmutable();
         $registrationRecordModel->hash = $registrationRecordModel->calculateHash();

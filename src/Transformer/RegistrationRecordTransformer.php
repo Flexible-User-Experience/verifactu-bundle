@@ -40,6 +40,7 @@ final readonly class RegistrationRecordTransformer extends BaseTransformer
         InvoiceIdentifier $invoiceIdentifier,
         ?InvoiceIdentifier $previousInvoiceIdentifier,
         array $breakdownDetails,
+        array $recipients,
     ): RegistrationRecord {
         $record = new RegistrationRecord();
         $record->invoiceId = $invoiceIdentifier;
@@ -51,7 +52,7 @@ final readonly class RegistrationRecordTransformer extends BaseTransformer
         $record->invoiceType = $dto->getInvoiceType();
         $record->operationDate = $dto->getOperationDate() ? BaseTransformer::makeDateTimeImmutableFromDate($dto->getOperationDate()) : null;
         $record->description = $dto->getDescription();
-        $record->recipients = $dto->getRecipients();
+        $record->recipients = $recipients;
         $record->correctiveType = $dto->getCorrectiveType();
         $record->correctedInvoices = $dto->getCorrectiveInvoices();
         $record->correctedBaseAmount = $dto->getCorrectedBaseAmount();

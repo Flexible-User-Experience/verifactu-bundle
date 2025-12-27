@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Transformer;
 
+use Flux\VerifactuBundle\Contract\FiscalIdentifierInterface;
 use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
 use josemmo\Verifactu\Models\Records\FiscalIdentifier;
 
@@ -14,6 +15,14 @@ final readonly class FiscalIdentifierTransformer extends BaseTransformer
         return new FiscalIdentifierDto(
             name: self::tt($input['name']),
             nif: self::tt($input['nif'], 9),
+        );
+    }
+
+    public function transformInterfaceToDto(FiscalIdentifierInterface $input): FiscalIdentifierDto
+    {
+        return new FiscalIdentifierDto(
+            name: self::tt($input->getName()),
+            nif: self::tt($input->getNif(), 9),
         );
     }
 
