@@ -20,7 +20,7 @@ final readonly class AeatResponseDto implements AeatResponseInterface
         #[Assert\NotBlank]
         public ResponseStatus $status,
         #[Assert\Valid]
-        public array $items = []
+        public array $items = [],
     ) {
     }
 
