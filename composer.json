@@ -24,8 +24,9 @@
     },
     "require": {
         "php": ">=8.2",
+        "ext-gd": "*",
         "ext-libxml": "*",
-        "endroid/qr-code-bundle": "^6.1",
+        "endroid/qr-code": "^6.1",
         "josemmo/verifactu-php": "^0.3",
         "symfony/config": "^6.4|^7.0",
         "symfony/dependency-injection": "^6.4|^7.0",
@@ -38,10 +39,5 @@
         "phpunit/phpunit": "^9.6",
         "symfony/phpunit-bridge": "^6.4|^7.0",
         "phpstan/phpstan": "^2.1"
-    },
-    "config": {
-        "allow-plugins": {
-            "endroid/installer": true
-        }
     }
 }
