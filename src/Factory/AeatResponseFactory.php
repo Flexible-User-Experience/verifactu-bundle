@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\AeatResponseInterface;
+use Flux\VerifactuBundle\Dto\AeatResponseDto;
 use Flux\VerifactuBundle\Transformer\AeatResponseTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Responses\AeatResponse;
@@ -23,5 +24,10 @@ final readonly class AeatResponseFactory
         $this->validator->validate($validatedAeatResponseDto);
 
         return $validatedAeatResponseDto;
+    }
+
+    public function getJsonStringFromAeatResponseDto(AeatResponseDto $dto): string
+    {
+        return $this->aeatResponseTransformer->transformDtoToJson($dto);
     }
 }

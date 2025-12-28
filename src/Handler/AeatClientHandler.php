@@ -6,6 +6,7 @@ namespace Flux\VerifactuBundle\Handler;
 
 use Flux\VerifactuBundle\Contract\AeatResponseInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
+use Flux\VerifactuBundle\Dto\AeatResponseDto;
 use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
@@ -32,6 +33,11 @@ final readonly class AeatClientHandler
         ])->wait();
 
         return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
+    }
+
+    public function getJsonStringFromAeatResponseDto(AeatResponseDto $dto): string
+    {
+        return $this->aeatResponseFactory->getJsonStringFromAeatResponseDto($dto);
     }
 
     private function buildAeatClient(): AeatClient
