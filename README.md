@@ -54,16 +54,24 @@ You can inject the `AeatClientHandler` service in your app. Make `sendRegistrati
 
 ```php
 use Flux\VerifactuBundle\Handler\AeatClientHandler;
+use Flux\VerifactuBundle\Handler\QrCodeHandler;
 
 class AppTestController
 {
-    public function test(Invoice $invoice, InvoiceManager $invoiceManager, AeatClientHandler $aeatClientHandler)
+    public function test(Invoice $invoice, InvoiceManager $invoiceManager, AeatClientHandler $aeatClientHandler, QrCodeHandler $qrCodeHandler)
     {
         $registrationRecord = $invoiceManager->transformInvoiceToRegistrationRecordInterface($invoice);
         // is up to you to create an `InvoiceManager` (or whatever) to transform your Invoice model into a data value object that implements the `RegistrationRecordInterface` contract.
-        $aeatClientHandler->sendRegistrationRecord($registrationRecord);
-        // for now this method only returns 'OK' or 'KO' as string (please, keep `aeat_client.is_prod_environment` configuration as `false`)
-        // TODO `AeatClientHandler` must return the CSV[^csv] response
+        $result = $aeatClientHandler->sendRegistrationRecord($registrationRecord);
+        // $result is an `AeatResponseInterface` contract, you must check the response status received and manage it accordingly.
+        // you must read Veri*Factu documentation to handle Invoice integrity and traceability, this is out of the scope of this bundle! 
+        $aeatJsonArrayResponse = $aeatClientHandler->getJsonArrayFromAeatResponseDto($result);
+        // we recommend you to store the result array or a JSON serialized version into your Invoice entity
+        $invoice->setAeatJsonResponse($aeatJsonArrayResponse);
+        $this->invoiceRepository->update(true);
+        // finally you can get a legal QR code as a PNG image, but keep in mind that must be generated at the same moment
+        $qrCodePngImage = $qrCodeHandler->buildQrCodeAsPngImageFromRegistrationRecordAndAeatResponseInterfaces($registrationRecord, $result);
+        // read endroid/qr-code documentation to handle the image file
     }
 }
 ```

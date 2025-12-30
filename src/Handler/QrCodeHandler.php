@@ -25,7 +25,7 @@ use josemmo\Verifactu\Services\QrGenerator;
 
 final readonly class QrCodeHandler
 {
-    private const QR_CODE_VERI_FACTU_LABEL = 'VERI*FACTU'; // this a is mandatory, case-sensitive, text label
+    private const QR_CODE_VERI_FACTU_LABEL = 'VERI*FACTU'; // this is a mandatory, case-sensitive, legal text label
     private QrGenerator $qrGenerator;
 
     public function __construct(
@@ -44,14 +44,14 @@ final readonly class QrCodeHandler
         $registrationRecordDto = $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($registrationRecordInterface);
         $aeatResponseDto = $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromInterface($aeatResponseInterface);
 
-        return $this->buildQrCodeAsPngImageFromRegistrationRecordAndAeatResponseDto($registrationRecordDto, $aeatResponseDto);
+        return $this->buildQrCodeAsPngImageFromRegistrationRecordAndAeatResponseDtos($registrationRecordDto, $aeatResponseDto);
     }
 
     /**
      * @throws \RuntimeException
      * @throws ValidationException
      */
-    public function buildQrCodeAsPngImageFromRegistrationRecordAndAeatResponseDto(RegistrationRecordDto $registrationRecordDto, AeatResponseDto $aeatResponseDto): ResultInterface
+    public function buildQrCodeAsPngImageFromRegistrationRecordAndAeatResponseDtos(RegistrationRecordDto $registrationRecordDto, AeatResponseDto $aeatResponseDto): ResultInterface
     {
         if (ResponseStatus::Incorrect === $aeatResponseDto->getStatus()) {
             throw new \RuntimeException('AEAT response status can not be incorrect');
