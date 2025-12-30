@@ -35,7 +35,6 @@ final class BreakdownDetailDtoTest extends TestCase
             surchargeRate: null,
             surchargeAmount: null
         );
-
         $violations = $this->validator->validate($dto);
         $this->assertCount(0, $violations);
     }
