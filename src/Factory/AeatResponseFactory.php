@@ -26,6 +26,14 @@ final readonly class AeatResponseFactory
         return $validatedAeatResponseDto;
     }
 
+    public function makeValidatedAeatResponseDtoFromInterface(AeatResponseInterface $input): AeatResponseDto
+    {
+        $validatedAeatResponseDto = $this->aeatResponseTransformer->transformInterfaceToDto($input);
+        $this->validator->validate($validatedAeatResponseDto);
+
+        return $validatedAeatResponseDto;
+    }
+
     public function getJsonArrayFromAeatResponseDto(AeatResponseDto $dto): array
     {
         return $this->aeatResponseTransformer->transformDtoToArray($dto);

@@ -14,9 +14,13 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Writer\Result\ResultInterface;
+use Flux\VerifactuBundle\Contract\AeatResponseInterface;
+use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\AeatResponseDto;
 use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
+use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
+use josemmo\Verifactu\Models\Responses\ResponseStatus;
 use josemmo\Verifactu\Services\QrGenerator;
 
 final readonly class QrCodeHandler
@@ -26,6 +30,7 @@ final readonly class QrCodeHandler
 
     public function __construct(
         private RegistrationRecordFactory $registrationRecordFactory,
+        private AeatResponseFactory $aeatResponseFactory,
     )
     {
         $this->qrGenerator = new QrGenerator();
@@ -35,8 +40,23 @@ final readonly class QrCodeHandler
      * @throws \RuntimeException
      * @throws ValidationException
      */
+    public function buildQrCodeAsPngImageFromRegistrationRecordAndAeatResponseInterfaces(RegistrationRecordInterface $registrationRecordInterface, AeatResponseInterface $aeatResponseInterface): ResultInterface
+    {
+        $registrationRecordDto = $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($registrationRecordInterface);
+        $aeatResponseDto = $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromInterface($aeatResponseInterface);
+
+        return $this->buildQrCodeAsPngImageFromRegistrationRecordAndAeatResponseDto($registrationRecordDto, $aeatResponseDto);
+    }
+
+    /**
+     * @throws \RuntimeException
+     * @throws ValidationException
+     */
     public function buildQrCodeAsPngImageFromRegistrationRecordAndAeatResponseDto(RegistrationRecordDto $registrationRecordDto, AeatResponseDto $aeatResponseDto): ResultInterface
     {
+        if ($aeatResponseDto->getStatus() === ResponseStatus::Incorrect) {
+            throw new \RuntimeException('AEAT response status can not be incorrect');
+        }
         if (is_null($aeatResponseDto->getCsv())) {
             throw new \RuntimeException('AEAT CSV response can not be null');
         }
