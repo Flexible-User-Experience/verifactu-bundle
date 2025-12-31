@@ -1,8 +1,9 @@
 VerifactuBundle
 ===============
 
-VerifactuBundle is Symfony bundle to deal with Veri*Factu Spanish digital
-invoicing law. This bundle relies on `josemmo/verifactu-php` library.
+VerifactuBundle is Symfony bundle to deal with Veri*Factu Spanish digital invoicing law. This bundle relies on `josemmo/verifactu-php` library to send your invoices to the AEAT[^aeat] Veri*Factu API.
+
+This bundle can generate legal QR validation codes as PNG image to include into your printed invoices.
 
 ## Disclaimer
 
@@ -14,8 +15,7 @@ For more information, see [Artículo 13 del RD 1007/2023](https://www.boe.es/bus
 Installation
 ------------
 
-VerifactuBundle requires PHP 8.2 or higher and Symfony 6.4 or higher. Run the
-following command to install it in your application:
+VerifactuBundle requires PHP 8.2 or higher and Symfony 6.4 or higher. Run the following command to install it in your application:
 
 ```shell
 composer require flexible-ux/verifactu-bundle
@@ -98,6 +98,9 @@ php ./vendor/bin/phpunit tests/
 ```
 
 ---
+
+[^aeat]: **AEAT** — *Agencia Estatal de Administración Tributaria*.  
+Agency of the Government of Spain.
 
 [^sif]: **SIF** — *Sistema Informático de Facturación*.  
 Certified invoicing software compliant with Spanish tax regulations.

@@ -1,8 +1,8 @@
 {
     "name": "flexible-ux/verifactu-bundle",
     "type": "symfony-bundle",
-    "description": "Symfony bundle to deal with Veri*Factu Spanish digital invoicing law",
-    "keywords": ["verifactu", "aeat", "sii", "symfony", "bundle"],
+    "description": "Symfony bundle to deal with Veri*Factu Spanish digital invoicing law and legal QR code generation",
+    "keywords": ["verifactu", "aeat", "sii", "qr", "symfony", "bundle"],
     "homepage": "https://github.com/Flexible-User-Experience/verifactu-bundle",
     "license": "MIT",
     "authors": [
