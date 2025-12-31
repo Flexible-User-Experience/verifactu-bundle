@@ -65,9 +65,9 @@ final readonly class QrCodeHandler
         $qrCode = new QrCode(
             data: $qrCodeUrlData,
             encoding: new Encoding('UTF-8'),
-            errorCorrectionLevel: ErrorCorrectionLevel::Low,
-            size: 400,
-            margin: 10,
+            errorCorrectionLevel: ErrorCorrectionLevel::Medium,
+            size: 945,
+            margin: 142,
             roundBlockSizeMode: RoundBlockSizeMode::Margin,
             foregroundColor: new Color(0, 0, 0),
             backgroundColor: new Color(255, 255, 255)
