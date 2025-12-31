@@ -26,7 +26,7 @@ use josemmo\Verifactu\Services\QrGenerator;
 
 final readonly class QrCodeHandler
 {
-    private const QR_CODE_VERI_FACTU_LABEL = 'VERI*FACTU'; // this is a mandatory, case-sensitive, legal text label
+    public const QR_CODE_VERI_FACTU_LEGAL_LABEL = 'VERI*FACTU'; // this is a mandatory, case-sensitive, legal text label
     private QrGenerator $qrGenerator;
 
     public function __construct(
@@ -73,7 +73,7 @@ final readonly class QrCodeHandler
             backgroundColor: new Color(255, 255, 255)
         );
         $label = new Label(
-            text: self::QR_CODE_VERI_FACTU_LABEL,
+            text: self::QR_CODE_VERI_FACTU_LEGAL_LABEL,
             font: new OpenSans(size: 26),
             alignment: LabelAlignment::Center,
             textColor: new Color(0, 0, 0)
