@@ -31,6 +31,10 @@ final readonly class AeatClientHandler
         $aeatResponse = $aeatClient->send([
             $this->registrationRecordFactory->makeValidatedRegistrationRecordModelFromDto($validatedRegistrationRecordDto),
         ])->wait();
+        $registrationRecord
+            ->setHash($validatedRegistrationRecordDto->getHash())
+            ->setHashedAt($validatedRegistrationRecordDto->getHashedAt())
+        ;
 
         return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
     }

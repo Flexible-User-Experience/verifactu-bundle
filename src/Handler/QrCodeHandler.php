@@ -26,6 +26,7 @@ use josemmo\Verifactu\Services\QrGenerator;
 
 final readonly class QrCodeHandler
 {
+    public const QR_CODE_TOP_LEGAL_LABEL = 'QR tributario:'; // this is a mandatory, case-sensitive, legal text label
     public const QR_CODE_VERI_FACTU_LEGAL_LABEL = 'VERI*FACTU'; // this is a mandatory, case-sensitive, legal text label
     private QrGenerator $qrGenerator;
 

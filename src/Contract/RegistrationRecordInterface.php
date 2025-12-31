@@ -17,7 +17,11 @@ interface RegistrationRecordInterface extends ValidatableInterface
 
     public function getHash(): string;
 
-    public function getHashAt(): \DateTimeInterface;
+    public function setHash(string $hash): RegistrationRecordInterface;
+
+    public function getHashedAt(): \DateTimeInterface;
+
+    public function setHashedAt(\DateTimeInterface $hashedAt): RegistrationRecordInterface;
 
     public function getIsCorrection(): bool;
 

@@ -11,7 +11,7 @@ use josemmo\Verifactu\Models\Records\CorrectiveType;
 use josemmo\Verifactu\Models\Records\InvoiceType;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final readonly class RegistrationRecordDto implements RegistrationRecordInterface
+final class RegistrationRecordDto implements RegistrationRecordInterface
 {
     private string $hash;
     private \DateTimeInterface $hashedAt;
@@ -19,44 +19,44 @@ final readonly class RegistrationRecordDto implements RegistrationRecordInterfac
     public function __construct(
         #[Assert\NotBlank]
         #[Assert\Valid]
-        private InvoiceIdentifierInterface $invoiceIdentifier,
+        private readonly InvoiceIdentifierInterface $invoiceIdentifier,
         #[Assert\Valid]
-        private ?InvoiceIdentifierInterface $previousInvoiceIdentifier,
+        private readonly ?InvoiceIdentifierInterface $previousInvoiceIdentifier,
         #[Assert\Regex(pattern: '/^[0-9A-F]{64}$/')]
-        private ?string $previousHash,
+        private readonly ?string $previousHash,
         #[Assert\NotNull]
         #[Assert\Type('boolean')]
-        private bool $isCorrection,
+        private readonly bool $isCorrection,
         #[Assert\Type('boolean')]
-        private ?bool $isPriorRejection,
+        private readonly ?bool $isPriorRejection,
         #[Assert\NotBlank]
         #[Assert\Length(max: 120)]
-        private string $issuerName,
+        private readonly string $issuerName,
         #[Assert\NotBlank]
-        private InvoiceType $invoiceType,
-        private ?\DateTimeInterface $operationDate,
+        private readonly InvoiceType $invoiceType,
+        private readonly ?\DateTimeInterface $operationDate,
         #[Assert\NotBlank]
         #[Assert\Length(max: 500)]
-        private string $description,
+        private readonly string $description,
         #[Assert\Valid]
         #[Assert\Count(max: 1000)]
-        private array $recipients,
-        private ?CorrectiveType $correctiveType,
-        private array $correctedInvoices,
+        private readonly array $recipients,
+        private readonly ?CorrectiveType $correctiveType,
+        private readonly array $correctedInvoices,
         #[Assert\Regex(pattern: '/^-?\d{1,12}\.\d{2}$/')]
-        private ?string $correctedBaseAmount,
+        private readonly ?string $correctedBaseAmount,
         #[Assert\Regex(pattern: '/^-?\d{1,12}\.\d{2}$/')]
-        private ?string $correctedTaxAmount,
-        private array $replacedInvoices,
+        private readonly ?string $correctedTaxAmount,
+        private readonly array $replacedInvoices,
         #[Assert\Valid]
         #[Assert\Count(min: 1, max: 12)]
-        private array $breakdownDetails,
+        private readonly array $breakdownDetails,
         #[Assert\NotBlank]
         #[Assert\Regex(pattern: '/^-?\d{1,12}\.\d{2}$/')]
-        private string $totalTaxAmount,
+        private readonly string $totalTaxAmount,
         #[Assert\NotBlank]
         #[Assert\Regex(pattern: '/^-?\d{1,12}\.\d{2}$/')]
-        private string $totalAmount,
+        private readonly string $totalAmount,
     ) {
         $this->hash = '';
         $this->hashedAt = new \DateTimeImmutable();
@@ -82,9 +82,23 @@ final readonly class RegistrationRecordDto implements RegistrationRecordInterfac
         return $this->hash;
     }
 
-    public function getHashAt(): \DateTimeInterface
+    public function setHash(string $hash): self
+    {
+        $this->hash = $hash;
+
+        return $this;
+    }
+
+    public function getHashedAt(): \DateTimeInterface
     {
         return $this->hashedAt;
+    }
+
+    public function setHashedAt(\DateTimeInterface $hashedAt): self
+    {
+        $this->hashedAt = $hashedAt;
+
+        return $this;
     }
 
     public function getIsCorrection(): bool
