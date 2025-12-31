@@ -75,7 +75,7 @@ final readonly class QrCodeHandler
         );
         $label = new Label(
             text: self::QR_CODE_VERI_FACTU_LEGAL_LABEL,
-            font: new OpenSans(size: 26),
+            font: new OpenSans(size: 56),
             alignment: LabelAlignment::Center,
             textColor: new Color(0, 0, 0)
         );
