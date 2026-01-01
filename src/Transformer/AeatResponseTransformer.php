@@ -7,6 +7,8 @@ namespace Flux\VerifactuBundle\Transformer;
 use Flux\VerifactuBundle\Contract\AeatResponseInterface;
 use Flux\VerifactuBundle\Dto\AeatResponseDto;
 use josemmo\Verifactu\Models\Responses\AeatResponse;
+use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 final readonly class AeatResponseTransformer extends BaseTransformer
@@ -14,7 +16,7 @@ final readonly class AeatResponseTransformer extends BaseTransformer
     public const FORMAT_JSON = 'json';
 
     public function __construct(
-        private SerializerInterface $serializer,
+        private DenormalizerInterface&NormalizerInterface&SerializerInterface $serializer,
     ) {
     }
 
