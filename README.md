@@ -64,14 +64,13 @@ class AppTestController
 {
     public function test(Invoice $invoice, InvoiceManager $invoiceManager, AeatClientHandler $aeatClientHandler, QrCodeHandler $qrCodeHandler)
     {
-//    $transformedInvoice = $this->invoiceManager->transformInvoiceToRegistrationRecordInterface($invoice, $previousInvoice);
         $registrationRecord = $invoiceManager->transformInvoiceToRegistrationRecordInterface($invoice, $invoice->getPreviousInvoice());
         // is up to you to create an `InvoiceManager` (or whatever) to transform your Invoice model into a data value object that implements the `RegistrationRecordInterface` contract.
         // to keep traceability you must include a reference to the previous registered invoice, only can be null for the very first invoice.
         $result = $aeatClientHandler->sendRegistrationRecord($registrationRecord);
         // $result is an `AeatResponseInterface` contract, you must check the response status received and manage it accordingly.
         // you must decide what to do with the response status, and check $result->getStatus() against ResponseStatus::Correct, ResponseStatus::PartiallyCorrect or ResponseStatus::Incorrect possible values 
-        // you must read Veri\*Factu documentation to handle Invoice integrity and traceability, this is out of the scope of this bundle! 
+        // you must read Veri*Factu documentation to handle Invoice integrity and traceability, this is out of the scope of this bundle! 
         $aeatJsonArrayResponse = $aeatClientHandler->getJsonArrayFromAeatResponseDto($result);
         // we recommend you to always store the result array or a JSON serialized version into your Invoice entity
         $invoice->setAeatJsonResponse($aeatJsonArrayResponse);
