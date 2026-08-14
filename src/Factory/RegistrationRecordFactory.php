@@ -9,6 +9,7 @@ use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Models\Records\Record;
 use josemmo\Verifactu\Models\Records\RegistrationRecord;
 
 final readonly class RegistrationRecordFactory
@@ -50,7 +51,29 @@ final readonly class RegistrationRecordFactory
         return $registrationRecordDto;
     }
 
-    public function makeValidatedRegistrationRecordModelFromDto(RegistrationRecordDto $input): RegistrationRecord
+    /**
+     * Build validated & chained registration record models: every record after the first one of the batch
+     * is chained to the preceding record (previousInvoiceIdentifier & previousHash are computed automatically).
+     *
+     * @param RegistrationRecordInterface[] $inputs
+     *
+     * @return RegistrationRecord[]
+     */
+    public function makeValidatedChainedRegistrationRecordModelsFromInterfaces(array $inputs): array
+    {
+        $registrationRecordModels = [];
+        $previousRegistrationRecordModel = null;
+        foreach ($inputs as $input) {
+            $registrationRecordDto = $this->makeValidatedRegistrationRecordDtoFromInterface($input);
+            $registrationRecordModel = $this->makeValidatedRegistrationRecordModelFromDto($registrationRecordDto, $previousRegistrationRecordModel);
+            $registrationRecordModels[] = $registrationRecordModel;
+            $previousRegistrationRecordModel = $registrationRecordModel;
+        }
+
+        return $registrationRecordModels;
+    }
+
+    public function makeValidatedRegistrationRecordModelFromDto(RegistrationRecordDto $input, ?Record $chainedPreviousRecord = null): RegistrationRecord
     {
         $invoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($input->getInvoiceIdentifier());
         $invoiceIdentifier = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($invoiceIdentifierDto);
@@ -81,6 +104,10 @@ final readonly class RegistrationRecordFactory
             breakdownDetails: $breakdownDetails,
             recipients: $recipients,
         );
+        if (null !== $chainedPreviousRecord) {
+            $registrationRecordModel->previousInvoiceId = $chainedPreviousRecord->invoiceId;
+            $registrationRecordModel->previousHash = $chainedPreviousRecord->hash;
+        }
         $registrationRecordModel->hashedAt = new \DateTimeImmutable();
         $registrationRecordModel->hash = $registrationRecordModel->calculateHash();
         $registrationRecordModel->validate();

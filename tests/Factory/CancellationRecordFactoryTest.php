@@ -55,4 +55,29 @@ final class CancellationRecordFactoryTest extends TestCase
         $this->assertMatchesRegularExpression('/^[0-9A-F]{64}$/', $model->hash);
         $this->assertSame($model->calculateHash(), $model->hash);
     }
+
+    public function testChainedBatchModelsAreLinkedByInvoiceIdentifierAndHash(): void
+    {
+        $placeholderHash = strtoupper(hash('sha256', 'previous-record'));
+        $models = $this->factory->makeValidatedChainedCancellationRecordModelsFromInterfaces([
+            $this->makeDto('FA-2026-002', $placeholderHash),
+            $this->makeDto('FA-2026-003', $placeholderHash),
+        ]);
+        $this->assertCount(2, $models);
+        $this->assertSame($placeholderHash, $models[0]->previousHash);
+        $this->assertSame($models[0]->invoiceId, $models[1]->previousInvoiceId);
+        $this->assertSame($models[0]->hash, $models[1]->previousHash);
+        $this->assertNotSame($placeholderHash, $models[1]->previousHash);
+    }
+
+    private function makeDto(string $invoiceNumber, string $previousHash): CancellationRecordDto
+    {
+        return new CancellationRecordDto(
+            invoiceIdentifier: new InvoiceIdentifierDto('12345678Z', $invoiceNumber, new \DateTimeImmutable('2026-08-01')),
+            previousInvoiceIdentifier: new InvoiceIdentifierDto('12345678Z', 'FA-2026-001', new \DateTimeImmutable('2026-07-01')),
+            previousHash: $previousHash,
+            withoutPriorRecord: false,
+            isPriorRejection: false
+        );
+    }
 }

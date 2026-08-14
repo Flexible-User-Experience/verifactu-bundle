@@ -109,6 +109,17 @@ $result = $aeatClientHandler->sendCancellationRecord($cancellationRecord);
 
 The previous invoice identifier and its hash are **mandatory** for every cancellation record to keep the chain ("encadenamiento") integrity. Like with registration records, the record's `hash` and `hashedAt` values are updated during the call and you must persist them, and you must check the returned response status.
 
+### Batch sending
+
+You can send up to 1000 records (the AEAT remission limit) in a single API call:
+
+```php
+$result = $aeatClientHandler->sendRegistrationRecords($registrationRecords);
+$result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
+```
+
+Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
+
 Development with Docker
 -----------------------
 

@@ -9,6 +9,7 @@ use Flux\VerifactuBundle\Dto\CancellationRecordDto;
 use Flux\VerifactuBundle\Transformer\CancellationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\CancellationRecord;
+use josemmo\Verifactu\Models\Records\Record;
 
 final readonly class CancellationRecordFactory
 {
@@ -32,7 +33,30 @@ final readonly class CancellationRecordFactory
         return $cancellationRecordDto;
     }
 
-    public function makeValidatedCancellationRecordModelFromDto(CancellationRecordDto $input): CancellationRecord
+    /**
+     * Build validated & chained cancellation record models: every record after the first one of the batch
+     * is chained to the preceding record (previousInvoiceIdentifier & previousHash are computed automatically,
+     * replacing the interface provided values).
+     *
+     * @param CancellationRecordInterface[] $inputs
+     *
+     * @return CancellationRecord[]
+     */
+    public function makeValidatedChainedCancellationRecordModelsFromInterfaces(array $inputs): array
+    {
+        $cancellationRecordModels = [];
+        $previousCancellationRecordModel = null;
+        foreach ($inputs as $input) {
+            $cancellationRecordDto = $this->makeValidatedCancellationRecordDtoFromInterface($input);
+            $cancellationRecordModel = $this->makeValidatedCancellationRecordModelFromDto($cancellationRecordDto, $previousCancellationRecordModel);
+            $cancellationRecordModels[] = $cancellationRecordModel;
+            $previousCancellationRecordModel = $cancellationRecordModel;
+        }
+
+        return $cancellationRecordModels;
+    }
+
+    public function makeValidatedCancellationRecordModelFromDto(CancellationRecordDto $input, ?Record $chainedPreviousRecord = null): CancellationRecord
     {
         $invoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($input->getInvoiceIdentifier());
         $invoiceIdentifier = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($invoiceIdentifierDto);
@@ -43,6 +67,10 @@ final readonly class CancellationRecordFactory
             invoiceIdentifier: $invoiceIdentifier,
             previousInvoiceIdentifier: $previousInvoiceIdentifier,
         );
+        if (null !== $chainedPreviousRecord) {
+            $cancellationRecordModel->previousInvoiceId = $chainedPreviousRecord->invoiceId;
+            $cancellationRecordModel->previousHash = $chainedPreviousRecord->hash;
+        }
         $cancellationRecordModel->hashedAt = new \DateTimeImmutable();
         $cancellationRecordModel->hash = $cancellationRecordModel->calculateHash();
         $cancellationRecordModel->validate();

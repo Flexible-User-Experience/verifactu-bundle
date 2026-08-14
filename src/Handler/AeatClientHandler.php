@@ -17,6 +17,9 @@ use josemmo\Verifactu\Services\AeatClient;
 
 final readonly class AeatClientHandler
 {
+    // AEAT limits every remission to 1000 records
+    private const MAX_RECORDS_PER_REMISSION = 1000;
+
     public function __construct(
         private array $aeatClientConfig,
         private RegistrationRecordFactory $registrationRecordFactory,
@@ -43,6 +46,28 @@ final readonly class AeatClientHandler
         return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
     }
 
+    /**
+     * Send a batch of registration records in a single AEAT API call: every record after the first one
+     * of the batch is chained to the preceding record automatically.
+     *
+     * @param RegistrationRecordInterface[] $registrationRecordInterfaces
+     */
+    public function sendRegistrationRecords(array $registrationRecordInterfaces): AeatResponseInterface
+    {
+        $this->assertBatchSize($registrationRecordInterfaces);
+        $aeatClient = $this->buildAeatClient();
+        $validatedRegistrationRecordModels = $this->registrationRecordFactory->makeValidatedChainedRegistrationRecordModelsFromInterfaces($registrationRecordInterfaces);
+        $aeatResponse = $aeatClient->send($validatedRegistrationRecordModels)->wait();
+        foreach (array_values($registrationRecordInterfaces) as $index => $registrationRecordInterface) {
+            $registrationRecordInterface
+                ->setHash($validatedRegistrationRecordModels[$index]->hash)
+                ->setHashedAt($validatedRegistrationRecordModels[$index]->hashedAt)
+            ;
+        }
+
+        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
+    }
+
     public function sendCancellationRecord(CancellationRecordInterface $cancellationRecordInterface): AeatResponseInterface
     {
         $aeatClient = $this->buildAeatClient();
@@ -55,6 +80,28 @@ final readonly class AeatClientHandler
             ->setHash($validatedCancellationRecordModel->hash)
             ->setHashedAt($validatedCancellationRecordModel->hashedAt)
         ;
+
+        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
+    }
+
+    /**
+     * Send a batch of cancellation records in a single AEAT API call: every record after the first one
+     * of the batch is chained to the preceding record automatically.
+     *
+     * @param CancellationRecordInterface[] $cancellationRecordInterfaces
+     */
+    public function sendCancellationRecords(array $cancellationRecordInterfaces): AeatResponseInterface
+    {
+        $this->assertBatchSize($cancellationRecordInterfaces);
+        $aeatClient = $this->buildAeatClient();
+        $validatedCancellationRecordModels = $this->cancellationRecordFactory->makeValidatedChainedCancellationRecordModelsFromInterfaces($cancellationRecordInterfaces);
+        $aeatResponse = $aeatClient->send($validatedCancellationRecordModels)->wait();
+        foreach (array_values($cancellationRecordInterfaces) as $index => $cancellationRecordInterface) {
+            $cancellationRecordInterface
+                ->setHash($validatedCancellationRecordModels[$index]->hash)
+                ->setHashedAt($validatedCancellationRecordModels[$index]->hashedAt)
+            ;
+        }
 
         return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
     }
@@ -89,5 +136,12 @@ final readonly class AeatClientHandler
         }
 
         return $client;
+    }
+
+    private function assertBatchSize(array $recordInterfaces): void
+    {
+        if ([] === $recordInterfaces || \count($recordInterfaces) > self::MAX_RECORDS_PER_REMISSION) {
+            throw new \InvalidArgumentException(\sprintf('A records batch must contain between 1 and %d records, %d given.', self::MAX_RECORDS_PER_REMISSION, \count($recordInterfaces)));
+        }
     }
 }
