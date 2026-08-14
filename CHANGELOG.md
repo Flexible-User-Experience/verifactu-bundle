@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-0.1.7
+0.2.0
 -----
  
  * Add Dockerized PHP development environment (`Dockerfile`, `compose.yaml` & `Makefile`)
