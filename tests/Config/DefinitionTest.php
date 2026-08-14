@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Config;
+namespace FlexibleUx\VerifactuBundle\Tests\Config;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -82,7 +82,7 @@ final class DefinitionTest extends TestCase
 
     private function processConfiguration(array $config): array
     {
-        $treeBuilder = new TreeBuilder('flux_verifactu');
+        $treeBuilder = new TreeBuilder('flexible_ux_verifactu');
         $loader = new DefinitionFileLoader($treeBuilder, new FileLocator(dirname(__DIR__, 2).'/config'));
         $loader->load('definition.php');
 

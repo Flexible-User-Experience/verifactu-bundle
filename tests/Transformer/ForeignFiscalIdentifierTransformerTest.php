@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Transformer;
+namespace FlexibleUx\VerifactuBundle\Tests\Transformer;
 
-use Flux\VerifactuBundle\Dto\ForeignFiscalIdentifierDto;
-use Flux\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Dto\ForeignFiscalIdentifierDto;
+use FlexibleUx\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
 use josemmo\Verifactu\Models\Records\ForeignIdType;
 use PHPUnit\Framework\TestCase;
 

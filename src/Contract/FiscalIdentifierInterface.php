@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Contract;
+namespace FlexibleUx\VerifactuBundle\Contract;
 
 interface FiscalIdentifierInterface extends ValidatableInterface
 {

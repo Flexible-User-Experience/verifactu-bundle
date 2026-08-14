@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Factory;
+namespace FlexibleUx\VerifactuBundle\Factory;
 
-use Flux\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
-use Flux\VerifactuBundle\Dto\ForeignFiscalIdentifierDto;
-use Flux\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Dto\ForeignFiscalIdentifierDto;
+use FlexibleUx\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\ForeignFiscalIdentifier;
 
 final readonly class ForeignFiscalIdentifierFactory

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Dto;
+namespace FlexibleUx\VerifactuBundle\Tests\Dto;
 
-use Flux\VerifactuBundle\Dto\BreakdownDetailDto;
+use FlexibleUx\VerifactuBundle\Dto\BreakdownDetailDto;
 use josemmo\Verifactu\Models\Records\OperationType;
 use josemmo\Verifactu\Models\Records\RegimeType;
 use josemmo\Verifactu\Models\Records\TaxType;

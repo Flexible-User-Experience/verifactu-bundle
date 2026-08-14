@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Transformer;
+namespace FlexibleUx\VerifactuBundle\Transformer;
 
-use Flux\VerifactuBundle\Dto\ComputerSystemDto;
+use FlexibleUx\VerifactuBundle\Dto\ComputerSystemDto;
 use josemmo\Verifactu\Models\ComputerSystem;
 
 final readonly class ComputerSystemTransformer extends BaseTransformer

@@ -22,10 +22,10 @@ VerifactuBundle requires PHP 8.2 or higher and Symfony 6.4 or higher. Run the fo
 composer require flexible-ux/verifactu-bundle
 ```
 
-### Configure the bundle in your `config/packages/flux_verifactu.yaml` file:
+### Configure the bundle in your `config/packages/flexible_ux_verifactu.yaml` file:
 
 ```yaml
-flux_verifactu:
+flexible_ux_verifactu:
     aeat_client:
         is_entity_seal_certificate: false # only set to true if your PFX certificate is an entity seal ("certificado de sello de entidad")
         is_prod_environment: false # only set to true to make real AEAT API calls, be careful here
@@ -59,13 +59,13 @@ flux_verifactu:
 
 ### `AeatClientHandler` and `QrCodeHandler` Services
 
-You can inject the `AeatClientHandler` service in your app. Make `sendRegistrationRecord` method calls to send registration records to AEAT API. Your `Invoice` model (or entity) must implement `Flux\VerifactuBundle\Contract\RegistrationRecordInterface`.
+You can inject the `AeatClientHandler` service in your app. Make `sendRegistrationRecord` method calls to send registration records to AEAT API. Your `Invoice` model (or entity) must implement `FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface`.
 
 For now, you must generate the QR code image at same time, so inject `QrCodeHandler` service too.
 
 ```php
-use Flux\VerifactuBundle\Handler\AeatClientHandler;
-use Flux\VerifactuBundle\Handler\QrCodeHandler;
+use FlexibleUx\VerifactuBundle\Handler\AeatClientHandler;
+use FlexibleUx\VerifactuBundle\Handler\QrCodeHandler;
 use josemmo\Verifactu\Models\Responses\ResponseStatus;
 
 class AppTestController
@@ -127,7 +127,7 @@ An `\InvalidArgumentException` is also thrown for a missing or unreadable PFX ce
 
 ### Cancellation records
 
-To cancel a previously registered invoice, make your cancellation model implement `Flux\VerifactuBundle\Contract\CancellationRecordInterface` (or build the provided `CancellationRecordDto` directly) and call:
+To cancel a previously registered invoice, make your cancellation model implement `FlexibleUx\VerifactuBundle\Contract\CancellationRecordInterface` (or build the provided `CancellationRecordDto` directly) and call:
 
 ```php
 $result = $aeatClientHandler->sendCancellationRecord($cancellationRecord);
@@ -151,7 +151,7 @@ Every record after the first one of the batch is chained to the preceding record
 Inject the `XmlRecordHandler` service to keep legal XML copies of your sent records and to read them back:
 
 ```php
-use Flux\VerifactuBundle\Handler\XmlRecordHandler;
+use FlexibleUx\VerifactuBundle\Handler\XmlRecordHandler;
 
 $xml = $xmlRecordHandler->exportRegistrationRecordToXmlString($registrationRecord); // standalone <sum1:RegistroAlta /> XML string
 $xml = $xmlRecordHandler->exportCancellationRecordToXmlString($cancellationRecord); // standalone <sum1:RegistroAnulacion /> XML string
@@ -165,7 +165,7 @@ Export keeps the **stored** `hash` and `hashedAt` values of the already sent rec
 Generate a draft of the legal "declaración responsable" document (Artículo 13 del RD 1007/2023) from your configured `computer_system` credentials:
 
 ```shell
-php bin/console flux:verifactu:generate-sif-statement "Barcelona" --output var/declaracion-responsable.txt
+php bin/console flexible-ux:verifactu:generate-sif-statement "Barcelona" --output var/declaracion-responsable.txt
 ```
 
 The generated document is a **draft**: review it with your legal counsel before signing it and keeping it available to your clients and to the AEAT[^aeat].

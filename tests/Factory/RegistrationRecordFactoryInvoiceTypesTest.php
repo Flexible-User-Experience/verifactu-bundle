@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Factory;
+namespace FlexibleUx\VerifactuBundle\Tests\Factory;
 
-use Flux\VerifactuBundle\Dto\BreakdownDetailDto;
-use Flux\VerifactuBundle\Dto\FiscalIdentifierDto;
-use Flux\VerifactuBundle\Dto\InvoiceIdentifierDto;
-use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
-use Flux\VerifactuBundle\Factory\BreakdownDetailFactory;
-use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
-use Flux\VerifactuBundle\Factory\ForeignFiscalIdentifierFactory;
-use Flux\VerifactuBundle\Factory\InvoiceIdentifierFactory;
-use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
-use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
-use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Dto\BreakdownDetailDto;
+use FlexibleUx\VerifactuBundle\Dto\FiscalIdentifierDto;
+use FlexibleUx\VerifactuBundle\Dto\InvoiceIdentifierDto;
+use FlexibleUx\VerifactuBundle\Dto\RegistrationRecordDto;
+use FlexibleUx\VerifactuBundle\Factory\BreakdownDetailFactory;
+use FlexibleUx\VerifactuBundle\Factory\FiscalIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\ForeignFiscalIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\InvoiceIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\RegistrationRecordFactory;
+use FlexibleUx\VerifactuBundle\Transformer\BreakdownDetailTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\RegistrationRecordTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\CorrectiveType;
 use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 use josemmo\Verifactu\Models\Records\InvoiceType;

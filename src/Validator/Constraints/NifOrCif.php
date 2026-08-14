@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Validator\Constraints;
+namespace FlexibleUx\VerifactuBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Validator\Constraints\RegexValidator;

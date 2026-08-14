@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Dto;
+namespace FlexibleUx\VerifactuBundle\Dto;
 
-use Flux\VerifactuBundle\Contract\AeatResponseInterface;
+use FlexibleUx\VerifactuBundle\Contract\AeatResponseInterface;
 use josemmo\Verifactu\Models\Responses\ResponseItem;
 use josemmo\Verifactu\Models\Responses\ResponseStatus;
 use Symfony\Component\Validator\Constraints as Assert;

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Dto;
+namespace FlexibleUx\VerifactuBundle\Dto;
 
-use Flux\VerifactuBundle\Contract\ComputerSystemInterface;
-use Flux\VerifactuBundle\Validator\Constraints\NifOrCif;
+use FlexibleUx\VerifactuBundle\Contract\ComputerSystemInterface;
+use FlexibleUx\VerifactuBundle\Validator\Constraints\NifOrCif;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class ComputerSystemDto implements ComputerSystemInterface

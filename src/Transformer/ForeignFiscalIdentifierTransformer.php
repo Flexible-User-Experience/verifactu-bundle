@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Transformer;
+namespace FlexibleUx\VerifactuBundle\Transformer;
 
-use Flux\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
-use Flux\VerifactuBundle\Dto\ForeignFiscalIdentifierDto;
+use FlexibleUx\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Dto\ForeignFiscalIdentifierDto;
 use josemmo\Verifactu\Models\Records\ForeignFiscalIdentifier;
 
 final readonly class ForeignFiscalIdentifierTransformer extends BaseTransformer

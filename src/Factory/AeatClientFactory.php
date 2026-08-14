@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Factory;
+namespace FlexibleUx\VerifactuBundle\Factory;
 
 use josemmo\Verifactu\Services\AeatClient;
 

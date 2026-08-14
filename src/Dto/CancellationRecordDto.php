@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Dto;
+namespace FlexibleUx\VerifactuBundle\Dto;
 
-use Flux\VerifactuBundle\Contract\CancellationRecordInterface;
-use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Contract\CancellationRecordInterface;
+use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class CancellationRecordDto implements CancellationRecordInterface

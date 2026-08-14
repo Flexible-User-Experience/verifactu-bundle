@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Command;
+namespace FlexibleUx\VerifactuBundle\Tests\Command;
 
-use Flux\VerifactuBundle\Command\GenerateSifStatementCommand;
+use FlexibleUx\VerifactuBundle\Command\GenerateSifStatementCommand;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 use Twig\Environment;
@@ -65,7 +65,7 @@ final class GenerateSifStatementCommandTest extends TestCase
     private function makeCommandTester(bool $onlySupportsVerifactu): CommandTester
     {
         $loader = new FilesystemLoader();
-        $loader->addPath(\dirname(__DIR__, 2).'/templates', 'FluxVerifactu');
+        $loader->addPath(\dirname(__DIR__, 2).'/templates', 'FlexibleUxVerifactu');
 
         return new CommandTester(new GenerateSifStatementCommand(
             [

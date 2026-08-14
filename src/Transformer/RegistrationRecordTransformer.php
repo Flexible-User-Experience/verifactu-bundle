@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Transformer;
+namespace FlexibleUx\VerifactuBundle\Transformer;
 
-use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
-use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
+use FlexibleUx\VerifactuBundle\Dto\RegistrationRecordDto;
 use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 use josemmo\Verifactu\Models\Records\RegistrationRecord;
 

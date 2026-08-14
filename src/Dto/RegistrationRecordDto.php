@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Dto;
+namespace FlexibleUx\VerifactuBundle\Dto;
 
-use Flux\VerifactuBundle\Contract\BreakdownDetailInterface;
-use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
-use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
+use FlexibleUx\VerifactuBundle\Contract\BreakdownDetailInterface;
+use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
 use josemmo\Verifactu\Models\Records\CorrectiveType;
 use josemmo\Verifactu\Models\Records\InvoiceType;
 use Symfony\Component\Validator\Constraints as Assert;

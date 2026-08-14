@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Factory;
+namespace FlexibleUx\VerifactuBundle\Factory;
 
-use Flux\VerifactuBundle\Contract\AeatResponseInterface;
-use Flux\VerifactuBundle\Dto\AeatResponseDto;
-use Flux\VerifactuBundle\Transformer\AeatResponseTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Contract\AeatResponseInterface;
+use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
+use FlexibleUx\VerifactuBundle\Transformer\AeatResponseTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Responses\AeatResponse;
 
 final readonly class AeatResponseFactory

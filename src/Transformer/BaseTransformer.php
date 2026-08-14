@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Transformer;
+namespace FlexibleUx\VerifactuBundle\Transformer;
 
 abstract readonly class BaseTransformer
 {

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Validator\Constraints;
+namespace FlexibleUx\VerifactuBundle\Tests\Validator\Constraints;
 
-use Flux\VerifactuBundle\Validator\Constraints\NifOrCif;
+use FlexibleUx\VerifactuBundle\Validator\Constraints\NifOrCif;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;

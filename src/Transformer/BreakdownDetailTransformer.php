@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Transformer;
+namespace FlexibleUx\VerifactuBundle\Transformer;
 
-use Flux\VerifactuBundle\Contract\BreakdownDetailInterface;
-use Flux\VerifactuBundle\Dto\BreakdownDetailDto;
+use FlexibleUx\VerifactuBundle\Contract\BreakdownDetailInterface;
+use FlexibleUx\VerifactuBundle\Dto\BreakdownDetailDto;
 use josemmo\Verifactu\Models\Records\BreakdownDetails;
 
 final readonly class BreakdownDetailTransformer extends BaseTransformer

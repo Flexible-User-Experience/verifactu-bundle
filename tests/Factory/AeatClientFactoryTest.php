@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Factory;
+namespace FlexibleUx\VerifactuBundle\Tests\Factory;
 
-use Flux\VerifactuBundle\Factory\AeatClientFactory;
-use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
-use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
-use Flux\VerifactuBundle\Transformer\ComputerSystemTransformer;
-use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Factory\AeatClientFactory;
+use FlexibleUx\VerifactuBundle\Factory\ComputerSystemFactory;
+use FlexibleUx\VerifactuBundle\Factory\FiscalIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Transformer\ComputerSystemTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\FiscalIdentifier;
 use josemmo\Verifactu\Services\AeatClient;
 use PHPUnit\Framework\TestCase;

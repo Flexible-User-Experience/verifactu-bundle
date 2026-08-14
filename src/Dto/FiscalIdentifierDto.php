@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Dto;
+namespace FlexibleUx\VerifactuBundle\Dto;
 
-use Flux\VerifactuBundle\Contract\FiscalIdentifierInterface;
-use Flux\VerifactuBundle\Validator\Constraints\NifOrCif;
+use FlexibleUx\VerifactuBundle\Contract\FiscalIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Validator\Constraints\NifOrCif;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class FiscalIdentifierDto implements FiscalIdentifierInterface

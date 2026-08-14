@@ -1,8 +1,8 @@
 <?php
 
-namespace Flux\VerifactuBundle\Validator;
+namespace FlexibleUx\VerifactuBundle\Validator;
 
-use Flux\VerifactuBundle\Contract\ValidatableInterface;
+use FlexibleUx\VerifactuBundle\Contract\ValidatableInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 

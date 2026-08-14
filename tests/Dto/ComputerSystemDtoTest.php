@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Dto;
+namespace FlexibleUx\VerifactuBundle\Tests\Dto;
 
-use Flux\VerifactuBundle\Dto\ComputerSystemDto;
+use FlexibleUx\VerifactuBundle\Dto\ComputerSystemDto;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
