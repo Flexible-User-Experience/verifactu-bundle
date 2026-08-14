@@ -15,7 +15,7 @@ TODO
 - [x] Handle AeatClient CancellationRecord ("RegistroAnulacion") requests
 - [x] Add batch sending support with automatic record chaining
 - [x] Add XML record storage support (export & import with tamper detection)
-- [ ] Document AeatException & PSR ClientExceptionInterface error handling in README (AeatClient throws them since josemmo/verifactu-php 0.3.1)
+- [x] Document AeatException & PSR ClientExceptionInterface error handling in README (AeatClient throws them since josemmo/verifactu-php 0.3.1)
 
 ---
 

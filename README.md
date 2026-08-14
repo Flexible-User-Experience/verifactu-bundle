@@ -99,6 +99,32 @@ class AppTestController
 }
 ```
 
+### Error handling
+
+Besides checking the returned response status, wrap the `AeatClientHandler` send calls to handle these exceptions (since `josemmo/verifactu-php` 0.3.1 HTTP errors do not throw at transport level, so AEAT server faults surface as `AeatException`):
+
+```php
+use josemmo\Verifactu\Exceptions\AeatException;
+use josemmo\Verifactu\Exceptions\InvalidModelException;
+use Psr\Http\Client\ClientExceptionInterface;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+
+try {
+    $result = $aeatClientHandler->sendRegistrationRecord($registrationRecord);
+} catch (ValidationFailedException|InvalidModelException $exception) {
+    // thrown BEFORE anything is sent: your data does not fulfill the bundle DTO asserts
+    // (ValidationFailedException) or the josemmo/verifactu-php model validations
+    // (InvalidModelException), fix the invoice data and send again.
+} catch (AeatException $exception) {
+    // the AEAT server returned a SOAP fault or an unparseable response: the remission outcome
+    // is UNKNOWN, treat the record as not registered and retry later.
+} catch (ClientExceptionInterface $exception) {
+    // PSR-18 network/transport failure (timeout, DNS, TLS): same treatment as AeatException.
+}
+```
+
+An `\InvalidArgumentException` is also thrown for a missing or unreadable PFX certificate file and for an invalid batch size (1 to 1000 records). Keep in mind that the record `hash` & `hashedAt` values are only written back to your entity **after** a response is received, so none of these exceptions can leave a half-updated invoice behind.
+
 ### Cancellation records
 
 To cancel a previously registered invoice, make your cancellation model implement `Flux\VerifactuBundle\Contract\CancellationRecordInterface` (or build the provided `CancellationRecordDto` directly) and call:
