@@ -27,6 +27,7 @@ composer require flexible-ux/verifactu-bundle
 ```yaml
 flux_verifactu:
     aeat_client:
+        is_entity_seal_certificate: false # only set to true if your PFX certificate is an entity seal ("certificado de sello de entidad")
         is_prod_environment: false # only set to true to make real AEAT API calls, be careful here
         pfx_certificate_filepath: '%your_pfx_certificate_filepath%'
         pfx_certificate_password: '%pfx_certificate_password%'
@@ -90,6 +91,26 @@ class AppTestController
     }
 }
 ```
+
+Development with Docker
+-----------------------
+
+This repository includes a Dockerized PHP environment to work on the bundle without a local PHP installation. It only requires [Docker](https://docs.docker.com/get-docker/) with the Compose plugin:
+
+```shell
+make install # build the PHP image, start the container and install Composer dependencies
+make it      # run the full local gate: PHP-CS-Fixer, PHPStan and PHPUnit
+make shell   # open an interactive shell into the PHP container
+make         # list all available targets
+```
+
+By default the image is built with PHP 8.4. To rebuild the environment with another PHP version of the CI matrix (8.2 to 8.5) run, for example:
+
+```shell
+PHP_VERSION=8.2 make destroy install
+```
+
+Xdebug is installed but disabled by default. Enable it with the `XDEBUG_MODE` environment variable (e.g. `XDEBUG_MODE=debug make startd` or `XDEBUG_MODE=coverage make test`).
 
 Code Style
 ----------
