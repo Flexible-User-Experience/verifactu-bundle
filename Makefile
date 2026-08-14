@@ -9,6 +9,8 @@ install: build startd composer/install ## build the PHP image, start the contain
 it: php-cs-fixer phpstan test ## run the full local gate: code style, static analysis and tests
 
 # Docker
+bash: shell ## alias of the shell target
+
 build: ## build the PHP Docker image
 	docker compose build
 
@@ -19,9 +21,6 @@ stop: CMD=stop ## stop the container
 
 destroy start startd stop:
 	docker compose $(CMD)
-
-bash:
-	@docker exec -it $(CONTAINER) bash
 
 shell: ## open an interactive shell into the PHP container
 	docker exec -it $(CONTAINER) bash
