@@ -5,7 +5,7 @@ TODO
 - [x] Add .pfx certificate file exists assert
 - [x] Add NIF or CIF asserts
 - [x] Handle AeatClient response to return the CSV[^csv]
-- [ ] Handle all AeatClient InvoiceType requests
+- [x] Handle all AeatClient InvoiceType requests
 - [x] Handle QR code PNG image generation from an AeatClient response
 - [ ] Add Symfony command to generate a valid SIF[^sif] statement of responsibility document
 - [x] Add Dockerized PHP development environment (Dockerfile, Compose & Makefile)

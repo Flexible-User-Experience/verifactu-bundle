@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Flux\VerifactuBundle\Factory;
 
 use Flux\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
+use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 use josemmo\Verifactu\Models\Records\Record;
 use josemmo\Verifactu\Models\Records\RegistrationRecord;
 
@@ -35,6 +37,10 @@ final readonly class RegistrationRecordFactory
         // validate breakdownDetail interface array
         foreach ($input->getBreakdownDetails() as $breakdownDetail) {
             $this->breakdownDetailFactory->makeValidatedBreakdownDetailDtoFromInterface($breakdownDetail);
+        }
+        // validate corrected & replaced invoice identifier interface arrays
+        foreach (array_merge($input->getCorrectiveInvoices(), $input->getReplacedInvoices()) as $invoiceIdentifier) {
+            $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($invoiceIdentifier);
         }
         // validate recipients interface array
         foreach ($input->getRecipients() as $recipient) {
@@ -126,6 +132,8 @@ final readonly class RegistrationRecordFactory
                 $recipients[] = $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierModelFromDto($recipientDto);
             }
         }
+        $correctedInvoices = $this->makeValidatedInvoiceIdentifierModels($input->getCorrectiveInvoices());
+        $replacedInvoices = $this->makeValidatedInvoiceIdentifierModels($input->getReplacedInvoices());
 
         return $this->registrationRecordTransformer->transformDtoToModel(
             dto: $input,
@@ -133,6 +141,24 @@ final readonly class RegistrationRecordFactory
             previousInvoiceIdentifier: $previousInvoiceIdentifier,
             breakdownDetails: $breakdownDetails,
             recipients: $recipients,
+            correctedInvoices: $correctedInvoices,
+            replacedInvoices: $replacedInvoices,
         );
+    }
+
+    /**
+     * @param InvoiceIdentifierInterface[] $invoiceIdentifierInterfaces
+     *
+     * @return InvoiceIdentifier[]
+     */
+    private function makeValidatedInvoiceIdentifierModels(array $invoiceIdentifierInterfaces): array
+    {
+        $invoiceIdentifierModels = [];
+        foreach ($invoiceIdentifierInterfaces as $invoiceIdentifierInterface) {
+            $invoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($invoiceIdentifierInterface);
+            $invoiceIdentifierModels[] = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($invoiceIdentifierDto);
+        }
+
+        return $invoiceIdentifierModels;
     }
 }
