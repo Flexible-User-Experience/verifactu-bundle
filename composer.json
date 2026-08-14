@@ -34,7 +34,7 @@
         "ext-gd": "*",
         "ext-libxml": "*",
         "endroid/qr-code": "^6.0",
-        "josemmo/verifactu-php": "^0.3",
+        "josemmo/verifactu-php": "^0.3.4",
         "khanamiryan/qrcode-detector-decoder": "^2.0",
         "symfony/config": "^6.4|^7.3|^8.0",
         "symfony/dependency-injection": "^6.4|^7.3|^8.0",

@@ -33,6 +33,8 @@ final readonly class BreakdownDetailTransformer extends BaseTransformer
         $detail->baseAmount = $dto->getBaseAmount();
         $detail->taxRate = $dto->getTaxRate();
         $detail->taxAmount = $dto->getTaxAmount();
+        $detail->surchargeRate = $dto->getSurchargeRate();
+        $detail->surchargeAmount = $dto->getSurchargeAmount();
 
         return $detail;
     }
