@@ -1,7 +1,7 @@
 TODO
 ====
  
-- [ ] Write unit tests for core services (AeatClientHandler & QrCodeHandler still pending, DTOs, transformers, factories & XmlRecordHandler are covered)
+- [x] Write unit tests for core services
 - [ ] Add .pfx certificate file exists assert
 - [ ] Add NIF or CIF asserts
 - [x] Handle AeatClient response to return the CSV[^csv]

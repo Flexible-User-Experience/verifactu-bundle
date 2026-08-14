@@ -28,7 +28,7 @@ final class FluxVerifactuBundle extends AbstractBundle
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
         $container->import('../config/services.php');
-        $builder->getDefinition('flux_verifactu.aeat_client_handler')
+        $builder->getDefinition('flux_verifactu.aeat_client_factory')
             ->setArgument(0, $config[self::AEAT_CLIENT_KEY])
         ;
         $builder->getDefinition('flux_verifactu.qr_code_handler')

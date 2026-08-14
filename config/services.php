@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Flux\VerifactuBundle\Factory\AeatClientFactory;
 use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\BreakdownDetailFactory;
 use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
@@ -25,6 +26,7 @@ use Flux\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Services\AeatClient;
 use Symfony\Component\Serializer\SerializerInterface;
 
 return static function (ContainerConfigurator $container): void {
@@ -33,11 +35,9 @@ return static function (ContainerConfigurator $container): void {
         // handlers
         ->set('flux_verifactu.aeat_client_handler', AeatClientHandler::class)
             ->args([
-                abstract_arg(FluxVerifactuBundle::AEAT_CLIENT_KEY),
+                service(AeatClient::class),
                 service(RegistrationRecordFactory::class),
                 service(CancellationRecordFactory::class),
-                service(ComputerSystemFactory::class),
-                service(FiscalIdentifierFactory::class),
                 service(AeatResponseFactory::class),
             ])
             ->alias(AeatClientHandler::class, 'flux_verifactu.aeat_client_handler')
@@ -58,7 +58,18 @@ return static function (ContainerConfigurator $container): void {
             ])
             ->alias(XmlRecordHandler::class, 'flux_verifactu.xml_record_handler')
             ->public()
+        // clients
+        ->set('flux_verifactu.aeat_client', AeatClient::class)
+            ->factory([service(AeatClientFactory::class), 'makeConfiguredAeatClient'])
+            ->alias(AeatClient::class, 'flux_verifactu.aeat_client')
         // factories
+        ->set('flux_verifactu.aeat_client_factory', AeatClientFactory::class)
+            ->args([
+                abstract_arg(FluxVerifactuBundle::AEAT_CLIENT_KEY),
+                service(ComputerSystemFactory::class),
+                service(FiscalIdentifierFactory::class),
+            ])
+            ->alias(AeatClientFactory::class, 'flux_verifactu.aeat_client_factory')
         ->set('flux_verifactu.aeat_response_factory', AeatResponseFactory::class)
             ->args([
                 service(AeatResponseTransformer::class),

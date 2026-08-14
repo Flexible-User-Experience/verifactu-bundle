@@ -10,8 +10,6 @@ use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\AeatResponseDto;
 use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
-use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
-use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
 use josemmo\Verifactu\Services\AeatClient;
 
@@ -21,21 +19,18 @@ final readonly class AeatClientHandler
     private const MAX_RECORDS_PER_REMISSION = 1000;
 
     public function __construct(
-        private array $aeatClientConfig,
+        private AeatClient $aeatClient,
         private RegistrationRecordFactory $registrationRecordFactory,
         private CancellationRecordFactory $cancellationRecordFactory,
-        private ComputerSystemFactory $computerSystemFactory,
-        private FiscalIdentifierFactory $fiscalIdentifierFactory,
         private AeatResponseFactory $aeatResponseFactory,
     ) {
     }
 
     public function sendRegistrationRecord(RegistrationRecordInterface $registrationRecordInterface): AeatResponseInterface
     {
-        $aeatClient = $this->buildAeatClient();
         $validatedRegistrationRecordDto = $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($registrationRecordInterface);
         $validatedRegistrationRecordModel = $this->registrationRecordFactory->makeValidatedRegistrationRecordModelFromDto($validatedRegistrationRecordDto);
-        $aeatResponse = $aeatClient->send([
+        $aeatResponse = $this->aeatClient->send([
             $validatedRegistrationRecordModel,
         ])->wait();
         $registrationRecordInterface
@@ -55,9 +50,8 @@ final readonly class AeatClientHandler
     public function sendRegistrationRecords(array $registrationRecordInterfaces): AeatResponseInterface
     {
         $this->assertBatchSize($registrationRecordInterfaces);
-        $aeatClient = $this->buildAeatClient();
         $validatedRegistrationRecordModels = $this->registrationRecordFactory->makeValidatedChainedRegistrationRecordModelsFromInterfaces($registrationRecordInterfaces);
-        $aeatResponse = $aeatClient->send($validatedRegistrationRecordModels)->wait();
+        $aeatResponse = $this->aeatClient->send($validatedRegistrationRecordModels)->wait();
         foreach (array_values($registrationRecordInterfaces) as $index => $registrationRecordInterface) {
             $registrationRecordInterface
                 ->setHash($validatedRegistrationRecordModels[$index]->hash)
@@ -70,10 +64,9 @@ final readonly class AeatClientHandler
 
     public function sendCancellationRecord(CancellationRecordInterface $cancellationRecordInterface): AeatResponseInterface
     {
-        $aeatClient = $this->buildAeatClient();
         $validatedCancellationRecordDto = $this->cancellationRecordFactory->makeValidatedCancellationRecordDtoFromInterface($cancellationRecordInterface);
         $validatedCancellationRecordModel = $this->cancellationRecordFactory->makeValidatedCancellationRecordModelFromDto($validatedCancellationRecordDto);
-        $aeatResponse = $aeatClient->send([
+        $aeatResponse = $this->aeatClient->send([
             $validatedCancellationRecordModel,
         ])->wait();
         $cancellationRecordInterface
@@ -93,9 +86,8 @@ final readonly class AeatClientHandler
     public function sendCancellationRecords(array $cancellationRecordInterfaces): AeatResponseInterface
     {
         $this->assertBatchSize($cancellationRecordInterfaces);
-        $aeatClient = $this->buildAeatClient();
         $validatedCancellationRecordModels = $this->cancellationRecordFactory->makeValidatedChainedCancellationRecordModelsFromInterfaces($cancellationRecordInterfaces);
-        $aeatResponse = $aeatClient->send($validatedCancellationRecordModels)->wait();
+        $aeatResponse = $this->aeatClient->send($validatedCancellationRecordModels)->wait();
         foreach (array_values($cancellationRecordInterfaces) as $index => $cancellationRecordInterface) {
             $cancellationRecordInterface
                 ->setHash($validatedCancellationRecordModels[$index]->hash)
@@ -114,28 +106,6 @@ final readonly class AeatClientHandler
     public function getJsonStringFromAeatResponseDto(AeatResponseDto $dto): string
     {
         return $this->aeatResponseFactory->getJsonStringFromAeatResponseDto($dto);
-    }
-
-    private function buildAeatClient(): AeatClient
-    {
-        $client = new AeatClient(
-            $this->computerSystemFactory->makeValidatedComputerSystemModel(),
-            $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierModel(),
-        );
-        $client->setCertificate($this->aeatClientConfig['pfx_certificate_filepath'], $this->aeatClientConfig['pfx_certificate_password']);
-        $client->setEntitySeal($this->aeatClientConfig['is_entity_seal_certificate']);
-        $client->setProduction($this->aeatClientConfig['is_prod_environment']);
-        if (null !== ($this->aeatClientConfig['representative'] ?? null)) {
-            $client->setRepresentative($this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierModelFromConfigArray($this->aeatClientConfig['representative']));
-        }
-        if (null !== $this->aeatClientConfig['requirement_reference']) {
-            $client->setRequirementReference($this->aeatClientConfig['requirement_reference'], $this->aeatClientConfig['requirement_is_last_submission']);
-        }
-        if (null !== $this->aeatClientConfig['voluntary_remission_end_date']) {
-            $client->setVoluntaryRemissionEndDate(new \DateTimeImmutable($this->aeatClientConfig['voluntary_remission_end_date']), $this->aeatClientConfig['voluntary_remission_is_affected_by_incident']);
-        }
-
-        return $client;
     }
 
     private function assertBatchSize(array $recordInterfaces): void

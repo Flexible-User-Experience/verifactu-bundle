@@ -29,7 +29,7 @@ jobs:
             deps: highest
           # Symfony 7.x
           - php: 8.2
-            symfony: 7.3.*
+            symfony: 7.4.*
             deps: highest
           - php: 8.3
             symfony: 7.4.*
@@ -42,10 +42,10 @@ jobs:
             deps: highest
           # Symfony 8.x (PHP ≥ 8.4)
           - php: 8.4
-            symfony: 8.0.*
+            symfony: 8.1.*
             deps: highest
           - php: 8.5
-            symfony: 8.0.*
+            symfony: 8.1.*
             deps: highest
           # Lowest deps baseline
           - php: 8.2
