@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- https://phpunit.de/manual/current/en/appendixes.configuration.html -->
+<!-- https://docs.phpunit.de/en/11.5/configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
+         cacheDirectory=".phpunit.cache"
          colors="true"
          failOnRisky="true"
          failOnWarning="true"
@@ -19,13 +20,13 @@
         </testsuite>
     </testsuites>
 
-    <coverage>
+    <source>
         <include>
             <directory>src</directory>
         </include>
-    </coverage>
+    </source>
 
-    <listeners>
-        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener"/>
-    </listeners>
+    <extensions>
+        <bootstrap class="Symfony\Bridge\PhpUnit\SymfonyExtension"/>
+    </extensions>
 </phpunit>
