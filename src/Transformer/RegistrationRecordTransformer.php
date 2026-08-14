@@ -41,6 +41,8 @@ final readonly class RegistrationRecordTransformer extends BaseTransformer
         ?InvoiceIdentifier $previousInvoiceIdentifier,
         array $breakdownDetails,
         array $recipients,
+        array $correctedInvoices,
+        array $replacedInvoices,
     ): RegistrationRecord {
         $record = new RegistrationRecord();
         $record->invoiceId = $invoiceIdentifier;
@@ -54,10 +56,10 @@ final readonly class RegistrationRecordTransformer extends BaseTransformer
         $record->description = $dto->getDescription();
         $record->recipients = $recipients;
         $record->correctiveType = $dto->getCorrectiveType();
-        $record->correctedInvoices = $dto->getCorrectiveInvoices();
+        $record->correctedInvoices = $correctedInvoices;
         $record->correctedBaseAmount = $dto->getCorrectedBaseAmount();
         $record->correctedTaxAmount = $dto->getCorrectedTaxAmount();
-        $record->replacedInvoices = $dto->getReplacedInvoices();
+        $record->replacedInvoices = $replacedInvoices;
         $record->breakdown = $breakdownDetails;
         $record->totalTaxAmount = $dto->getTotalTaxAmount();
         $record->totalAmount = $dto->getTotalAmount();

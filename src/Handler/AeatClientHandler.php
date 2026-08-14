@@ -11,7 +11,11 @@ use Flux\VerifactuBundle\Dto\AeatResponseDto;
 use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
+use josemmo\Verifactu\Exceptions\AeatException;
+use josemmo\Verifactu\Exceptions\InvalidModelException;
 use josemmo\Verifactu\Services\AeatClient;
+use Psr\Http\Client\ClientExceptionInterface;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 final readonly class AeatClientHandler
 {
@@ -26,6 +30,13 @@ final readonly class AeatClientHandler
     ) {
     }
 
+    /**
+     * @throws ValidationFailedException if the record data does not fulfill the bundle DTO asserts (nothing is sent)
+     * @throws InvalidModelException     if the record data does not fulfill the library model validations (nothing is sent)
+     * @throws AeatException             if the AEAT server returned a fault or an unparseable response (remission outcome unknown)
+     * @throws ClientExceptionInterface  if the request could not be sent (remission outcome unknown)
+     * @throws \InvalidArgumentException if the configured PFX certificate file does not exist or is not readable
+     */
     public function sendRegistrationRecord(RegistrationRecordInterface $registrationRecordInterface): AeatResponseInterface
     {
         $validatedRegistrationRecordDto = $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($registrationRecordInterface);
@@ -46,6 +57,8 @@ final readonly class AeatClientHandler
      * of the batch is chained to the preceding record automatically.
      *
      * @param RegistrationRecordInterface[] $registrationRecordInterfaces
+     *
+     * @throws \InvalidArgumentException if the batch does not contain between 1 and 1000 records, see also sendRegistrationRecord() throws
      */
     public function sendRegistrationRecords(array $registrationRecordInterfaces): AeatResponseInterface
     {
@@ -62,6 +75,13 @@ final readonly class AeatClientHandler
         return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
     }
 
+    /**
+     * @throws ValidationFailedException if the record data does not fulfill the bundle DTO asserts (nothing is sent)
+     * @throws InvalidModelException     if the record data does not fulfill the library model validations (nothing is sent)
+     * @throws AeatException             if the AEAT server returned a fault or an unparseable response (remission outcome unknown)
+     * @throws ClientExceptionInterface  if the request could not be sent (remission outcome unknown)
+     * @throws \InvalidArgumentException if the configured PFX certificate file does not exist or is not readable
+     */
     public function sendCancellationRecord(CancellationRecordInterface $cancellationRecordInterface): AeatResponseInterface
     {
         $validatedCancellationRecordDto = $this->cancellationRecordFactory->makeValidatedCancellationRecordDtoFromInterface($cancellationRecordInterface);
@@ -82,6 +102,8 @@ final readonly class AeatClientHandler
      * of the batch is chained to the preceding record automatically.
      *
      * @param CancellationRecordInterface[] $cancellationRecordInterfaces
+     *
+     * @throws \InvalidArgumentException if the batch does not contain between 1 and 1000 records, see also sendCancellationRecord() throws
      */
     public function sendCancellationRecords(array $cancellationRecordInterfaces): AeatResponseInterface
     {

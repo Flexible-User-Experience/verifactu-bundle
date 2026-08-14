@@ -17,11 +17,15 @@ final readonly class AeatClientFactory
 
     public function makeConfiguredAeatClient(): AeatClient
     {
+        $pfxCertificateFilepath = $this->aeatClientConfig['pfx_certificate_filepath'];
+        if (!is_file($pfxCertificateFilepath) || !is_readable($pfxCertificateFilepath)) {
+            throw new \InvalidArgumentException(\sprintf('The configured AEAT client PFX certificate file "%s" does not exist or is not readable.', $pfxCertificateFilepath));
+        }
         $client = new AeatClient(
             $this->computerSystemFactory->makeValidatedComputerSystemModel(),
             $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierModel(),
         );
-        $client->setCertificate($this->aeatClientConfig['pfx_certificate_filepath'], $this->aeatClientConfig['pfx_certificate_password']);
+        $client->setCertificate($pfxCertificateFilepath, $this->aeatClientConfig['pfx_certificate_password']);
         $client->setEntitySeal($this->aeatClientConfig['is_entity_seal_certificate']);
         $client->setProduction($this->aeatClientConfig['is_prod_environment']);
         if (null !== ($this->aeatClientConfig['representative'] ?? null)) {

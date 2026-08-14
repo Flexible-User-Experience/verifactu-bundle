@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Flux\VerifactuBundle\Dto;
 
 use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
+use Flux\VerifactuBundle\Validator\Constraints\NifOrCif;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class InvoiceIdentifierDto implements InvoiceIdentifierInterface
 {
     public function __construct(
         #[Assert\NotBlank]
-        #[Assert\Length(exactly: 9)]
-        private string $issuerId, // TODO apply a better assert "A00000000" | "00000000A"
+        #[NifOrCif]
+        private string $issuerId,
         #[Assert\NotBlank]
         #[Assert\Length(max: 60)]
         private string $invoiceNumber,

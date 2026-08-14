@@ -1,0 +1,57 @@
+================================================================================
+       DECLARACIÓN RESPONSABLE DEL SISTEMA INFORMÁTICO DE FACTURACIÓN
+================================================================================
+(Artículo 13 del Real Decreto 1007/2023, de 5 de diciembre, y Orden HAC/1177/2024,
+de 17 de octubre)
+
+1. PRODUCTOR DEL SISTEMA INFORMÁTICO DE FACTURACIÓN
+
+   Nombre o razón social: {{ computer_system.vendor_name }}
+   NIF: {{ computer_system.vendor_nif }}
+
+2. SISTEMA INFORMÁTICO DE FACTURACIÓN
+
+   Nombre del sistema: {{ computer_system.name }}
+   Código identificador: {{ computer_system.id }}
+   Versión: {{ computer_system.version }}
+
+3. DECLARACIÓN
+
+   El productor arriba identificado DECLARA, BAJO SU RESPONSABILIDAD, que el
+   sistema informático de facturación indicado, en la versión señalada, cumple
+   con lo dispuesto en el artículo 29.2.j) de la Ley 58/2003, de 17 de
+   diciembre, General Tributaria, en el Reglamento que establece los requisitos
+   de los sistemas y programas informáticos o electrónicos que soporten los
+   procesos de facturación, aprobado por el Real Decreto 1007/2023, de 5 de
+   diciembre (en particular, sus artículos 8 a 14), y en la Orden
+   HAC/1177/2024, de 17 de octubre, que lo desarrolla, garantizando la
+   integridad, conservación, accesibilidad, legibilidad, trazabilidad e
+   inalterabilidad de los registros de facturación.
+
+{% if computer_system.only_supports_verifactu %}
+   El sistema funciona únicamente como sistema de emisión de facturas
+   verificables ("VERI*FACTU"), remitiendo todos los registros de facturación
+   a la Agencia Estatal de Administración Tributaria.
+{% else %}
+   El sistema puede funcionar tanto como sistema de emisión de facturas
+   verificables ("VERI*FACTU") como en modalidad de no remisión de los
+   registros de facturación a la Agencia Estatal de Administración Tributaria.
+{% endif %}
+{% if computer_system.supports_multiple_taxpayers %}
+   El sistema permite su uso por varios obligados tributarios.
+{% else %}
+   El sistema no permite su uso por varios obligados tributarios.
+{% endif %}
+
+4. LUGAR, FECHA Y FIRMA
+
+   En {{ place }}, a {{ signed_at|date('d/m/Y') }}
+
+
+   Firma del productor: _______________________________
+
+--------------------------------------------------------------------------------
+Documento generado con flexible-ux/verifactu-bundle. Este documento es un
+borrador: revise su contenido con su asesoría legal antes de firmarlo y
+conservarlo a disposición de sus clientes y de la Administración tributaria.
+--------------------------------------------------------------------------------

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flux\VerifactuBundle\Dto;
 
 use Flux\VerifactuBundle\Contract\FiscalIdentifierInterface;
+use Flux\VerifactuBundle\Validator\Constraints\NifOrCif;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class FiscalIdentifierDto implements FiscalIdentifierInterface
@@ -14,9 +15,8 @@ final readonly class FiscalIdentifierDto implements FiscalIdentifierInterface
         #[Assert\Length(max: 120)]
         private string $name,
         #[Assert\NotBlank]
-        #[Assert\Length(exactly: 9)]
+        #[NifOrCif]
         private string $nif,
-        // TODO apply a better assert "A00000000" | "00000000A"
     ) {
     }
 
