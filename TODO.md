@@ -7,7 +7,7 @@ TODO
 - [x] Handle AeatClient response to return the CSV[^csv]
 - [x] Handle all AeatClient InvoiceType requests
 - [x] Handle QR code PNG image generation from an AeatClient response
-- [ ] Add Symfony command to generate a valid SIF[^sif] statement of responsibility document
+- [x] Add Symfony command to generate a valid SIF[^sif] statement of responsibility document
 - [x] Add Dockerized PHP development environment (Dockerfile, Compose & Makefile)
 - [x] Migrate PHPUnit configuration to the modern schema with native deprecation gate
 - [x] Add `is_entity_seal_certificate`, `representative`, `requirement_reference` & `voluntary_remission_end_date` AEAT client config options

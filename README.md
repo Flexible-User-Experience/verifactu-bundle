@@ -134,6 +134,16 @@ $record = $xmlRecordHandler->importRecordFromXmlString($xml); // back to a josem
 
 Export keeps the **stored** `hash` and `hashedAt` values of the already sent record (make sure your entity returns them exactly as persisted, timezone included) and re-validates the record, so any tampering with the persisted data is detected — the same integrity check runs on import, unless you pass `$validate: false` to inspect a corrupted record.
 
+### SIF statement of responsibility
+
+Generate a draft of the legal "declaración responsable" document (Artículo 13 del RD 1007/2023) from your configured `computer_system` credentials:
+
+```shell
+php bin/console flux:verifactu:generate-sif-statement "Barcelona" --output var/declaracion-responsable.txt
+```
+
+The generated document is a **draft**: review it with your legal counsel before signing it and keeping it available to your clients and to the AEAT[^aeat].
+
 Development with Docker
 -----------------------
 

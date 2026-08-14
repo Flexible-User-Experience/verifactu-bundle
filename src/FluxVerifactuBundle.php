@@ -37,6 +37,9 @@ final class FluxVerifactuBundle extends AbstractBundle
         $builder->getDefinition('flux_verifactu.computer_system_factory')
             ->setArgument(0, $config[self::COMPUTER_SYSTEM_CONFIG_KEY])
         ;
+        $builder->getDefinition('flux_verifactu.generate_sif_statement_command')
+            ->setArgument(0, $config[self::COMPUTER_SYSTEM_CONFIG_KEY])
+        ;
         $builder->getDefinition('flux_verifactu.fiscal_identifier_factory')
             ->setArgument(0, $config[self::FISCAL_IDENTIFIER_CONFIG_KEY])
         ;

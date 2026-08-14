@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Flux\VerifactuBundle\Command\GenerateSifStatementCommand;
 use Flux\VerifactuBundle\Factory\AeatClientFactory;
 use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\BreakdownDetailFactory;
@@ -32,6 +33,13 @@ use Symfony\Component\Serializer\SerializerInterface;
 return static function (ContainerConfigurator $container): void {
     $services = $container->services();
     $services
+        // commands
+        ->set('flux_verifactu.generate_sif_statement_command', GenerateSifStatementCommand::class)
+            ->args([
+                abstract_arg(FluxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
+                service('twig'),
+            ])
+            ->tag('console.command')
         // handlers
         ->set('flux_verifactu.aeat_client_handler', AeatClientHandler::class)
             ->args([
