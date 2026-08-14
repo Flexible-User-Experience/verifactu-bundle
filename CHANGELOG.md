@@ -15,6 +15,7 @@ CHANGELOG
  * Add existence & readability assert for the configured PFX certificate file when the AEAT client is built (clear early failure instead of a cryptic send-time error)
  * Add a reusable `#[NifOrCif]` validation constraint asserting the Spanish NIF/CIF format on the fiscal identifier, invoice issuer & vendor NIF fields
  * Add per-InvoiceType test coverage proving F1, F2, F3 & R1-R5 registration records are fully supported
+ * Add `flux:verifactu:generate-sif-statement` Symfony command to generate a draft SIF statement of responsibility document ("declaración responsable", Art. 13 RD 1007/2023) from the configured computer system, adding symfony/console as a new requirement
  * Require josemmo/verifactu-php **^0.3.4** to avoid silent FechaOperacion & RechazoPrevio loss on older releases
  * Migrate `phpunit.xml.dist` to the modern PHPUnit schema with native deprecation gate & Symfony bridge extension
  * Require phpunit/phpunit **^11.1** and symfony/phpunit-bridge **^7.3**
