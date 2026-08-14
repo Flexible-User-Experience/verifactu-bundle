@@ -24,6 +24,7 @@ CHANGELOG
  * Require khanamiryan/qrcode-detector-decoder **^2.0.3** to avoid PHP 8.4 deprecation notices
  * Align require-dev caret constraints to the latest tested minors (friendsofphp/php-cs-fixer **^3.95**, phpstan/phpstan **^2.2** & phpunit/phpunit **^11.5**)
  * Bump Symfony requirements to the currently supported versions (**^6.4|^7.4|^8.1**) across `composer.json` & the CI matrix
+ * Document the AeatClientHandler exception surface (AeatException, PSR ClientExceptionInterface, validation exceptions) in the README & the send methods @throws annotations
  * Improve README documentation
  * Assorted housekeeping (`composer.json` keywords reformat, `Makefile` bash alias, TODO updates)
  * Fix BreakdownDetailTransformer dropping surcharge (recargo de equivalencia) fields, breaking C18 regime invoices
