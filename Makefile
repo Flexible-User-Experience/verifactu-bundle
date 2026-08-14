@@ -20,6 +20,9 @@ stop: CMD=stop ## stop the container
 destroy start startd stop:
 	docker compose $(CMD)
 
+bash:
+	@docker exec -it $(CONTAINER) bash
+
 shell: ## open an interactive shell into the PHP container
 	docker exec -it $(CONTAINER) bash
 
