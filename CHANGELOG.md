@@ -10,6 +10,7 @@ CHANGELOG
  * Fix copy-pasted PHPUnit testsuite name
  * Migrate phpunit.xml.dist to the modern PHPUnit schema with native deprecation gate & Symfony bridge extension
  * Require phpunit/phpunit ^11.1 and symfony/phpunit-bridge ^7.3
+ * Fix Symfony 6.4 incompatibility in bundle configuration (stringNode() only exists since Config 7.2)
 
 0.1.6
 -----
