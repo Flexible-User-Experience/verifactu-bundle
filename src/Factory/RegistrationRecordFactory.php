@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Flux\VerifactuBundle\Factory;
 
+use Flux\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Models\Records\Record;
 use josemmo\Verifactu\Models\Records\RegistrationRecord;
 
 final readonly class RegistrationRecordFactory
@@ -16,6 +18,7 @@ final readonly class RegistrationRecordFactory
         private InvoiceIdentifierFactory $invoiceIdentifierFactory,
         private BreakdownDetailFactory $breakdownDetailFactory,
         private FiscalIdentifierFactory $fiscalIdentifierFactory,
+        private ForeignFiscalIdentifierFactory $foreignFiscalIdentifierFactory,
         private RegistrationRecordTransformer $registrationRecordTransformer,
         private ContractsValidator $validator,
     ) {
@@ -35,7 +38,11 @@ final readonly class RegistrationRecordFactory
         }
         // validate recipients interface array
         foreach ($input->getRecipients() as $recipient) {
-            $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierDtoFromInterface($recipient);
+            if ($recipient instanceof ForeignFiscalIdentifierInterface) {
+                $this->foreignFiscalIdentifierFactory->makeValidatedForeignFiscalIdentifierDtoFromInterface($recipient);
+            } else {
+                $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierDtoFromInterface($recipient);
+            }
         }
         // validate registrationRecord interface
         $registrationRecordDto = $this->registrationRecordTransformer->transformInterfaceToDto($input);
@@ -44,7 +51,58 @@ final readonly class RegistrationRecordFactory
         return $registrationRecordDto;
     }
 
-    public function makeValidatedRegistrationRecordModelFromDto(RegistrationRecordDto $input): RegistrationRecord
+    /**
+     * Build validated & chained registration record models: every record after the first one of the batch
+     * is chained to the preceding record (previousInvoiceIdentifier & previousHash are computed automatically).
+     *
+     * @param RegistrationRecordInterface[] $inputs
+     *
+     * @return RegistrationRecord[]
+     */
+    public function makeValidatedChainedRegistrationRecordModelsFromInterfaces(array $inputs): array
+    {
+        $registrationRecordModels = [];
+        $previousRegistrationRecordModel = null;
+        foreach ($inputs as $input) {
+            $registrationRecordDto = $this->makeValidatedRegistrationRecordDtoFromInterface($input);
+            $registrationRecordModel = $this->makeValidatedRegistrationRecordModelFromDto($registrationRecordDto, $previousRegistrationRecordModel);
+            $registrationRecordModels[] = $registrationRecordModel;
+            $previousRegistrationRecordModel = $registrationRecordModel;
+        }
+
+        return $registrationRecordModels;
+    }
+
+    public function makeValidatedRegistrationRecordModelFromDto(RegistrationRecordDto $input, ?Record $chainedPreviousRecord = null): RegistrationRecord
+    {
+        $registrationRecordModel = $this->buildRegistrationRecordModelFromDto($input);
+        if (null !== $chainedPreviousRecord) {
+            $registrationRecordModel->previousInvoiceId = $chainedPreviousRecord->invoiceId;
+            $registrationRecordModel->previousHash = $chainedPreviousRecord->hash;
+        }
+        $registrationRecordModel->hashedAt = new \DateTimeImmutable();
+        $registrationRecordModel->hash = $registrationRecordModel->calculateHash();
+        $registrationRecordModel->validate();
+
+        return $registrationRecordModel;
+    }
+
+    /**
+     * Rebuild a previously sent registration record keeping its stored hash & hashedAt values: the
+     * validation re-calculates the hash, so any tampering with the persisted record data is detected.
+     */
+    public function makeValidatedRegistrationRecordModelWithStoredHashFromInterface(RegistrationRecordInterface $input): RegistrationRecord
+    {
+        $registrationRecordDto = $this->makeValidatedRegistrationRecordDtoFromInterface($input);
+        $registrationRecordModel = $this->buildRegistrationRecordModelFromDto($registrationRecordDto);
+        $registrationRecordModel->hashedAt = \DateTimeImmutable::createFromInterface($input->getHashedAt());
+        $registrationRecordModel->hash = $input->getHash();
+        $registrationRecordModel->validate();
+
+        return $registrationRecordModel;
+    }
+
+    private function buildRegistrationRecordModelFromDto(RegistrationRecordDto $input): RegistrationRecord
     {
         $invoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($input->getInvoiceIdentifier());
         $invoiceIdentifier = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($invoiceIdentifierDto);
@@ -60,20 +118,21 @@ final readonly class RegistrationRecordFactory
         }
         $recipients = [];
         foreach ($input->getRecipients() as $recipientInterface) {
-            $recipientDto = $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierDtoFromInterface($recipientInterface);
-            $recipients[] = $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierModelFromDto($recipientDto);
+            if ($recipientInterface instanceof ForeignFiscalIdentifierInterface) {
+                $recipientDto = $this->foreignFiscalIdentifierFactory->makeValidatedForeignFiscalIdentifierDtoFromInterface($recipientInterface);
+                $recipients[] = $this->foreignFiscalIdentifierFactory->makeValidatedForeignFiscalIdentifierModelFromDto($recipientDto);
+            } else {
+                $recipientDto = $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierDtoFromInterface($recipientInterface);
+                $recipients[] = $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierModelFromDto($recipientDto);
+            }
         }
-        $registrationRecordModel = $this->registrationRecordTransformer->transformDtoToModel(
+
+        return $this->registrationRecordTransformer->transformDtoToModel(
             dto: $input,
             invoiceIdentifier: $invoiceIdentifier,
             previousInvoiceIdentifier: $previousInvoiceIdentifier,
             breakdownDetails: $breakdownDetails,
             recipients: $recipients,
         );
-        $registrationRecordModel->hashedAt = new \DateTimeImmutable();
-        $registrationRecordModel->hash = $registrationRecordModel->calculateHash();
-        $registrationRecordModel->validate();
-
-        return $registrationRecordModel;
     }
 }

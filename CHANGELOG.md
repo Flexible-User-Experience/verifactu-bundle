@@ -13,6 +13,12 @@ CHANGELOG
  * Fix Symfony 6.4 incompatibility in bundle configuration (stringNode() only exists since Config 7.2)
  * Add `is_entity_seal_certificate` AEAT client config option to support entity seal certificates ("certificado de sello de entidad")
  * Fix unprocessable bundle configuration definition (boolean nodes cannot be required and have a default value at once) and cover it with a config definition test
+ * Add foreign recipients support ("IDOtro" destinatarios) with a new `ForeignFiscalIdentifierInterface` contract, DTO, transformer & factory
+ * Apply sorted-config-arrays convention (sort composer.json packages & Makefile targets, enable Composer sort-packages)
+ * Add CancellationRecord support ("RegistroAnulacion") with a new `CancellationRecordInterface` contract, DTO, transformer, factory & `AeatClientHandler::sendCancellationRecord()` method
+ * Add `representative`, `requirement_reference` & `voluntary_remission_end_date` AEAT client config options to support "Representante", "RemisionRequerimiento" & "RemisionVoluntaria" headers
+ * Add batch sending support with automatic record chaining (`sendRegistrationRecords()` & `sendCancellationRecords()`, up to 1000 records per AEAT API call)
+ * Add XML record storage support with a new `XmlRecordHandler` service to export sent records as standalone XML strings (keeping stored hashes) and import them back with tamper detection
 
 0.1.6
 -----

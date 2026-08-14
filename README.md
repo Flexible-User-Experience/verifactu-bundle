@@ -31,6 +31,13 @@ flux_verifactu:
         is_prod_environment: false # only set to true to make real AEAT API calls, be careful here
         pfx_certificate_filepath: '%your_pfx_certificate_filepath%'
         pfx_certificate_password: '%pfx_certificate_password%'
+        representative: # optional ("Representante"), remove if not applicable
+            name: '%your_representative_name%'
+            nif: '%your_representative_nif%'
+        requirement_is_last_submission: false # only used together with a requirement_reference
+        requirement_reference: null # only for remissions upon AEAT request ("remisión por requerimiento")
+        voluntary_remission_end_date: null # 'YYYY-MM-DD' format, only set it when ending Veri*Factu voluntary remission
+        voluntary_remission_is_affected_by_incident: false # only used together with a voluntary_remission_end_date
     # SIF (developer) credentials
     computer_system:
         vendor_name: '%your_vendor_name%'
@@ -91,6 +98,41 @@ class AppTestController
     }
 }
 ```
+
+### Cancellation records
+
+To cancel a previously registered invoice, make your cancellation model implement `Flux\VerifactuBundle\Contract\CancellationRecordInterface` (or build the provided `CancellationRecordDto` directly) and call:
+
+```php
+$result = $aeatClientHandler->sendCancellationRecord($cancellationRecord);
+```
+
+The previous invoice identifier and its hash are **mandatory** for every cancellation record to keep the chain ("encadenamiento") integrity. Like with registration records, the record's `hash` and `hashedAt` values are updated during the call and you must persist them, and you must check the returned response status.
+
+### Batch sending
+
+You can send up to 1000 records (the AEAT remission limit) in a single API call:
+
+```php
+$result = $aeatClientHandler->sendRegistrationRecords($registrationRecords);
+$result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
+```
+
+Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
+
+### XML record storage
+
+Inject the `XmlRecordHandler` service to keep legal XML copies of your sent records and to read them back:
+
+```php
+use Flux\VerifactuBundle\Handler\XmlRecordHandler;
+
+$xml = $xmlRecordHandler->exportRegistrationRecordToXmlString($registrationRecord); // standalone <sum1:RegistroAlta /> XML string
+$xml = $xmlRecordHandler->exportCancellationRecordToXmlString($cancellationRecord); // standalone <sum1:RegistroAnulacion /> XML string
+$record = $xmlRecordHandler->importRecordFromXmlString($xml); // back to a josemmo/verifactu-php record model
+```
+
+Export keeps the **stored** `hash` and `hashedAt` values of the already sent record (make sure your entity returns them exactly as persisted, timezone included) and re-validates the record, so any tampering with the persisted data is detected — the same integrity check runs on import, unless you pass `$validate: false` to inspect a corrupted record.
 
 Development with Docker
 -----------------------
