@@ -14,6 +14,7 @@ CHANGELOG
  * Add AeatClientHandler, QrCodeHandler & AeatClientFactory unit tests to complete core services coverage
  * Add existence & readability assert for the configured PFX certificate file when the AEAT client is built (clear early failure instead of a cryptic send-time error)
  * Add a reusable `#[NifOrCif]` validation constraint asserting the Spanish NIF/CIF format on the fiscal identifier, invoice issuer & vendor NIF fields
+ * Add per-InvoiceType test coverage proving F1, F2, F3 & R1-R5 registration records are fully supported
  * Require josemmo/verifactu-php **^0.3.4** to avoid silent FechaOperacion & RechazoPrevio loss on older releases
  * Migrate `phpunit.xml.dist` to the modern PHPUnit schema with native deprecation gate & Symfony bridge extension
  * Require phpunit/phpunit **^11.1** and symfony/phpunit-bridge **^7.3**
@@ -29,6 +30,7 @@ CHANGELOG
  * Fix Symfony 6.4 incompatibility in bundle configuration (`stringNode()` only exists since Config 7.2)
  * Fix unprocessable bundle configuration definition (boolean nodes cannot be required and have a default value at once) and cover it with a config definition test
  * Fix QR code validation always failing at the AEAT recommended 850px dimensions (the decode-back check now runs on a downscaled copy of the generated image)
+ * Fix corrected & replaced invoice identifiers not being transformed to library models, which made rectificative (R1-R5) & substitutive (F3) invoices crash on export
 
 0.1.6
 -----
