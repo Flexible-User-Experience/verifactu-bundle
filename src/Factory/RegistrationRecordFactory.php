@@ -75,6 +75,35 @@ final readonly class RegistrationRecordFactory
 
     public function makeValidatedRegistrationRecordModelFromDto(RegistrationRecordDto $input, ?Record $chainedPreviousRecord = null): RegistrationRecord
     {
+        $registrationRecordModel = $this->buildRegistrationRecordModelFromDto($input);
+        if (null !== $chainedPreviousRecord) {
+            $registrationRecordModel->previousInvoiceId = $chainedPreviousRecord->invoiceId;
+            $registrationRecordModel->previousHash = $chainedPreviousRecord->hash;
+        }
+        $registrationRecordModel->hashedAt = new \DateTimeImmutable();
+        $registrationRecordModel->hash = $registrationRecordModel->calculateHash();
+        $registrationRecordModel->validate();
+
+        return $registrationRecordModel;
+    }
+
+    /**
+     * Rebuild a previously sent registration record keeping its stored hash & hashedAt values: the
+     * validation re-calculates the hash, so any tampering with the persisted record data is detected.
+     */
+    public function makeValidatedRegistrationRecordModelWithStoredHashFromInterface(RegistrationRecordInterface $input): RegistrationRecord
+    {
+        $registrationRecordDto = $this->makeValidatedRegistrationRecordDtoFromInterface($input);
+        $registrationRecordModel = $this->buildRegistrationRecordModelFromDto($registrationRecordDto);
+        $registrationRecordModel->hashedAt = \DateTimeImmutable::createFromInterface($input->getHashedAt());
+        $registrationRecordModel->hash = $input->getHash();
+        $registrationRecordModel->validate();
+
+        return $registrationRecordModel;
+    }
+
+    private function buildRegistrationRecordModelFromDto(RegistrationRecordDto $input): RegistrationRecord
+    {
         $invoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($input->getInvoiceIdentifier());
         $invoiceIdentifier = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($invoiceIdentifierDto);
         $previousInvoiceIdentifier = null;
@@ -97,21 +126,13 @@ final readonly class RegistrationRecordFactory
                 $recipients[] = $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierModelFromDto($recipientDto);
             }
         }
-        $registrationRecordModel = $this->registrationRecordTransformer->transformDtoToModel(
+
+        return $this->registrationRecordTransformer->transformDtoToModel(
             dto: $input,
             invoiceIdentifier: $invoiceIdentifier,
             previousInvoiceIdentifier: $previousInvoiceIdentifier,
             breakdownDetails: $breakdownDetails,
             recipients: $recipients,
         );
-        if (null !== $chainedPreviousRecord) {
-            $registrationRecordModel->previousInvoiceId = $chainedPreviousRecord->invoiceId;
-            $registrationRecordModel->previousHash = $chainedPreviousRecord->hash;
-        }
-        $registrationRecordModel->hashedAt = new \DateTimeImmutable();
-        $registrationRecordModel->hash = $registrationRecordModel->calculateHash();
-        $registrationRecordModel->validate();
-
-        return $registrationRecordModel;
     }
 }

@@ -120,6 +120,20 @@ $result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
 
 Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
 
+### XML record storage
+
+Inject the `XmlRecordHandler` service to keep legal XML copies of your sent records and to read them back:
+
+```php
+use Flux\VerifactuBundle\Handler\XmlRecordHandler;
+
+$xml = $xmlRecordHandler->exportRegistrationRecordToXmlString($registrationRecord); // standalone <sum1:RegistroAlta /> XML string
+$xml = $xmlRecordHandler->exportCancellationRecordToXmlString($cancellationRecord); // standalone <sum1:RegistroAnulacion /> XML string
+$record = $xmlRecordHandler->importRecordFromXmlString($xml); // back to a josemmo/verifactu-php record model
+```
+
+Export keeps the **stored** `hash` and `hashedAt` values of the already sent record (make sure your entity returns them exactly as persisted, timezone included) and re-validates the record, so any tampering with the persisted data is detected — the same integrity check runs on import, unless you pass `$validate: false` to inspect a corrupted record.
+
 Development with Docker
 -----------------------
 

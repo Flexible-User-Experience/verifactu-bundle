@@ -58,15 +58,7 @@ final readonly class CancellationRecordFactory
 
     public function makeValidatedCancellationRecordModelFromDto(CancellationRecordDto $input, ?Record $chainedPreviousRecord = null): CancellationRecord
     {
-        $invoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($input->getInvoiceIdentifier());
-        $invoiceIdentifier = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($invoiceIdentifierDto);
-        $previousInvoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($input->getPreviousInvoiceIdentifier());
-        $previousInvoiceIdentifier = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($previousInvoiceIdentifierDto);
-        $cancellationRecordModel = $this->cancellationRecordTransformer->transformDtoToModel(
-            dto: $input,
-            invoiceIdentifier: $invoiceIdentifier,
-            previousInvoiceIdentifier: $previousInvoiceIdentifier,
-        );
+        $cancellationRecordModel = $this->buildCancellationRecordModelFromDto($input);
         if (null !== $chainedPreviousRecord) {
             $cancellationRecordModel->previousInvoiceId = $chainedPreviousRecord->invoiceId;
             $cancellationRecordModel->previousHash = $chainedPreviousRecord->hash;
@@ -76,5 +68,34 @@ final readonly class CancellationRecordFactory
         $cancellationRecordModel->validate();
 
         return $cancellationRecordModel;
+    }
+
+    /**
+     * Rebuild a previously sent cancellation record keeping its stored hash & hashedAt values: the
+     * validation re-calculates the hash, so any tampering with the persisted record data is detected.
+     */
+    public function makeValidatedCancellationRecordModelWithStoredHashFromInterface(CancellationRecordInterface $input): CancellationRecord
+    {
+        $cancellationRecordDto = $this->makeValidatedCancellationRecordDtoFromInterface($input);
+        $cancellationRecordModel = $this->buildCancellationRecordModelFromDto($cancellationRecordDto);
+        $cancellationRecordModel->hashedAt = \DateTimeImmutable::createFromInterface($input->getHashedAt());
+        $cancellationRecordModel->hash = $input->getHash();
+        $cancellationRecordModel->validate();
+
+        return $cancellationRecordModel;
+    }
+
+    private function buildCancellationRecordModelFromDto(CancellationRecordDto $input): CancellationRecord
+    {
+        $invoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($input->getInvoiceIdentifier());
+        $invoiceIdentifier = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($invoiceIdentifierDto);
+        $previousInvoiceIdentifierDto = $this->invoiceIdentifierFactory->makeValidatedInvoiceIdentifierDtoFromInterface($input->getPreviousInvoiceIdentifier());
+        $previousInvoiceIdentifier = $this->invoiceIdentifierFactory->makeValidatedRegistrationRecordModelFromDto($previousInvoiceIdentifierDto);
+
+        return $this->cancellationRecordTransformer->transformDtoToModel(
+            dto: $input,
+            invoiceIdentifier: $invoiceIdentifier,
+            previousInvoiceIdentifier: $previousInvoiceIdentifier,
+        );
     }
 }

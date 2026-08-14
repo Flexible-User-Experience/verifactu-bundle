@@ -15,6 +15,7 @@ use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
 use Flux\VerifactuBundle\FluxVerifactuBundle;
 use Flux\VerifactuBundle\Handler\AeatClientHandler;
 use Flux\VerifactuBundle\Handler\QrCodeHandler;
+use Flux\VerifactuBundle\Handler\XmlRecordHandler;
 use Flux\VerifactuBundle\Transformer\AeatResponseTransformer;
 use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
 use Flux\VerifactuBundle\Transformer\CancellationRecordTransformer;
@@ -48,6 +49,14 @@ return static function (ContainerConfigurator $container): void {
                 service(AeatResponseFactory::class),
             ])
             ->alias(QrCodeHandler::class, 'flux_verifactu.qr_code_handler')
+            ->public()
+        ->set('flux_verifactu.xml_record_handler', XmlRecordHandler::class)
+            ->args([
+                service(RegistrationRecordFactory::class),
+                service(CancellationRecordFactory::class),
+                service(ComputerSystemFactory::class),
+            ])
+            ->alias(XmlRecordHandler::class, 'flux_verifactu.xml_record_handler')
             ->public()
         // factories
         ->set('flux_verifactu.aeat_response_factory', AeatResponseFactory::class)
