@@ -8,6 +8,8 @@ CHANGELOG
  * Fix BreakdownDetailTransformer dropping surcharge (recargo de equivalencia) fields, breaking C18 regime invoices
  * Require josemmo/verifactu-php ^0.3.4 to avoid silent FechaOperacion & RechazoPrevio loss on older releases
  * Fix copy-pasted PHPUnit testsuite name
+ * Migrate phpunit.xml.dist to the modern PHPUnit schema with native deprecation gate & Symfony bridge extension
+ * Require phpunit/phpunit ^11.1 and symfony/phpunit-bridge ^7.3
 
 0.1.6
 -----

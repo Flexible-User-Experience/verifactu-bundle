@@ -6,12 +6,14 @@
          bootstrap="tests/bootstrap.php"
          cacheDirectory=".phpunit.cache"
          colors="true"
+         failOnDeprecation="true"
+         failOnNotice="true"
          failOnRisky="true"
          failOnWarning="true"
 >
     <php>
+        <ini name="display_errors" value="1" />
         <ini name="error_reporting" value="-1" />
-        <env name="SYMFONY_DEPRECATIONS_HELPER" value="max[self]=0&amp;max[direct]=0&amp;quiet[]=indirect&amp;quiet[]=other"/>
     </php>
 
     <testsuites>
@@ -20,10 +22,18 @@
         </testsuite>
     </testsuites>
 
-    <source>
+    <source ignoreIndirectDeprecations="true"
+            ignoreSuppressionOfDeprecations="true"
+            restrictNotices="true"
+            restrictWarnings="true"
+    >
         <include>
             <directory>src</directory>
         </include>
+
+        <deprecationTrigger>
+            <function>trigger_deprecation</function>
+        </deprecationTrigger>
     </source>
 
     <extensions>
