@@ -13,6 +13,7 @@ CHANGELOG
  * Fix Symfony 6.4 incompatibility in bundle configuration (stringNode() only exists since Config 7.2)
  * Add `is_entity_seal_certificate` AEAT client config option to support entity seal certificates ("certificado de sello de entidad")
  * Fix unprocessable bundle configuration definition (boolean nodes cannot be required and have a default value at once) and cover it with a config definition test
+ * Add foreign recipients support ("IDOtro" destinatarios) with a new `ForeignFiscalIdentifierInterface` contract, DTO, transformer & factory
 
 0.1.6
 -----

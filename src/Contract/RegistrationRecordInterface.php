@@ -36,7 +36,7 @@ interface RegistrationRecordInterface extends ValidatableInterface
     public function getDescription(): string;
 
     /**
-     * @return FiscalIdentifierInterface[]
+     * @return array<FiscalIdentifierInterface|ForeignFiscalIdentifierInterface>
      */
     public function getRecipients(): array;
 

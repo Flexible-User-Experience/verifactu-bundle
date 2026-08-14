@@ -8,6 +8,7 @@ use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\BreakdownDetailFactory;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
+use Flux\VerifactuBundle\Factory\ForeignFiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\InvoiceIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
 use Flux\VerifactuBundle\FluxVerifactuBundle;
@@ -17,6 +18,7 @@ use Flux\VerifactuBundle\Transformer\AeatResponseTransformer;
 use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
 use Flux\VerifactuBundle\Transformer\ComputerSystemTransformer;
 use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
+use Flux\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use Flux\VerifactuBundle\Validator\ContractsValidator;
@@ -71,6 +73,12 @@ return static function (ContainerConfigurator $container): void {
                 service(ContractsValidator::class),
             ])
             ->alias(FiscalIdentifierFactory::class, 'flux_verifactu.fiscal_identifier_factory')
+        ->set('flux_verifactu.foreign_fiscal_identifier_factory', ForeignFiscalIdentifierFactory::class)
+            ->args([
+                service(ForeignFiscalIdentifierTransformer::class),
+                service(ContractsValidator::class),
+            ])
+            ->alias(ForeignFiscalIdentifierFactory::class, 'flux_verifactu.foreign_fiscal_identifier_factory')
         ->set('flux_verifactu.invoice_identifier_factory', InvoiceIdentifierFactory::class)
             ->args([
                 service(InvoiceIdentifierTransformer::class),
@@ -82,6 +90,7 @@ return static function (ContainerConfigurator $container): void {
                 service(InvoiceIdentifierFactory::class),
                 service(BreakdownDetailFactory::class),
                 service(FiscalIdentifierFactory::class),
+                service(ForeignFiscalIdentifierFactory::class),
                 service(RegistrationRecordTransformer::class),
                 service(ContractsValidator::class),
             ])
@@ -98,6 +107,8 @@ return static function (ContainerConfigurator $container): void {
             ->alias(ComputerSystemTransformer::class, 'flux_verifactu.computer_system_transformer')
         ->set('flux_verifactu.fiscal_identifier_transformer', FiscalIdentifierTransformer::class)
             ->alias(FiscalIdentifierTransformer::class, 'flux_verifactu.fiscal_identifier_transformer')
+        ->set('flux_verifactu.foreign_fiscal_identifier_transformer', ForeignFiscalIdentifierTransformer::class)
+            ->alias(ForeignFiscalIdentifierTransformer::class, 'flux_verifactu.foreign_fiscal_identifier_transformer')
         ->set('flux_verifactu.invoice_identifier_transformer', InvoiceIdentifierTransformer::class)
             ->alias(InvoiceIdentifierTransformer::class, 'flux_verifactu.invoice_identifier_transformer')
         ->set('flux_verifactu.registration_record_transformer', RegistrationRecordTransformer::class)
