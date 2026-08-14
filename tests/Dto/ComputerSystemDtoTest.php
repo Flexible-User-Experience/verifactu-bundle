@@ -55,11 +55,11 @@ final class ComputerSystemDtoTest extends TestCase
         $this->assertSame('vendorName', $violations[0]->getPropertyPath());
     }
 
-    public function testVendorNifMustHaveExactLength(): void
+    public function testVendorNifMustBeAValidNifOrCif(): void
     {
         $dto = new ComputerSystemDto(
             vendorName: 'Vendor Name SL',
-            vendorNif: 'B123',
+            vendorNif: '123456789',
             name: 'My Software SIF',
             id: '01',
             version: '1.0.0',

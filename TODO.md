@@ -3,7 +3,7 @@ TODO
  
 - [x] Write unit tests for core services
 - [x] Add .pfx certificate file exists assert
-- [ ] Add NIF or CIF asserts
+- [x] Add NIF or CIF asserts
 - [x] Handle AeatClient response to return the CSV[^csv]
 - [ ] Handle all AeatClient InvoiceType requests
 - [x] Handle QR code PNG image generation from an AeatClient response

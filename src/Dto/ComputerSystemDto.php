@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Flux\VerifactuBundle\Dto;
 
 use Flux\VerifactuBundle\Contract\ComputerSystemInterface;
+use Flux\VerifactuBundle\Validator\Constraints\NifOrCif;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final readonly class ComputerSystemDto implements ComputerSystemInterface
@@ -14,8 +15,8 @@ final readonly class ComputerSystemDto implements ComputerSystemInterface
         #[Assert\Length(max: 120)]
         private string $vendorName,
         #[Assert\NotBlank]
-        #[Assert\Length(exactly: 9)]
-        private string $vendorNif, // TODO apply a better assert "A00000000" | "00000000A"
+        #[NifOrCif]
+        private string $vendorNif,
         #[Assert\NotBlank]
         #[Assert\Length(max: 30)]
         private string $name,
