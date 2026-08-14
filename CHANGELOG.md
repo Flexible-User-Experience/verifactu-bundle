@@ -25,6 +25,7 @@ CHANGELOG
  * Align require-dev caret constraints to the latest tested minors (friendsofphp/php-cs-fixer **^3.95**, phpstan/phpstan **^2.2** & phpunit/phpunit **^11.5**)
  * Bump Symfony requirements to the currently supported versions (**^6.4|^7.4|^8.1**) across `composer.json` & the CI matrix
  * Document the AeatClientHandler exception surface (AeatException, PSR ClientExceptionInterface, validation exceptions) in the README & the send methods @throws annotations
+ * Align the root namespace to `FlexibleUx\VerifactuBundle\`: the bundle class is now `FlexibleUx\VerifactuBundle\FlexibleUxVerifactuBundle`, the config key & service ids use the `flexible_ux_verifactu` prefix and the command is renamed to `flexible-ux:verifactu:generate-sif-statement`
  * Improve README documentation
  * Assorted housekeeping (`composer.json` keywords reformat, `Makefile` bash alias, TODO updates)
  * Fix BreakdownDetailTransformer dropping surcharge (recargo de equivalencia) fields, breaking C18 regime invoices

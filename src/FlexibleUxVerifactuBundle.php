@@ -23,22 +23,22 @@ final class FlexibleUxVerifactuBundle extends AbstractBundle
         $definition->import('../config/definition.php');
     }
 
-    public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
+    public function loadExtension(array $config, ContainerConfigurator $configurator, ContainerBuilder $container): void
     {
-        $container->import('../config/services.php');
-        $builder->getDefinition('flexible_ux_verifactu.aeat_client_factory')
+        $configurator->import('../config/services.php');
+        $container->getDefinition('flexible_ux_verifactu.aeat_client_factory')
             ->setArgument(0, $config[self::AEAT_CLIENT_KEY])
         ;
-        $builder->getDefinition('flexible_ux_verifactu.qr_code_handler')
+        $container->getDefinition('flexible_ux_verifactu.qr_code_handler')
             ->setArgument(0, $config[self::AEAT_CLIENT_KEY])
         ;
-        $builder->getDefinition('flexible_ux_verifactu.computer_system_factory')
+        $container->getDefinition('flexible_ux_verifactu.computer_system_factory')
             ->setArgument(0, $config[self::COMPUTER_SYSTEM_CONFIG_KEY])
         ;
-        $builder->getDefinition('flexible_ux_verifactu.generate_sif_statement_command')
+        $container->getDefinition('flexible_ux_verifactu.generate_sif_statement_command')
             ->setArgument(0, $config[self::COMPUTER_SYSTEM_CONFIG_KEY])
         ;
-        $builder->getDefinition('flexible_ux_verifactu.fiscal_identifier_factory')
+        $container->getDefinition('flexible_ux_verifactu.fiscal_identifier_factory')
             ->setArgument(0, $config[self::FISCAL_IDENTIFIER_CONFIG_KEY])
         ;
     }
