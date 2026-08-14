@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+0.1.7
+-----
+ 
+ * Add Dockerized PHP development environment (Dockerfile, Compose & Makefile)
+
 0.1.6
 -----
  

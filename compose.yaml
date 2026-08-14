@@ -1,0 +1,21 @@
+services:
+  php:
+    build:
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.4}
+      context: .
+    command: tail -f /dev/null
+    container_name: verifactu-bundle-php
+    environment:
+      XDEBUG_MODE: ${XDEBUG_MODE:-off}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    image: verifactu-bundle-php:${PHP_VERSION:-8.4}
+    init: true
+    volumes:
+      - .:/app
+      - composer-cache:/root/.composer/cache
+    working_dir: /app
+
+volumes:
+  composer-cache:
