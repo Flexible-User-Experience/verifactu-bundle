@@ -31,6 +31,13 @@ flux_verifactu:
         is_prod_environment: false # only set to true to make real AEAT API calls, be careful here
         pfx_certificate_filepath: '%your_pfx_certificate_filepath%'
         pfx_certificate_password: '%pfx_certificate_password%'
+        representative: # optional ("Representante"), remove if not applicable
+            name: '%your_representative_name%'
+            nif: '%your_representative_nif%'
+        requirement_is_last_submission: false # only used together with a requirement_reference
+        requirement_reference: null # only for remissions upon AEAT request ("remisión por requerimiento")
+        voluntary_remission_end_date: null # 'YYYY-MM-DD' format, only set it when ending Veri*Factu voluntary remission
+        voluntary_remission_is_affected_by_incident: false # only used together with a voluntary_remission_end_date
     # SIF (developer) credentials
     computer_system:
         vendor_name: '%your_vendor_name%'

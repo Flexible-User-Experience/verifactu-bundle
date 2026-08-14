@@ -16,6 +16,7 @@ CHANGELOG
  * Add foreign recipients support ("IDOtro" destinatarios) with a new `ForeignFiscalIdentifierInterface` contract, DTO, transformer & factory
  * Apply sorted-config-arrays convention (sort composer.json packages & Makefile targets, enable Composer sort-packages)
  * Add CancellationRecord support ("RegistroAnulacion") with a new `CancellationRecordInterface` contract, DTO, transformer, factory & `AeatClientHandler::sendCancellationRecord()` method
+ * Add `representative`, `requirement_reference` & `voluntary_remission_end_date` AEAT client config options to support "Representante", "RemisionRequerimiento" & "RemisionVoluntaria" headers
 
 0.1.6
 -----
