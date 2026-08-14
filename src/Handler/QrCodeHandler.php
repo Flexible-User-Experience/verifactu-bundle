@@ -24,11 +24,14 @@ use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
 use josemmo\Verifactu\Models\Responses\ResponseStatus;
 use josemmo\Verifactu\Services\QrGenerator;
+use Zxing\QrReader;
 
 final readonly class QrCodeHandler
 {
     public const QR_CODE_TOP_LEGAL_LABEL = 'QR tributario:'; // this is a mandatory, case-sensitive, legal text label
     public const QR_CODE_VERI_FACTU_LEGAL_LABEL = 'VERI*FACTU'; // this is a mandatory, case-sensitive, legal text label
+    // the khanamiryan decoder cannot read renders bigger than ~500px, so validation runs on a downscaled copy of the generated image
+    private const QR_CODE_VALIDATION_SIZE = 300;
     private QrGenerator $qrGenerator;
 
     public function __construct(
@@ -90,8 +93,30 @@ final readonly class QrCodeHandler
                 PngWriter::WRITER_OPTION_COMPRESSION_LEVEL => 0,
             ]
         );
-        $writer->validateResult($result, $qrCodeUrlData);
+        $this->validateQrCodeResult($result, $qrCodeUrlData);
 
         return $result;
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function validateQrCodeResult(ResultInterface $result, string $expectedData): void
+    {
+        $image = imagecreatefromstring($result->getString());
+        if (false === $image) {
+            throw new ValidationException('Unable to read the generated QR code PNG image');
+        }
+        $scaledImage = imagescale($image, self::QR_CODE_VALIDATION_SIZE);
+        if (false === $scaledImage) {
+            throw new ValidationException('Unable to downscale the generated QR code PNG image');
+        }
+        ob_start();
+        imagepng($scaledImage);
+        $scaledBlob = (string) ob_get_clean();
+        $readData = (new QrReader($scaledBlob, QrReader::SOURCE_TYPE_BLOB, false))->text();
+        if ($expectedData !== $readData) {
+            throw new ValidationException(\sprintf('The validation reader read "%s" instead of "%s"', \is_string($readData) ? $readData : '', $expectedData));
+        }
     }
 }

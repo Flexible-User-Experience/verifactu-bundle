@@ -2,7 +2,14 @@
     "name": "flexible-ux/verifactu-bundle",
     "type": "symfony-bundle",
     "description": "Symfony bundle to deal with Veri*Factu Spanish digital invoicing law and legal QR code generation",
-    "keywords": ["verifactu", "aeat", "sii", "qr", "symfony", "bundle"],
+    "keywords": [
+        "aeat",
+        "qr",
+        "sii",
+        "symfony",
+        "symfony-bundle",
+        "verifactu"
+    ],
     "homepage": "https://github.com/Flexible-User-Experience/verifactu-bundle",
     "license": "MIT",
     "authors": [
@@ -27,19 +34,23 @@
         "ext-gd": "*",
         "ext-libxml": "*",
         "endroid/qr-code": "^6.0",
-        "josemmo/verifactu-php": "^0.3",
-        "khanamiryan/qrcode-detector-decoder": "^2.0",
-        "symfony/config": "^6.4|^7.3|^8.0",
-        "symfony/dependency-injection": "^6.4|^7.3|^8.0",
-        "symfony/http-kernel": "^6.4|^7.3|^8.0",
-        "symfony/filesystem": "^6.4|^7.3|^8.0",
-        "symfony/twig-bundle": "^6.4|^7.3|^8.0",
-        "symfony/serializer": "^6.4|^7.3|^8.0"
+        "josemmo/verifactu-php": "^0.3.4",
+        "khanamiryan/qrcode-detector-decoder": "^2.0.3",
+        "symfony/config": "^6.4|^7.4|^8.1",
+        "symfony/console": "^6.4|^7.4|^8.1",
+        "symfony/dependency-injection": "^6.4|^7.4|^8.1",
+        "symfony/filesystem": "^6.4|^7.4|^8.1",
+        "symfony/http-kernel": "^6.4|^7.4|^8.1",
+        "symfony/serializer": "^6.4|^7.4|^8.1",
+        "symfony/twig-bundle": "^6.4|^7.4|^8.1"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.92",
-        "phpunit/phpunit": "^9.6|^10.5|^11.0",
-        "symfony/phpunit-bridge": "^6.4|^7.3|^8.0",
-        "phpstan/phpstan": "^2.1"
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "phpstan/phpstan": "^2.2",
+        "phpunit/phpunit": "^11.5",
+        "symfony/phpunit-bridge": "^7.4|^8.1"
+    },
+    "config": {
+        "sort-packages": true
     }
 }

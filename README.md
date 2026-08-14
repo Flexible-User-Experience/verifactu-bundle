@@ -27,9 +27,17 @@ composer require flexible-ux/verifactu-bundle
 ```yaml
 flux_verifactu:
     aeat_client:
+        is_entity_seal_certificate: false # only set to true if your PFX certificate is an entity seal ("certificado de sello de entidad")
         is_prod_environment: false # only set to true to make real AEAT API calls, be careful here
         pfx_certificate_filepath: '%your_pfx_certificate_filepath%'
         pfx_certificate_password: '%pfx_certificate_password%'
+        representative: # optional ("Representante"), remove if not applicable
+            name: '%your_representative_name%'
+            nif: '%your_representative_nif%'
+        requirement_is_last_submission: false # only used together with a requirement_reference
+        requirement_reference: null # only for remissions upon AEAT request ("remisión por requerimiento")
+        voluntary_remission_end_date: null # 'YYYY-MM-DD' format, only set it when ending Veri*Factu voluntary remission
+        voluntary_remission_is_affected_by_incident: false # only used together with a voluntary_remission_end_date
     # SIF (developer) credentials
     computer_system:
         vendor_name: '%your_vendor_name%'
@@ -90,6 +98,97 @@ class AppTestController
     }
 }
 ```
+
+### Error handling
+
+Besides checking the returned response status, wrap the `AeatClientHandler` send calls to handle these exceptions (since `josemmo/verifactu-php` 0.3.1 HTTP errors do not throw at transport level, so AEAT server faults surface as `AeatException`):
+
+```php
+use josemmo\Verifactu\Exceptions\AeatException;
+use josemmo\Verifactu\Exceptions\InvalidModelException;
+use Psr\Http\Client\ClientExceptionInterface;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
+
+try {
+    $result = $aeatClientHandler->sendRegistrationRecord($registrationRecord);
+} catch (ValidationFailedException|InvalidModelException $exception) {
+    // thrown BEFORE anything is sent: your data does not fulfill the bundle DTO asserts
+    // (ValidationFailedException) or the josemmo/verifactu-php model validations
+    // (InvalidModelException), fix the invoice data and send again.
+} catch (AeatException $exception) {
+    // the AEAT server returned a SOAP fault or an unparseable response: the remission outcome
+    // is UNKNOWN, treat the record as not registered and retry later.
+} catch (ClientExceptionInterface $exception) {
+    // PSR-18 network/transport failure (timeout, DNS, TLS): same treatment as AeatException.
+}
+```
+
+An `\InvalidArgumentException` is also thrown for a missing or unreadable PFX certificate file and for an invalid batch size (1 to 1000 records). Keep in mind that the record `hash` & `hashedAt` values are only written back to your entity **after** a response is received, so none of these exceptions can leave a half-updated invoice behind.
+
+### Cancellation records
+
+To cancel a previously registered invoice, make your cancellation model implement `Flux\VerifactuBundle\Contract\CancellationRecordInterface` (or build the provided `CancellationRecordDto` directly) and call:
+
+```php
+$result = $aeatClientHandler->sendCancellationRecord($cancellationRecord);
+```
+
+The previous invoice identifier and its hash are **mandatory** for every cancellation record to keep the chain ("encadenamiento") integrity. Like with registration records, the record's `hash` and `hashedAt` values are updated during the call and you must persist them, and you must check the returned response status.
+
+### Batch sending
+
+You can send up to 1000 records (the AEAT remission limit) in a single API call:
+
+```php
+$result = $aeatClientHandler->sendRegistrationRecords($registrationRecords);
+$result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
+```
+
+Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
+
+### XML record storage
+
+Inject the `XmlRecordHandler` service to keep legal XML copies of your sent records and to read them back:
+
+```php
+use Flux\VerifactuBundle\Handler\XmlRecordHandler;
+
+$xml = $xmlRecordHandler->exportRegistrationRecordToXmlString($registrationRecord); // standalone <sum1:RegistroAlta /> XML string
+$xml = $xmlRecordHandler->exportCancellationRecordToXmlString($cancellationRecord); // standalone <sum1:RegistroAnulacion /> XML string
+$record = $xmlRecordHandler->importRecordFromXmlString($xml); // back to a josemmo/verifactu-php record model
+```
+
+Export keeps the **stored** `hash` and `hashedAt` values of the already sent record (make sure your entity returns them exactly as persisted, timezone included) and re-validates the record, so any tampering with the persisted data is detected — the same integrity check runs on import, unless you pass `$validate: false` to inspect a corrupted record.
+
+### SIF statement of responsibility
+
+Generate a draft of the legal "declaración responsable" document (Artículo 13 del RD 1007/2023) from your configured `computer_system` credentials:
+
+```shell
+php bin/console flux:verifactu:generate-sif-statement "Barcelona" --output var/declaracion-responsable.txt
+```
+
+The generated document is a **draft**: review it with your legal counsel before signing it and keeping it available to your clients and to the AEAT[^aeat].
+
+Development with Docker
+-----------------------
+
+This repository includes a Dockerized PHP environment to work on the bundle without a local PHP installation. It only requires [Docker](https://docs.docker.com/get-docker/) with the Compose plugin:
+
+```shell
+make install # build the PHP image, start the container and install Composer dependencies
+make it      # run the full local gate: PHP-CS-Fixer, PHPStan and PHPUnit
+make shell   # open an interactive shell into the PHP container
+make         # list all available targets
+```
+
+By default the image is built with PHP 8.4. To rebuild the environment with another PHP version of the CI matrix (8.2 to 8.5) run, for example:
+
+```shell
+PHP_VERSION=8.2 make destroy install
+```
+
+Xdebug is installed but disabled by default. Enable it with the `XDEBUG_MODE` environment variable (e.g. `XDEBUG_MODE=debug make startd` or `XDEBUG_MODE=coverage make test`).
 
 Code Style
 ----------

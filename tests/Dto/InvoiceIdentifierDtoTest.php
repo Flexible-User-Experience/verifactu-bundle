@@ -31,10 +31,10 @@ final class InvoiceIdentifierDtoTest extends TestCase
         $this->assertCount(0, $violations);
     }
 
-    public function testIssuerIdMustHaveExactLength(): void
+    public function testIssuerIdMustBeAValidNifOrCif(): void
     {
         $dto = new InvoiceIdentifierDto(
-            issuerId: 'A123',
+            issuerId: '123456789',
             invoiceNumber: 'INV-1',
             issueDate: new \DateTimeImmutable()
         );
