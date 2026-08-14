@@ -27,6 +27,7 @@ composer require flexible-ux/verifactu-bundle
 ```yaml
 flux_verifactu:
     aeat_client:
+        is_entity_seal_certificate: false # only set to true if your PFX certificate is an entity seal ("certificado de sello de entidad")
         is_prod_environment: false # only set to true to make real AEAT API calls, be careful here
         pfx_certificate_filepath: '%your_pfx_certificate_filepath%'
         pfx_certificate_password: '%pfx_certificate_password%'

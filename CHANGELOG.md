@@ -11,6 +11,8 @@ CHANGELOG
  * Migrate phpunit.xml.dist to the modern PHPUnit schema with native deprecation gate & Symfony bridge extension
  * Require phpunit/phpunit ^11.1 and symfony/phpunit-bridge ^7.3
  * Fix Symfony 6.4 incompatibility in bundle configuration (stringNode() only exists since Config 7.2)
+ * Add `is_entity_seal_certificate` AEAT client config option to support entity seal certificates ("certificado de sello de entidad")
+ * Fix unprocessable bundle configuration definition (boolean nodes cannot be required and have a default value at once) and cover it with a config definition test
 
 0.1.6
 -----

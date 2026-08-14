@@ -57,6 +57,7 @@ final readonly class AeatClientHandler
             $this->fiscalIdentifierFactory->makeValidatedFiscalIdentifierModel(),
         );
         $client->setCertificate($this->aeatClientConfig['pfx_certificate_filepath'], $this->aeatClientConfig['pfx_certificate_password']);
+        $client->setEntitySeal($this->aeatClientConfig['is_entity_seal_certificate']);
         $client->setProduction($this->aeatClientConfig['is_prod_environment']);
 
         return $client;
