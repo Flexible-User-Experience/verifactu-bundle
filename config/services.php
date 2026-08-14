@@ -6,6 +6,7 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use Flux\VerifactuBundle\Factory\AeatResponseFactory;
 use Flux\VerifactuBundle\Factory\BreakdownDetailFactory;
+use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\ForeignFiscalIdentifierFactory;
@@ -16,6 +17,7 @@ use Flux\VerifactuBundle\Handler\AeatClientHandler;
 use Flux\VerifactuBundle\Handler\QrCodeHandler;
 use Flux\VerifactuBundle\Transformer\AeatResponseTransformer;
 use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
+use Flux\VerifactuBundle\Transformer\CancellationRecordTransformer;
 use Flux\VerifactuBundle\Transformer\ComputerSystemTransformer;
 use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
 use Flux\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
@@ -32,6 +34,7 @@ return static function (ContainerConfigurator $container): void {
             ->args([
                 abstract_arg(FluxVerifactuBundle::AEAT_CLIENT_KEY),
                 service(RegistrationRecordFactory::class),
+                service(CancellationRecordFactory::class),
                 service(ComputerSystemFactory::class),
                 service(FiscalIdentifierFactory::class),
                 service(AeatResponseFactory::class),
@@ -59,6 +62,13 @@ return static function (ContainerConfigurator $container): void {
                 service(ContractsValidator::class),
             ])
             ->alias(BreakdownDetailFactory::class, 'flux_verifactu.breakdown_detail_factory')
+        ->set('flux_verifactu.cancellation_record_factory', CancellationRecordFactory::class)
+            ->args([
+                service(InvoiceIdentifierFactory::class),
+                service(CancellationRecordTransformer::class),
+                service(ContractsValidator::class),
+            ])
+            ->alias(CancellationRecordFactory::class, 'flux_verifactu.cancellation_record_factory')
         ->set('flux_verifactu.computer_system_factory', ComputerSystemFactory::class)
             ->args([
                 abstract_arg(FluxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
@@ -103,6 +113,8 @@ return static function (ContainerConfigurator $container): void {
             ->alias(AeatResponseTransformer::class, 'flux_verifactu.aeat_response_transformer')
         ->set('flux_verifactu.breakdown_detail_transformer', BreakdownDetailTransformer::class)
             ->alias(BreakdownDetailTransformer::class, 'flux_verifactu.breakdown_detail_transformer')
+        ->set('flux_verifactu.cancellation_record_transformer', CancellationRecordTransformer::class)
+            ->alias(CancellationRecordTransformer::class, 'flux_verifactu.cancellation_record_transformer')
         ->set('flux_verifactu.computer_system_transformer', ComputerSystemTransformer::class)
             ->alias(ComputerSystemTransformer::class, 'flux_verifactu.computer_system_transformer')
         ->set('flux_verifactu.fiscal_identifier_transformer', FiscalIdentifierTransformer::class)

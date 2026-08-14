@@ -92,6 +92,16 @@ class AppTestController
 }
 ```
 
+### Cancellation records
+
+To cancel a previously registered invoice, make your cancellation model implement `Flux\VerifactuBundle\Contract\CancellationRecordInterface` (or build the provided `CancellationRecordDto` directly) and call:
+
+```php
+$result = $aeatClientHandler->sendCancellationRecord($cancellationRecord);
+```
+
+The previous invoice identifier and its hash are **mandatory** for every cancellation record to keep the chain ("encadenamiento") integrity. Like with registration records, the record's `hash` and `hashedAt` values are updated during the call and you must persist them, and you must check the returned response status.
+
 Development with Docker
 -----------------------
 

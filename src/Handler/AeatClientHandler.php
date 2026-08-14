@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Flux\VerifactuBundle\Handler;
 
 use Flux\VerifactuBundle\Contract\AeatResponseInterface;
+use Flux\VerifactuBundle\Contract\CancellationRecordInterface;
 use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
 use Flux\VerifactuBundle\Dto\AeatResponseDto;
 use Flux\VerifactuBundle\Factory\AeatResponseFactory;
+use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
 use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
 use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
 use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
@@ -18,6 +20,7 @@ final readonly class AeatClientHandler
     public function __construct(
         private array $aeatClientConfig,
         private RegistrationRecordFactory $registrationRecordFactory,
+        private CancellationRecordFactory $cancellationRecordFactory,
         private ComputerSystemFactory $computerSystemFactory,
         private FiscalIdentifierFactory $fiscalIdentifierFactory,
         private AeatResponseFactory $aeatResponseFactory,
@@ -35,6 +38,22 @@ final readonly class AeatClientHandler
         $registrationRecordInterface
             ->setHash($validatedRegistrationRecordModel->hash)
             ->setHashedAt($validatedRegistrationRecordModel->hashedAt)
+        ;
+
+        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
+    }
+
+    public function sendCancellationRecord(CancellationRecordInterface $cancellationRecordInterface): AeatResponseInterface
+    {
+        $aeatClient = $this->buildAeatClient();
+        $validatedCancellationRecordDto = $this->cancellationRecordFactory->makeValidatedCancellationRecordDtoFromInterface($cancellationRecordInterface);
+        $validatedCancellationRecordModel = $this->cancellationRecordFactory->makeValidatedCancellationRecordModelFromDto($validatedCancellationRecordDto);
+        $aeatResponse = $aeatClient->send([
+            $validatedCancellationRecordModel,
+        ])->wait();
+        $cancellationRecordInterface
+            ->setHash($validatedCancellationRecordModel->hash)
+            ->setHashedAt($validatedCancellationRecordModel->hashedAt)
         ;
 
         return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
