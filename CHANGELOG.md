@@ -4,25 +4,28 @@ CHANGELOG
 0.1.7
 -----
  
- * Add Dockerized PHP development environment (Dockerfile, Compose & Makefile)
- * Fix BreakdownDetailTransformer dropping surcharge (recargo de equivalencia) fields, breaking C18 regime invoices
- * Require josemmo/verifactu-php ^0.3.4 to avoid silent FechaOperacion & RechazoPrevio loss on older releases
- * Fix copy-pasted PHPUnit testsuite name
- * Migrate phpunit.xml.dist to the modern PHPUnit schema with native deprecation gate & Symfony bridge extension
- * Require phpunit/phpunit ^11.1 and symfony/phpunit-bridge ^7.3
- * Fix Symfony 6.4 incompatibility in bundle configuration (stringNode() only exists since Config 7.2)
+ * Add Dockerized PHP development environment (`Dockerfile`, `compose.yaml` & `Makefile`)
  * Add `is_entity_seal_certificate` AEAT client config option to support entity seal certificates ("certificado de sello de entidad")
- * Fix unprocessable bundle configuration definition (boolean nodes cannot be required and have a default value at once) and cover it with a config definition test
  * Add foreign recipients support ("IDOtro" destinatarios) with a new `ForeignFiscalIdentifierInterface` contract, DTO, transformer & factory
- * Apply sorted-config-arrays convention (sort composer.json packages & Makefile targets, enable Composer sort-packages)
  * Add CancellationRecord support ("RegistroAnulacion") with a new `CancellationRecordInterface` contract, DTO, transformer, factory & `AeatClientHandler::sendCancellationRecord()` method
  * Add `representative`, `requirement_reference` & `voluntary_remission_end_date` AEAT client config options to support "Representante", "RemisionRequerimiento" & "RemisionVoluntaria" headers
  * Add batch sending support with automatic record chaining (`sendRegistrationRecords()` & `sendCancellationRecords()`, up to 1000 records per AEAT API call)
  * Add XML record storage support with a new `XmlRecordHandler` service to export sent records as standalone XML strings (keeping stored hashes) and import them back with tamper detection
  * Add AeatClientHandler, QrCodeHandler & AeatClientFactory unit tests to complete core services coverage
+ * Require josemmo/verifactu-php **^0.3.4** to avoid silent FechaOperacion & RechazoPrevio loss on older releases
+ * Migrate `phpunit.xml.dist` to the modern PHPUnit schema with native deprecation gate & Symfony bridge extension
+ * Require phpunit/phpunit **^11.1** and symfony/phpunit-bridge **^7.3**
+ * Apply sorted-config-arrays convention (sort `composer.json` packages & `Makefile` targets, enable Composer `sort-packages`)
  * Extract AeatClientFactory and expose the configured `AeatClient` as an injectable service
+ * Require khanamiryan/qrcode-detector-decoder **^2.0.3** to avoid PHP 8.4 deprecation notices
+ * Align require-dev caret constraints to the latest tested minors (friendsofphp/php-cs-fixer **^3.95**, phpstan/phpstan **^2.2** & phpunit/phpunit **^11.5**)
+ * Improve README documentation
+ * Assorted housekeeping (`composer.json` keywords reformat, `Makefile` bash alias, TODO updates)
+ * Fix BreakdownDetailTransformer dropping surcharge (recargo de equivalencia) fields, breaking C18 regime invoices
+ * Fix copy-pasted PHPUnit testsuite name
+ * Fix Symfony 6.4 incompatibility in bundle configuration (`stringNode()` only exists since Config 7.2)
+ * Fix unprocessable bundle configuration definition (boolean nodes cannot be required and have a default value at once) and cover it with a config definition test
  * Fix QR code validation always failing at the AEAT recommended 850px dimensions (the decode-back check now runs on a downscaled copy of the generated image)
- * Require khanamiryan/qrcode-detector-decoder ^2.0.3 to avoid PHP 8.4 deprecation notices
 
 0.1.6
 -----
