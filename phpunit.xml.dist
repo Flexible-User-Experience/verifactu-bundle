@@ -14,7 +14,7 @@
     </php>
 
     <testsuites>
-        <testsuite name="symfonycasts/object-translation-bundle Test Suite">
+        <testsuite name="flexible-ux/verifactu-bundle Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>

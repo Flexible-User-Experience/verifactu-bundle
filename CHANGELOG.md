@@ -7,6 +7,7 @@ CHANGELOG
  * Add Dockerized PHP development environment (Dockerfile, Compose & Makefile)
  * Fix BreakdownDetailTransformer dropping surcharge (recargo de equivalencia) fields, breaking C18 regime invoices
  * Require josemmo/verifactu-php ^0.3.4 to avoid silent FechaOperacion & RechazoPrevio loss on older releases
+ * Fix copy-pasted PHPUnit testsuite name
 
 0.1.6
 -----
