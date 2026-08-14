@@ -13,6 +13,7 @@ CHANGELOG
  * Add XML record storage support with a new `XmlRecordHandler` service to export sent records as standalone XML strings (keeping stored hashes) and import them back with tamper detection
  * Add AeatClientHandler, QrCodeHandler & AeatClientFactory unit tests to complete core services coverage
  * Add existence & readability assert for the configured PFX certificate file when the AEAT client is built (clear early failure instead of a cryptic send-time error)
+ * Add a reusable `#[NifOrCif]` validation constraint asserting the Spanish NIF/CIF format on the fiscal identifier, invoice issuer & vendor NIF fields
  * Require josemmo/verifactu-php **^0.3.4** to avoid silent FechaOperacion & RechazoPrevio loss on older releases
  * Migrate `phpunit.xml.dist` to the modern PHPUnit schema with native deprecation gate & Symfony bridge extension
  * Require phpunit/phpunit **^11.1** and symfony/phpunit-bridge **^7.3**
