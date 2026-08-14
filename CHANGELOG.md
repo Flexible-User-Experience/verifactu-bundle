@@ -19,6 +19,10 @@ CHANGELOG
  * Add `representative`, `requirement_reference` & `voluntary_remission_end_date` AEAT client config options to support "Representante", "RemisionRequerimiento" & "RemisionVoluntaria" headers
  * Add batch sending support with automatic record chaining (`sendRegistrationRecords()` & `sendCancellationRecords()`, up to 1000 records per AEAT API call)
  * Add XML record storage support with a new `XmlRecordHandler` service to export sent records as standalone XML strings (keeping stored hashes) and import them back with tamper detection
+ * Add AeatClientHandler, QrCodeHandler & AeatClientFactory unit tests to complete core services coverage
+ * Extract AeatClientFactory and expose the configured `AeatClient` as an injectable service
+ * Fix QR code validation always failing at the AEAT recommended 850px dimensions (the decode-back check now runs on a downscaled copy of the generated image)
+ * Require khanamiryan/qrcode-detector-decoder ^2.0.3 to avoid PHP 8.4 deprecation notices
 
 0.1.6
 -----
