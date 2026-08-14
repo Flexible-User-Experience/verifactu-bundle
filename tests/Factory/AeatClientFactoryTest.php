@@ -18,20 +18,23 @@ use Symfony\Component\Validator\Validation;
 
 final class AeatClientFactoryTest extends TestCase
 {
-    private const MINIMAL_AEAT_CLIENT_CONFIG = [
-        'is_entity_seal_certificate' => false,
-        'is_prod_environment' => false,
-        'pfx_certificate_filepath' => '/path/to/certificate.pfx',
-        'pfx_certificate_password' => 'secret',
-        'requirement_is_last_submission' => false,
-        'requirement_reference' => null,
-        'voluntary_remission_end_date' => null,
-        'voluntary_remission_is_affected_by_incident' => false,
-    ];
+    private string $pfxCertificateFilepath;
+
+    protected function setUp(): void
+    {
+        $this->pfxCertificateFilepath = (string) tempnam(sys_get_temp_dir(), 'pfx');
+    }
+
+    protected function tearDown(): void
+    {
+        if (file_exists($this->pfxCertificateFilepath)) {
+            unlink($this->pfxCertificateFilepath);
+        }
+    }
 
     public function testMakesConfiguredClientWithDefaults(): void
     {
-        $client = $this->makeFactory(self::MINIMAL_AEAT_CLIENT_CONFIG)->makeConfiguredAeatClient();
+        $client = $this->makeFactory($this->makeAeatClientConfig())->makeConfiguredAeatClient();
         $this->assertInstanceOf(AeatClient::class, $client);
         $this->assertFalse($this->readPrivateProperty($client, 'isProduction'));
         $this->assertFalse($this->readPrivateProperty($client, 'isEntitySeal'));
@@ -42,7 +45,7 @@ final class AeatClientFactoryTest extends TestCase
 
     public function testMakesConfiguredClientWithAllOptions(): void
     {
-        $config = self::MINIMAL_AEAT_CLIENT_CONFIG;
+        $config = $this->makeAeatClientConfig();
         $config['is_entity_seal_certificate'] = true;
         $config['representative'] = ['name' => 'Representative Name', 'nif' => '87654321X'];
         $config['requirement_is_last_submission'] = true;
@@ -62,12 +65,35 @@ final class AeatClientFactoryTest extends TestCase
         $this->assertTrue($this->readPrivateProperty($client, 'isVoluntaryRemissionAffectedByIncident'));
     }
 
+    public function testMissingPfxCertificateFileIsRejected(): void
+    {
+        $config = $this->makeAeatClientConfig();
+        $config['pfx_certificate_filepath'] = '/path/to/missing/certificate.pfx';
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('does not exist or is not readable');
+        $this->makeFactory($config)->makeConfiguredAeatClient();
+    }
+
     public function testInvalidRepresentativeNifIsRejected(): void
     {
-        $config = self::MINIMAL_AEAT_CLIENT_CONFIG;
+        $config = $this->makeAeatClientConfig();
         $config['representative'] = ['name' => 'Representative Name', 'nif' => '123'];
         $this->expectException(ValidationFailedException::class);
         $this->makeFactory($config)->makeConfiguredAeatClient();
+    }
+
+    private function makeAeatClientConfig(): array
+    {
+        return [
+            'is_entity_seal_certificate' => false,
+            'is_prod_environment' => false,
+            'pfx_certificate_filepath' => $this->pfxCertificateFilepath,
+            'pfx_certificate_password' => 'secret',
+            'requirement_is_last_submission' => false,
+            'requirement_reference' => null,
+            'voluntary_remission_end_date' => null,
+            'voluntary_remission_is_affected_by_incident' => false,
+        ];
     }
 
     private function makeFactory(array $aeatClientConfig): AeatClientFactory
