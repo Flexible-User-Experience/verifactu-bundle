@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Transformer;
+namespace FlexibleUx\VerifactuBundle\Transformer;
 
-use Flux\VerifactuBundle\Contract\AeatResponseInterface;
-use Flux\VerifactuBundle\Dto\AeatResponseDto;
+use FlexibleUx\VerifactuBundle\Contract\AeatResponseInterface;
+use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
 use josemmo\Verifactu\Models\Responses\AeatResponse;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Contract;
+namespace FlexibleUx\VerifactuBundle\Contract;
 
 use josemmo\Verifactu\Models\Responses\ResponseItem;
 use josemmo\Verifactu\Models\Responses\ResponseStatus;

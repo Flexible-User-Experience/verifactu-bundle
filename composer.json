@@ -21,12 +21,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Flux\\VerifactuBundle\\": "src"
+            "FlexibleUx\\VerifactuBundle\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Flux\\VerifactuBundle\\Tests\\": "tests"
+            "FlexibleUx\\VerifactuBundle\\Tests\\": "tests/"
         }
     },
     "require": {

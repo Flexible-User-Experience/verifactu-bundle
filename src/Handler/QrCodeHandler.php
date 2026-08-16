@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Handler;
+namespace FlexibleUx\VerifactuBundle\Handler;
 
 use Endroid\QrCode\Color\Color;
 use Endroid\QrCode\Encoding\Encoding;
@@ -16,12 +16,12 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Writer\Result\ResultInterface;
-use Flux\VerifactuBundle\Contract\AeatResponseInterface;
-use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
-use Flux\VerifactuBundle\Dto\AeatResponseDto;
-use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
-use Flux\VerifactuBundle\Factory\AeatResponseFactory;
-use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
+use FlexibleUx\VerifactuBundle\Contract\AeatResponseInterface;
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
+use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
+use FlexibleUx\VerifactuBundle\Dto\RegistrationRecordDto;
+use FlexibleUx\VerifactuBundle\Factory\AeatResponseFactory;
+use FlexibleUx\VerifactuBundle\Factory\RegistrationRecordFactory;
 use josemmo\Verifactu\Models\Responses\ResponseStatus;
 use josemmo\Verifactu\Services\QrGenerator;
 use Zxing\QrReader;

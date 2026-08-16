@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Dto;
+namespace FlexibleUx\VerifactuBundle\Dto;
 
-use Flux\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
 use josemmo\Verifactu\Models\Records\ForeignIdType;
 use Symfony\Component\Validator\Constraints as Assert;
 

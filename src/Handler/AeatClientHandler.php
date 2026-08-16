@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Handler;
+namespace FlexibleUx\VerifactuBundle\Handler;
 
-use Flux\VerifactuBundle\Contract\AeatResponseInterface;
-use Flux\VerifactuBundle\Contract\CancellationRecordInterface;
-use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
-use Flux\VerifactuBundle\Dto\AeatResponseDto;
-use Flux\VerifactuBundle\Factory\AeatResponseFactory;
-use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
-use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
+use FlexibleUx\VerifactuBundle\Contract\AeatResponseInterface;
+use FlexibleUx\VerifactuBundle\Contract\CancellationRecordInterface;
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
+use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
+use FlexibleUx\VerifactuBundle\Factory\AeatResponseFactory;
+use FlexibleUx\VerifactuBundle\Factory\CancellationRecordFactory;
+use FlexibleUx\VerifactuBundle\Factory\RegistrationRecordFactory;
 use josemmo\Verifactu\Exceptions\AeatException;
 use josemmo\Verifactu\Exceptions\InvalidModelException;
 use josemmo\Verifactu\Services\AeatClient;

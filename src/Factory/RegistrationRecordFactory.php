@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Factory;
+namespace FlexibleUx\VerifactuBundle\Factory;
 
-use Flux\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
-use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
-use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
-use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
-use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Contract\ForeignFiscalIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
+use FlexibleUx\VerifactuBundle\Dto\RegistrationRecordDto;
+use FlexibleUx\VerifactuBundle\Transformer\RegistrationRecordTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 use josemmo\Verifactu\Models\Records\Record;
 use josemmo\Verifactu\Models\Records\RegistrationRecord;

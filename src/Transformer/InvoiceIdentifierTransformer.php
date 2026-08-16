@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Transformer;
+namespace FlexibleUx\VerifactuBundle\Transformer;
 
-use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
-use Flux\VerifactuBundle\Dto\InvoiceIdentifierDto;
+use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Dto\InvoiceIdentifierDto;
 use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 
 final readonly class InvoiceIdentifierTransformer extends BaseTransformer

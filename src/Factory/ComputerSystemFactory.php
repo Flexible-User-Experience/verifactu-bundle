@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Factory;
+namespace FlexibleUx\VerifactuBundle\Factory;
 
-use Flux\VerifactuBundle\Dto\ComputerSystemDto;
-use Flux\VerifactuBundle\Transformer\ComputerSystemTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Dto\ComputerSystemDto;
+use FlexibleUx\VerifactuBundle\Transformer\ComputerSystemTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\ComputerSystem;
 
 final readonly class ComputerSystemFactory

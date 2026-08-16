@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Handler;
+namespace FlexibleUx\VerifactuBundle\Tests\Handler;
 
-use Flux\VerifactuBundle\Dto\AeatResponseDto;
-use Flux\VerifactuBundle\Dto\BreakdownDetailDto;
-use Flux\VerifactuBundle\Dto\InvoiceIdentifierDto;
-use Flux\VerifactuBundle\Dto\RegistrationRecordDto;
-use Flux\VerifactuBundle\Factory\AeatResponseFactory;
-use Flux\VerifactuBundle\Factory\BreakdownDetailFactory;
-use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
-use Flux\VerifactuBundle\Factory\ForeignFiscalIdentifierFactory;
-use Flux\VerifactuBundle\Factory\InvoiceIdentifierFactory;
-use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
-use Flux\VerifactuBundle\Handler\QrCodeHandler;
-use Flux\VerifactuBundle\Transformer\AeatResponseTransformer;
-use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
-use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
+use FlexibleUx\VerifactuBundle\Dto\BreakdownDetailDto;
+use FlexibleUx\VerifactuBundle\Dto\InvoiceIdentifierDto;
+use FlexibleUx\VerifactuBundle\Dto\RegistrationRecordDto;
+use FlexibleUx\VerifactuBundle\Factory\AeatResponseFactory;
+use FlexibleUx\VerifactuBundle\Factory\BreakdownDetailFactory;
+use FlexibleUx\VerifactuBundle\Factory\FiscalIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\ForeignFiscalIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\InvoiceIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\RegistrationRecordFactory;
+use FlexibleUx\VerifactuBundle\Handler\QrCodeHandler;
+use FlexibleUx\VerifactuBundle\Transformer\AeatResponseTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\BreakdownDetailTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\RegistrationRecordTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\InvoiceType;
 use josemmo\Verifactu\Models\Records\OperationType;
 use josemmo\Verifactu\Models\Records\RegimeType;

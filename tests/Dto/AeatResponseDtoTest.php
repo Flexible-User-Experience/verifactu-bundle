@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Dto;
+namespace FlexibleUx\VerifactuBundle\Tests\Dto;
 
-use Flux\VerifactuBundle\Dto\AeatResponseDto;
+use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
 use josemmo\Verifactu\Models\Responses\ResponseStatus;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;

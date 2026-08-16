@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Factory;
+namespace FlexibleUx\VerifactuBundle\Tests\Factory;
 
-use Flux\VerifactuBundle\Dto\CancellationRecordDto;
-use Flux\VerifactuBundle\Dto\InvoiceIdentifierDto;
-use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
-use Flux\VerifactuBundle\Factory\InvoiceIdentifierFactory;
-use Flux\VerifactuBundle\Transformer\CancellationRecordTransformer;
-use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Dto\CancellationRecordDto;
+use FlexibleUx\VerifactuBundle\Dto\InvoiceIdentifierDto;
+use FlexibleUx\VerifactuBundle\Factory\CancellationRecordFactory;
+use FlexibleUx\VerifactuBundle\Factory\InvoiceIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Transformer\CancellationRecordTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\CancellationRecord;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;

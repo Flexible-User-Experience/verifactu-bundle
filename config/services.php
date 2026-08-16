@@ -4,29 +4,29 @@ declare(strict_types=1);
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
-use Flux\VerifactuBundle\Command\GenerateSifStatementCommand;
-use Flux\VerifactuBundle\Factory\AeatClientFactory;
-use Flux\VerifactuBundle\Factory\AeatResponseFactory;
-use Flux\VerifactuBundle\Factory\BreakdownDetailFactory;
-use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
-use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
-use Flux\VerifactuBundle\Factory\FiscalIdentifierFactory;
-use Flux\VerifactuBundle\Factory\ForeignFiscalIdentifierFactory;
-use Flux\VerifactuBundle\Factory\InvoiceIdentifierFactory;
-use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
-use Flux\VerifactuBundle\FluxVerifactuBundle;
-use Flux\VerifactuBundle\Handler\AeatClientHandler;
-use Flux\VerifactuBundle\Handler\QrCodeHandler;
-use Flux\VerifactuBundle\Handler\XmlRecordHandler;
-use Flux\VerifactuBundle\Transformer\AeatResponseTransformer;
-use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
-use Flux\VerifactuBundle\Transformer\CancellationRecordTransformer;
-use Flux\VerifactuBundle\Transformer\ComputerSystemTransformer;
-use Flux\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
-use Flux\VerifactuBundle\Transformer\RegistrationRecordTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Command\GenerateSifStatementCommand;
+use FlexibleUx\VerifactuBundle\Factory\AeatClientFactory;
+use FlexibleUx\VerifactuBundle\Factory\AeatResponseFactory;
+use FlexibleUx\VerifactuBundle\Factory\BreakdownDetailFactory;
+use FlexibleUx\VerifactuBundle\Factory\CancellationRecordFactory;
+use FlexibleUx\VerifactuBundle\Factory\ComputerSystemFactory;
+use FlexibleUx\VerifactuBundle\Factory\FiscalIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\ForeignFiscalIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\InvoiceIdentifierFactory;
+use FlexibleUx\VerifactuBundle\Factory\RegistrationRecordFactory;
+use FlexibleUx\VerifactuBundle\FlexibleUxVerifactuBundle;
+use FlexibleUx\VerifactuBundle\Handler\AeatClientHandler;
+use FlexibleUx\VerifactuBundle\Handler\QrCodeHandler;
+use FlexibleUx\VerifactuBundle\Handler\XmlRecordHandler;
+use FlexibleUx\VerifactuBundle\Transformer\AeatResponseTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\BreakdownDetailTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\CancellationRecordTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\ComputerSystemTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\FiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Transformer\RegistrationRecordTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Services\AeatClient;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -34,96 +34,96 @@ return static function (ContainerConfigurator $container): void {
     $services = $container->services();
     $services
         // commands
-        ->set('flux_verifactu.generate_sif_statement_command', GenerateSifStatementCommand::class)
+        ->set('flexible_ux_verifactu.generate_sif_statement_command', GenerateSifStatementCommand::class)
             ->args([
-                abstract_arg(FluxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
+                abstract_arg(FlexibleUxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
                 service('twig'),
             ])
             ->tag('console.command')
         // handlers
-        ->set('flux_verifactu.aeat_client_handler', AeatClientHandler::class)
+        ->set('flexible_ux_verifactu.aeat_client_handler', AeatClientHandler::class)
             ->args([
                 service(AeatClient::class),
                 service(RegistrationRecordFactory::class),
                 service(CancellationRecordFactory::class),
                 service(AeatResponseFactory::class),
             ])
-            ->alias(AeatClientHandler::class, 'flux_verifactu.aeat_client_handler')
+            ->alias(AeatClientHandler::class, 'flexible_ux_verifactu.aeat_client_handler')
             ->public()
-        ->set('flux_verifactu.qr_code_handler', QrCodeHandler::class)
+        ->set('flexible_ux_verifactu.qr_code_handler', QrCodeHandler::class)
             ->args([
-                abstract_arg(FluxVerifactuBundle::AEAT_CLIENT_KEY),
+                abstract_arg(FlexibleUxVerifactuBundle::AEAT_CLIENT_KEY),
                 service(RegistrationRecordFactory::class),
                 service(AeatResponseFactory::class),
             ])
-            ->alias(QrCodeHandler::class, 'flux_verifactu.qr_code_handler')
+            ->alias(QrCodeHandler::class, 'flexible_ux_verifactu.qr_code_handler')
             ->public()
-        ->set('flux_verifactu.xml_record_handler', XmlRecordHandler::class)
+        ->set('flexible_ux_verifactu.xml_record_handler', XmlRecordHandler::class)
             ->args([
                 service(RegistrationRecordFactory::class),
                 service(CancellationRecordFactory::class),
                 service(ComputerSystemFactory::class),
             ])
-            ->alias(XmlRecordHandler::class, 'flux_verifactu.xml_record_handler')
+            ->alias(XmlRecordHandler::class, 'flexible_ux_verifactu.xml_record_handler')
             ->public()
         // clients
-        ->set('flux_verifactu.aeat_client', AeatClient::class)
+        ->set('flexible_ux_verifactu.aeat_client', AeatClient::class)
             ->factory([service(AeatClientFactory::class), 'makeConfiguredAeatClient'])
-            ->alias(AeatClient::class, 'flux_verifactu.aeat_client')
+            ->alias(AeatClient::class, 'flexible_ux_verifactu.aeat_client')
         // factories
-        ->set('flux_verifactu.aeat_client_factory', AeatClientFactory::class)
+        ->set('flexible_ux_verifactu.aeat_client_factory', AeatClientFactory::class)
             ->args([
-                abstract_arg(FluxVerifactuBundle::AEAT_CLIENT_KEY),
+                abstract_arg(FlexibleUxVerifactuBundle::AEAT_CLIENT_KEY),
                 service(ComputerSystemFactory::class),
                 service(FiscalIdentifierFactory::class),
             ])
-            ->alias(AeatClientFactory::class, 'flux_verifactu.aeat_client_factory')
-        ->set('flux_verifactu.aeat_response_factory', AeatResponseFactory::class)
+            ->alias(AeatClientFactory::class, 'flexible_ux_verifactu.aeat_client_factory')
+        ->set('flexible_ux_verifactu.aeat_response_factory', AeatResponseFactory::class)
             ->args([
                 service(AeatResponseTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(AeatResponseFactory::class, 'flux_verifactu.aeat_response_factory')
-        ->set('flux_verifactu.breakdown_detail_factory', BreakdownDetailFactory::class)
+            ->alias(AeatResponseFactory::class, 'flexible_ux_verifactu.aeat_response_factory')
+        ->set('flexible_ux_verifactu.breakdown_detail_factory', BreakdownDetailFactory::class)
             ->args([
                 service(BreakdownDetailTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(BreakdownDetailFactory::class, 'flux_verifactu.breakdown_detail_factory')
-        ->set('flux_verifactu.cancellation_record_factory', CancellationRecordFactory::class)
+            ->alias(BreakdownDetailFactory::class, 'flexible_ux_verifactu.breakdown_detail_factory')
+        ->set('flexible_ux_verifactu.cancellation_record_factory', CancellationRecordFactory::class)
             ->args([
                 service(InvoiceIdentifierFactory::class),
                 service(CancellationRecordTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(CancellationRecordFactory::class, 'flux_verifactu.cancellation_record_factory')
-        ->set('flux_verifactu.computer_system_factory', ComputerSystemFactory::class)
+            ->alias(CancellationRecordFactory::class, 'flexible_ux_verifactu.cancellation_record_factory')
+        ->set('flexible_ux_verifactu.computer_system_factory', ComputerSystemFactory::class)
             ->args([
-                abstract_arg(FluxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
+                abstract_arg(FlexibleUxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
                 service(ComputerSystemTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(ComputerSystemFactory::class, 'flux_verifactu.computer_system_factory')
-        ->set('flux_verifactu.fiscal_identifier_factory', FiscalIdentifierFactory::class)
+            ->alias(ComputerSystemFactory::class, 'flexible_ux_verifactu.computer_system_factory')
+        ->set('flexible_ux_verifactu.fiscal_identifier_factory', FiscalIdentifierFactory::class)
             ->args([
-                abstract_arg(FluxVerifactuBundle::FISCAL_IDENTIFIER_CONFIG_KEY),
+                abstract_arg(FlexibleUxVerifactuBundle::FISCAL_IDENTIFIER_CONFIG_KEY),
                 service(FiscalIdentifierTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(FiscalIdentifierFactory::class, 'flux_verifactu.fiscal_identifier_factory')
-        ->set('flux_verifactu.foreign_fiscal_identifier_factory', ForeignFiscalIdentifierFactory::class)
+            ->alias(FiscalIdentifierFactory::class, 'flexible_ux_verifactu.fiscal_identifier_factory')
+        ->set('flexible_ux_verifactu.foreign_fiscal_identifier_factory', ForeignFiscalIdentifierFactory::class)
             ->args([
                 service(ForeignFiscalIdentifierTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(ForeignFiscalIdentifierFactory::class, 'flux_verifactu.foreign_fiscal_identifier_factory')
-        ->set('flux_verifactu.invoice_identifier_factory', InvoiceIdentifierFactory::class)
+            ->alias(ForeignFiscalIdentifierFactory::class, 'flexible_ux_verifactu.foreign_fiscal_identifier_factory')
+        ->set('flexible_ux_verifactu.invoice_identifier_factory', InvoiceIdentifierFactory::class)
             ->args([
                 service(InvoiceIdentifierTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(InvoiceIdentifierFactory::class, 'flux_verifactu.invoice_identifier_factory')
-        ->set('flux_verifactu.registration_record_factory', RegistrationRecordFactory::class)
+            ->alias(InvoiceIdentifierFactory::class, 'flexible_ux_verifactu.invoice_identifier_factory')
+        ->set('flexible_ux_verifactu.registration_record_factory', RegistrationRecordFactory::class)
             ->args([
                 service(InvoiceIdentifierFactory::class),
                 service(BreakdownDetailFactory::class),
@@ -132,32 +132,32 @@ return static function (ContainerConfigurator $container): void {
                 service(RegistrationRecordTransformer::class),
                 service(ContractsValidator::class),
             ])
-            ->alias(RegistrationRecordFactory::class, 'flux_verifactu.registration_record_factory')
+            ->alias(RegistrationRecordFactory::class, 'flexible_ux_verifactu.registration_record_factory')
         // transformers
-        ->set('flux_verifactu.aeat_response_transformer', AeatResponseTransformer::class)
+        ->set('flexible_ux_verifactu.aeat_response_transformer', AeatResponseTransformer::class)
             ->args([
                 service(SerializerInterface::class)
             ])
-            ->alias(AeatResponseTransformer::class, 'flux_verifactu.aeat_response_transformer')
-        ->set('flux_verifactu.breakdown_detail_transformer', BreakdownDetailTransformer::class)
-            ->alias(BreakdownDetailTransformer::class, 'flux_verifactu.breakdown_detail_transformer')
-        ->set('flux_verifactu.cancellation_record_transformer', CancellationRecordTransformer::class)
-            ->alias(CancellationRecordTransformer::class, 'flux_verifactu.cancellation_record_transformer')
-        ->set('flux_verifactu.computer_system_transformer', ComputerSystemTransformer::class)
-            ->alias(ComputerSystemTransformer::class, 'flux_verifactu.computer_system_transformer')
-        ->set('flux_verifactu.fiscal_identifier_transformer', FiscalIdentifierTransformer::class)
-            ->alias(FiscalIdentifierTransformer::class, 'flux_verifactu.fiscal_identifier_transformer')
-        ->set('flux_verifactu.foreign_fiscal_identifier_transformer', ForeignFiscalIdentifierTransformer::class)
-            ->alias(ForeignFiscalIdentifierTransformer::class, 'flux_verifactu.foreign_fiscal_identifier_transformer')
-        ->set('flux_verifactu.invoice_identifier_transformer', InvoiceIdentifierTransformer::class)
-            ->alias(InvoiceIdentifierTransformer::class, 'flux_verifactu.invoice_identifier_transformer')
-        ->set('flux_verifactu.registration_record_transformer', RegistrationRecordTransformer::class)
-            ->alias(RegistrationRecordTransformer::class, 'flux_verifactu.registration_record_transformer')
+            ->alias(AeatResponseTransformer::class, 'flexible_ux_verifactu.aeat_response_transformer')
+        ->set('flexible_ux_verifactu.breakdown_detail_transformer', BreakdownDetailTransformer::class)
+            ->alias(BreakdownDetailTransformer::class, 'flexible_ux_verifactu.breakdown_detail_transformer')
+        ->set('flexible_ux_verifactu.cancellation_record_transformer', CancellationRecordTransformer::class)
+            ->alias(CancellationRecordTransformer::class, 'flexible_ux_verifactu.cancellation_record_transformer')
+        ->set('flexible_ux_verifactu.computer_system_transformer', ComputerSystemTransformer::class)
+            ->alias(ComputerSystemTransformer::class, 'flexible_ux_verifactu.computer_system_transformer')
+        ->set('flexible_ux_verifactu.fiscal_identifier_transformer', FiscalIdentifierTransformer::class)
+            ->alias(FiscalIdentifierTransformer::class, 'flexible_ux_verifactu.fiscal_identifier_transformer')
+        ->set('flexible_ux_verifactu.foreign_fiscal_identifier_transformer', ForeignFiscalIdentifierTransformer::class)
+            ->alias(ForeignFiscalIdentifierTransformer::class, 'flexible_ux_verifactu.foreign_fiscal_identifier_transformer')
+        ->set('flexible_ux_verifactu.invoice_identifier_transformer', InvoiceIdentifierTransformer::class)
+            ->alias(InvoiceIdentifierTransformer::class, 'flexible_ux_verifactu.invoice_identifier_transformer')
+        ->set('flexible_ux_verifactu.registration_record_transformer', RegistrationRecordTransformer::class)
+            ->alias(RegistrationRecordTransformer::class, 'flexible_ux_verifactu.registration_record_transformer')
         // validators
-        ->set('flux_verifactu.contracts_validator', ContractsValidator::class)
+        ->set('flexible_ux_verifactu.contracts_validator', ContractsValidator::class)
             ->args([
                 service('validator'),
             ])
-            ->alias(ContractsValidator::class, 'flux_verifactu.contracts_validator')
+            ->alias(ContractsValidator::class, 'flexible_ux_verifactu.contracts_validator')
     ;
 };

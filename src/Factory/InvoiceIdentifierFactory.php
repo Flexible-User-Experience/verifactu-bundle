@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Factory;
+namespace FlexibleUx\VerifactuBundle\Factory;
 
-use Flux\VerifactuBundle\Contract\InvoiceIdentifierInterface;
-use Flux\VerifactuBundle\Dto\InvoiceIdentifierDto;
-use Flux\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Dto\InvoiceIdentifierDto;
+use FlexibleUx\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 
 final readonly class InvoiceIdentifierFactory

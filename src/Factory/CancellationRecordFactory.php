@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Factory;
+namespace FlexibleUx\VerifactuBundle\Factory;
 
-use Flux\VerifactuBundle\Contract\CancellationRecordInterface;
-use Flux\VerifactuBundle\Dto\CancellationRecordDto;
-use Flux\VerifactuBundle\Transformer\CancellationRecordTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Contract\CancellationRecordInterface;
+use FlexibleUx\VerifactuBundle\Dto\CancellationRecordDto;
+use FlexibleUx\VerifactuBundle\Transformer\CancellationRecordTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\CancellationRecord;
 use josemmo\Verifactu\Models\Records\Record;
 

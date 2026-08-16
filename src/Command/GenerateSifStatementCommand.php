@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Command;
+namespace FlexibleUx\VerifactuBundle\Command;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -14,7 +14,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Twig\Environment;
 
 #[AsCommand(
-    name: 'flux:verifactu:generate-sif-statement',
+    name: 'flexible-ux:verifactu:generate-sif-statement',
     description: 'Generate a draft SIF statement of responsibility document ("declaración responsable", Art. 13 RD 1007/2023) from the configured computer system',
 )]
 final class GenerateSifStatementCommand extends Command
@@ -37,7 +37,7 @@ final class GenerateSifStatementCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $document = $this->twig->render('@FluxVerifactu/statement_of_responsibility.txt.twig', [
+        $document = $this->twig->render('@FlexibleUxVerifactu/statement_of_responsibility.txt.twig', [
             'computer_system' => $this->computerSystemConfig,
             'place' => $input->getArgument('place'),
             'signed_at' => new \DateTimeImmutable((string) ($input->getOption('signed-at') ?? 'now')),

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Dto;
+namespace FlexibleUx\VerifactuBundle\Tests\Dto;
 
-use Flux\VerifactuBundle\Dto\ForeignFiscalIdentifierDto;
+use FlexibleUx\VerifactuBundle\Dto\ForeignFiscalIdentifierDto;
 use josemmo\Verifactu\Models\Records\ForeignIdType;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;

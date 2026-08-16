@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Factory;
+namespace FlexibleUx\VerifactuBundle\Factory;
 
-use Flux\VerifactuBundle\Contract\BreakdownDetailInterface;
-use Flux\VerifactuBundle\Dto\BreakdownDetailDto;
-use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
-use Flux\VerifactuBundle\Validator\ContractsValidator;
+use FlexibleUx\VerifactuBundle\Contract\BreakdownDetailInterface;
+use FlexibleUx\VerifactuBundle\Dto\BreakdownDetailDto;
+use FlexibleUx\VerifactuBundle\Transformer\BreakdownDetailTransformer;
+use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
 use josemmo\Verifactu\Models\Records\BreakdownDetails;
 
 final readonly class BreakdownDetailFactory

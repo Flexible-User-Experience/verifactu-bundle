@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Handler;
+namespace FlexibleUx\VerifactuBundle\Handler;
 
-use Flux\VerifactuBundle\Contract\CancellationRecordInterface;
-use Flux\VerifactuBundle\Contract\RegistrationRecordInterface;
-use Flux\VerifactuBundle\Factory\CancellationRecordFactory;
-use Flux\VerifactuBundle\Factory\ComputerSystemFactory;
-use Flux\VerifactuBundle\Factory\RegistrationRecordFactory;
+use FlexibleUx\VerifactuBundle\Contract\CancellationRecordInterface;
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
+use FlexibleUx\VerifactuBundle\Factory\CancellationRecordFactory;
+use FlexibleUx\VerifactuBundle\Factory\ComputerSystemFactory;
+use FlexibleUx\VerifactuBundle\Factory\RegistrationRecordFactory;
 use josemmo\Verifactu\Exceptions\ImportException;
 use josemmo\Verifactu\Exceptions\InvalidModelException;
 use josemmo\Verifactu\Models\Records\CancellationRecord;

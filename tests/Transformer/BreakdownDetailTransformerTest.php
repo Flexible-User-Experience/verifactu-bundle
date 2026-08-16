@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Flux\VerifactuBundle\Tests\Transformer;
+namespace FlexibleUx\VerifactuBundle\Tests\Transformer;
 
-use Flux\VerifactuBundle\Dto\BreakdownDetailDto;
-use Flux\VerifactuBundle\Transformer\BreakdownDetailTransformer;
+use FlexibleUx\VerifactuBundle\Dto\BreakdownDetailDto;
+use FlexibleUx\VerifactuBundle\Transformer\BreakdownDetailTransformer;
 use josemmo\Verifactu\Models\Records\OperationType;
 use josemmo\Verifactu\Models\Records\RegimeType;
 use josemmo\Verifactu\Models\Records\TaxType;
