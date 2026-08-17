@@ -13,6 +13,8 @@ use FlexibleUx\VerifactuBundle\Factory\CancellationRecordFactory;
 use FlexibleUx\VerifactuBundle\Factory\RegistrationRecordFactory;
 use josemmo\Verifactu\Exceptions\AeatException;
 use josemmo\Verifactu\Exceptions\InvalidModelException;
+use josemmo\Verifactu\Models\Records\CancellationRecord;
+use josemmo\Verifactu\Models\Records\RegistrationRecord;
 use josemmo\Verifactu\Services\AeatClient;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
@@ -156,6 +158,54 @@ final readonly class AeatClientHandler
         return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
     }
 
+    /**
+     * Answer an AEAT requirement ("remisión por requerimiento") with a page of already issued registration
+     * records, the way a SIF operating in "No Veri*Factu" mode remits its records when the AEAT asks for them.
+     * Set $isLastRequirementSubmission to true on the page that closes the requirement ("FinRequerimiento").
+     *
+     * The records are sent verbatim, keeping their stored hash & hashedAt values: they are neither re-chained
+     * nor re-hashed, because a requirement answer remits the records exactly as they were recorded, so nothing
+     * is written back to your entities and any tampering with the persisted data is detected before sending.
+     *
+     * The requirement reference only applies to this call, the configured aeat_client.requirement_reference
+     * one is restored afterwards.
+     *
+     * @param RegistrationRecordInterface[] $registrationRecordInterfaces
+     *
+     * @throws \InvalidArgumentException if the requirement reference is blank or the batch does not contain between 1 and 1000 records, see also sendRegistrationRecord() throws
+     */
+    public function sendRegistrationRecordsUponRequirement(array $registrationRecordInterfaces, string $requirementReference, bool $isLastRequirementSubmission = false): AeatResponseInterface
+    {
+        $this->assertRequirementReference($requirementReference);
+        $this->assertBatchSize($registrationRecordInterfaces);
+        $registrationRecordModels = [];
+        foreach ($registrationRecordInterfaces as $registrationRecordInterface) {
+            $registrationRecordModels[] = $this->registrationRecordFactory->makeValidatedRegistrationRecordModelWithStoredHashFromInterface($registrationRecordInterface);
+        }
+
+        return $this->sendRecordModelsUponRequirement($registrationRecordModels, $requirementReference, $isLastRequirementSubmission);
+    }
+
+    /**
+     * Answer an AEAT requirement ("remisión por requerimiento") with a page of already issued cancellation
+     * records, see sendRegistrationRecordsUponRequirement() for the whole behaviour.
+     *
+     * @param CancellationRecordInterface[] $cancellationRecordInterfaces
+     *
+     * @throws \InvalidArgumentException if the requirement reference is blank or the batch does not contain between 1 and 1000 records, see also sendCancellationRecord() throws
+     */
+    public function sendCancellationRecordsUponRequirement(array $cancellationRecordInterfaces, string $requirementReference, bool $isLastRequirementSubmission = false): AeatResponseInterface
+    {
+        $this->assertRequirementReference($requirementReference);
+        $this->assertBatchSize($cancellationRecordInterfaces);
+        $cancellationRecordModels = [];
+        foreach ($cancellationRecordInterfaces as $cancellationRecordInterface) {
+            $cancellationRecordModels[] = $this->cancellationRecordFactory->makeValidatedCancellationRecordModelWithStoredHashFromInterface($cancellationRecordInterface);
+        }
+
+        return $this->sendRecordModelsUponRequirement($cancellationRecordModels, $requirementReference, $isLastRequirementSubmission);
+    }
+
     public function getJsonArrayFromAeatResponseDto(AeatResponseDto $dto): array
     {
         return $this->aeatResponseFactory->getJsonArrayFromAeatResponseDto($dto);
@@ -166,9 +216,34 @@ final readonly class AeatClientHandler
         return $this->aeatResponseFactory->getJsonStringFromAeatResponseDto($dto);
     }
 
+    /**
+     * @param array<RegistrationRecord|CancellationRecord> $recordModels
+     */
+    private function sendRecordModelsUponRequirement(array $recordModels, string $requirementReference, bool $isLastRequirementSubmission): AeatResponseInterface
+    {
+        $this->aeatClient->setRequirementReference($requirementReference, $isLastRequirementSubmission);
+        try {
+            $aeatResponse = $this->aeatClient->send($recordModels)->wait();
+        } finally {
+            $this->aeatClient->setRequirementReference(
+                $this->aeatClientConfig['requirement_reference'],
+                $this->aeatClientConfig['requirement_is_last_submission']
+            );
+        }
+
+        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
+    }
+
     private function makeConfiguredVoluntaryRemissionEndDate(): ?\DateTimeImmutable
     {
         return null !== $this->aeatClientConfig['voluntary_remission_end_date'] ? new \DateTimeImmutable($this->aeatClientConfig['voluntary_remission_end_date']) : null;
+    }
+
+    private function assertRequirementReference(string $requirementReference): void
+    {
+        if ('' === trim($requirementReference)) {
+            throw new \InvalidArgumentException('The AEAT requirement reference ("RefRequerimiento") can not be blank.');
+        }
     }
 
     private function assertBatchSize(array $recordInterfaces): void

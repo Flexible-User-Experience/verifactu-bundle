@@ -172,6 +172,25 @@ $result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
 
 Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
 
+### Answering an AEAT requirement
+
+A SIF operating in "No Veri\*Factu" mode does not remit its records, but the AEAT can request them through a requirement ("remisión por requerimiento"). Send the requested records page by page, marking the page that closes the requirement:
+
+```php
+// first page(s) of the requirement
+$result = $aeatClientHandler->sendRegistrationRecordsUponRequirement($registrationRecords, 'REF00001ABDEAF1234');
+
+// the page that closes it ("FinRequerimiento")
+$result = $aeatClientHandler->sendRegistrationRecordsUponRequirement($lastRegistrationRecords, 'REF00001ABDEAF1234', true);
+
+// same for cancellation records
+$result = $aeatClientHandler->sendCancellationRecordsUponRequirement($cancellationRecords, 'REF00001ABDEAF1234', true);
+```
+
+These records are sent **verbatim**, keeping the `hash` and `hashedAt` values you persisted: they are neither re-chained nor re-hashed, because a requirement answer remits the records exactly as they were recorded — so nothing is written back to your entities, and any tampering with the persisted data is detected before anything is sent. The batch limit of 1000 records per call also applies here.
+
+The requirement reference only applies to the call, the configured `aeat_client.requirement_reference` one is restored afterwards, so a requirement can be answered without touching the app configuration.
+
 ### Ending the Veri*Factu voluntary remission
 
 A SIF operating in Veri\*Factu mode that wants to stop remitting its records must notify the AEAT of the end of the voluntary remission ("baja de la remisión voluntaria"). The notification travels in the `RemisionVoluntaria` header of a remission carrying **no record at all**:

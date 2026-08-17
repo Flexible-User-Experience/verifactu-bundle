@@ -59,12 +59,17 @@ final class AeatClientHandlerTest extends TestCase
      */
     private array $voluntaryRemissionEndDateCalls = [];
 
+    /**
+     * @var array<array{0: ?string, 1: bool}>
+     */
+    private array $requirementReferenceCalls = [];
+
     protected function setUp(): void
     {
         $this->handler = $this->makeHandler();
     }
 
-    private function makeHandler(?string $configuredVoluntaryRemissionEndDate = null): AeatClientHandler
+    private function makeHandler(?string $configuredVoluntaryRemissionEndDate = null, ?string $configuredRequirementReference = null): AeatClientHandler
     {
         $validator = new ContractsValidator(
             Validation::createValidatorBuilder()
@@ -75,6 +80,12 @@ final class AeatClientHandlerTest extends TestCase
         $this->aeatClient = $this->createMock(AeatClient::class);
         $this->sentRecords = [];
         $this->voluntaryRemissionEndDateCalls = [];
+        $this->requirementReferenceCalls = [];
+        $this->aeatClient->method('setRequirementReference')->willReturnCallback(function (?string $requirementReference, bool $isLastRequirementSubmission): AeatClient {
+            $this->requirementReferenceCalls[] = [$requirementReference, $isLastRequirementSubmission];
+
+            return $this->aeatClient;
+        });
         $this->aeatClient->method('setVoluntaryRemissionEndDate')->willReturnCallback(function (?\DateTimeImmutable $endDate, bool $isAffectedByIncident): AeatClient {
             $this->voluntaryRemissionEndDateCalls[] = [$endDate, $isAffectedByIncident];
 
@@ -94,6 +105,8 @@ final class AeatClientHandlerTest extends TestCase
 
         return new AeatClientHandler(
             [
+                'requirement_is_last_submission' => false,
+                'requirement_reference' => $configuredRequirementReference,
                 'voluntary_remission_end_date' => $configuredVoluntaryRemissionEndDate,
                 'voluntary_remission_is_affected_by_incident' => false,
             ],
@@ -164,6 +177,43 @@ final class AeatClientHandlerTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->handler->sendCancellationRecords(array_fill(0, 1001, $this->makeCancellationRecordDto()));
+    }
+
+    public function testRequirementSubmissionSendsRecordsWithTheirStoredHashAndRestoresTheConfiguredReference(): void
+    {
+        $dto = $this->makeRegistrationRecordDto('FA-2026-001');
+        $this->handler->sendRegistrationRecord($dto);
+        $storedHash = $dto->getHash();
+        $storedHashedAt = $dto->getHashedAt();
+        $this->handler->sendRegistrationRecordsUponRequirement([$dto], 'REF00001ABDEAF1234', true);
+        $this->assertCount(1, $this->sentRecords);
+        $this->assertSame($storedHash, $this->sentRecords[0]->hash);
+        $this->assertSame($storedHash, $dto->getHash());
+        $this->assertSame($storedHashedAt, $dto->getHashedAt());
+        $this->assertSame([['REF00001ABDEAF1234', true], [null, false]], $this->requirementReferenceCalls);
+    }
+
+    public function testRequirementSubmissionRestoresTheConfiguredReference(): void
+    {
+        $handler = $this->makeHandler(configuredRequirementReference: 'REF00000CONFIGURED');
+        $dto = $this->makeCancellationRecordDto();
+        $handler->sendCancellationRecord($dto);
+        $handler->sendCancellationRecordsUponRequirement([$dto], 'REF00001ABDEAF1234');
+        $this->assertInstanceOf(CancellationRecord::class, $this->sentRecords[0]);
+        $this->assertSame([['REF00001ABDEAF1234', false], ['REF00000CONFIGURED', false]], $this->requirementReferenceCalls);
+    }
+
+    public function testBlankRequirementReferenceIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('can not be blank');
+        $this->handler->sendRegistrationRecordsUponRequirement([$this->makeRegistrationRecordDto('FA-2026-001')], '   ');
+    }
+
+    public function testEmptyRequirementBatchIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->handler->sendRegistrationRecordsUponRequirement([], 'REF00001ABDEAF1234');
     }
 
     public function testVoluntaryRemissionEndNotificationSendsAnEmptyRemission(): void
