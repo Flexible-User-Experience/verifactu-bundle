@@ -54,7 +54,17 @@ final class AeatClientHandlerTest extends TestCase
      */
     private array $sentRecords = [];
 
+    /**
+     * @var array<array{0: ?\DateTimeImmutable, 1: bool}>
+     */
+    private array $voluntaryRemissionEndDateCalls = [];
+
     protected function setUp(): void
+    {
+        $this->handler = $this->makeHandler();
+    }
+
+    private function makeHandler(?string $configuredVoluntaryRemissionEndDate = null): AeatClientHandler
     {
         $validator = new ContractsValidator(
             Validation::createValidatorBuilder()
@@ -64,6 +74,12 @@ final class AeatClientHandlerTest extends TestCase
         $invoiceIdentifierFactory = new InvoiceIdentifierFactory(new InvoiceIdentifierTransformer(), $validator);
         $this->aeatClient = $this->createMock(AeatClient::class);
         $this->sentRecords = [];
+        $this->voluntaryRemissionEndDateCalls = [];
+        $this->aeatClient->method('setVoluntaryRemissionEndDate')->willReturnCallback(function (?\DateTimeImmutable $endDate, bool $isAffectedByIncident): AeatClient {
+            $this->voluntaryRemissionEndDateCalls[] = [$endDate, $isAffectedByIncident];
+
+            return $this->aeatClient;
+        });
         $this->aeatClient->method('send')->willReturnCallback(function (array $records): FulfilledPromise {
             $this->sentRecords = $records;
             $aeatResponse = new AeatResponse();
@@ -75,7 +91,12 @@ final class AeatClientHandlerTest extends TestCase
 
             return new FulfilledPromise($aeatResponse);
         });
-        $this->handler = new AeatClientHandler(
+
+        return new AeatClientHandler(
+            [
+                'voluntary_remission_end_date' => $configuredVoluntaryRemissionEndDate,
+                'voluntary_remission_is_affected_by_incident' => false,
+            ],
             $this->aeatClient,
             new RegistrationRecordFactory(
                 $invoiceIdentifierFactory,
@@ -143,6 +164,41 @@ final class AeatClientHandlerTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->handler->sendCancellationRecords(array_fill(0, 1001, $this->makeCancellationRecordDto()));
+    }
+
+    public function testVoluntaryRemissionEndNotificationSendsAnEmptyRemission(): void
+    {
+        $response = $this->handler->sendVoluntaryRemissionEndNotification(new \DateTimeImmutable('2026-12-31'), true);
+        $this->assertSame([], $this->sentRecords);
+        $this->assertSame(ResponseStatus::Correct, $response->getStatus());
+        $this->assertCount(2, $this->voluntaryRemissionEndDateCalls);
+        $this->assertSame('2026-12-31', $this->voluntaryRemissionEndDateCalls[0][0]?->format('Y-m-d'));
+        $this->assertTrue($this->voluntaryRemissionEndDateCalls[0][1]);
+    }
+
+    public function testVoluntaryRemissionEndNotificationFallsBackToTheConfiguredEndDateAndRestoresIt(): void
+    {
+        $handler = $this->makeHandler('2026-12-31');
+        $handler->sendVoluntaryRemissionEndNotification();
+        $this->assertSame([], $this->sentRecords);
+        $this->assertCount(2, $this->voluntaryRemissionEndDateCalls);
+        $this->assertSame('2026-12-31', $this->voluntaryRemissionEndDateCalls[0][0]?->format('Y-m-d'));
+        $this->assertSame('2026-12-31', $this->voluntaryRemissionEndDateCalls[1][0]?->format('Y-m-d'));
+    }
+
+    public function testVoluntaryRemissionEndNotificationRestoresTheConfiguredHeaderAfterAnOverride(): void
+    {
+        $handler = $this->makeHandler('2026-12-31');
+        $handler->sendVoluntaryRemissionEndNotification(new \DateTimeImmutable('2026-11-30'));
+        $this->assertSame('2026-11-30', $this->voluntaryRemissionEndDateCalls[0][0]?->format('Y-m-d'));
+        $this->assertSame('2026-12-31', $this->voluntaryRemissionEndDateCalls[1][0]?->format('Y-m-d'));
+    }
+
+    public function testVoluntaryRemissionEndNotificationWithoutAnyEndDateIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('A voluntary remission end date is mandatory');
+        $this->handler->sendVoluntaryRemissionEndNotification();
     }
 
     public function testGetJsonArrayFromAeatResponseDto(): void

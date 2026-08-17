@@ -172,6 +172,22 @@ $result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
 
 Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
 
+### Ending the Veri*Factu voluntary remission
+
+A SIF operating in Veri\*Factu mode that wants to stop remitting its records must notify the AEAT of the end of the voluntary remission ("baja de la remisión voluntaria"). The notification travels in the `RemisionVoluntaria` header of a remission carrying **no record at all**:
+
+```php
+// with the configured aeat_client.voluntary_remission_end_date
+$result = $aeatClientHandler->sendVoluntaryRemissionEndNotification();
+
+// or overriding it at call time ("YYYY-MM-DD" end date, technical incident flag)
+$result = $aeatClientHandler->sendVoluntaryRemissionEndNotification(new \DateTimeImmutable('2026-12-31'), false);
+```
+
+The end date is mandatory: an `\InvalidArgumentException` is thrown when neither the argument nor the config option provides one. An overridden date only applies to this call, the configured header is restored afterwards for the following remissions.
+
+Since this response carries no record, `isAccepted()` is always `false` for it (a response with no record is never a record acceptance): read `$result->getStatus()` to tell whether the AEAT accepted the notification.
+
 ### QR codes without an AEAT response
 
 The legal QR code only carries the invoice issuer NIF, invoice number, issue date and total amount, so it does **not** depend on the AEAT response. Besides the `...AndAeatResponse...` methods shown above, `QrCodeHandler` can build it from the record alone, from the invoice identifier plus the total amount, or from raw values — useful to print the QR before submitting the record, to reprint an already sent invoice without keeping its response, or to operate in "No Veri*Factu" mode:

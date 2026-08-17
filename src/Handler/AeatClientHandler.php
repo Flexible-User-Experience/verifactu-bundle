@@ -23,11 +23,47 @@ final readonly class AeatClientHandler
     private const MAX_RECORDS_PER_REMISSION = 1000;
 
     public function __construct(
+        private array $aeatClientConfig,
         private AeatClient $aeatClient,
         private RegistrationRecordFactory $registrationRecordFactory,
         private CancellationRecordFactory $cancellationRecordFactory,
         private AeatResponseFactory $aeatResponseFactory,
     ) {
+    }
+
+    /**
+     * Notify the AEAT of the end of the Veri*Factu voluntary remission ("baja de la remisión voluntaria") right
+     * away, with an empty remission carrying the "RemisionVoluntaria" header and no record at all. Pass an end
+     * date to override the configured aeat_client.voluntary_remission_end_date one, which is restored on the
+     * shared AEAT client afterwards so the following remissions keep their configured header.
+     *
+     * Note that the returned response carries no record, so isAccepted() is always false for it: read
+     * getStatus() instead to tell whether the AEAT accepted the notification.
+     *
+     * @throws \InvalidArgumentException if no end date is given nor configured, see also sendRegistrationRecord() throws
+     * @throws AeatException             if the AEAT server returned a fault or an unparseable response (notification outcome unknown)
+     * @throws ClientExceptionInterface  if the request could not be sent (notification outcome unknown)
+     */
+    public function sendVoluntaryRemissionEndNotification(?\DateTimeInterface $endDate = null, ?bool $isAffectedByIncident = null): AeatResponseInterface
+    {
+        $endDate ??= $this->makeConfiguredVoluntaryRemissionEndDate();
+        if (null === $endDate) {
+            throw new \InvalidArgumentException('A voluntary remission end date is mandatory to notify the AEAT: pass it to sendVoluntaryRemissionEndNotification() or set the aeat_client.voluntary_remission_end_date config option.');
+        }
+        $this->aeatClient->setVoluntaryRemissionEndDate(
+            \DateTimeImmutable::createFromInterface($endDate),
+            $isAffectedByIncident ?? $this->aeatClientConfig['voluntary_remission_is_affected_by_incident']
+        );
+        try {
+            $aeatResponse = $this->aeatClient->send([])->wait();
+        } finally {
+            $this->aeatClient->setVoluntaryRemissionEndDate(
+                $this->makeConfiguredVoluntaryRemissionEndDate(),
+                $this->aeatClientConfig['voluntary_remission_is_affected_by_incident']
+            );
+        }
+
+        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
     }
 
     /**
@@ -128,6 +164,11 @@ final readonly class AeatClientHandler
     public function getJsonStringFromAeatResponseDto(AeatResponseDto $dto): string
     {
         return $this->aeatResponseFactory->getJsonStringFromAeatResponseDto($dto);
+    }
+
+    private function makeConfiguredVoluntaryRemissionEndDate(): ?\DateTimeImmutable
+    {
+        return null !== $this->aeatClientConfig['voluntary_remission_end_date'] ? new \DateTimeImmutable($this->aeatClientConfig['voluntary_remission_end_date']) : null;
     }
 
     private function assertBatchSize(array $recordInterfaces): void
