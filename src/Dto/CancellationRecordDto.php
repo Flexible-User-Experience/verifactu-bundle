@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace FlexibleUx\VerifactuBundle\Dto;
 
 use FlexibleUx\VerifactuBundle\Contract\CancellationRecordInterface;
+use FlexibleUx\VerifactuBundle\Contract\ChainableRecordInterface;
 use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class CancellationRecordDto implements CancellationRecordInterface
+final class CancellationRecordDto implements CancellationRecordInterface, ChainableRecordInterface
 {
     private string $hash;
     private \DateTimeInterface $hashedAt;
@@ -19,10 +20,10 @@ final class CancellationRecordDto implements CancellationRecordInterface
         private readonly InvoiceIdentifierInterface $invoiceIdentifier,
         #[Assert\NotBlank]
         #[Assert\Valid]
-        private readonly InvoiceIdentifierInterface $previousInvoiceIdentifier,
+        private InvoiceIdentifierInterface $previousInvoiceIdentifier,
         #[Assert\NotBlank]
         #[Assert\Regex(pattern: '/^[0-9A-F]{64}$/')]
-        private readonly string $previousHash,
+        private string $previousHash,
         #[Assert\NotNull]
         #[Assert\Type('boolean')]
         private readonly bool $withoutPriorRecord,
@@ -42,6 +43,20 @@ final class CancellationRecordDto implements CancellationRecordInterface
     public function getPreviousInvoiceIdentifier(): InvoiceIdentifierInterface
     {
         return $this->previousInvoiceIdentifier;
+    }
+
+    public function setPreviousInvoiceIdentifier(InvoiceIdentifierInterface $previousInvoiceIdentifier): self
+    {
+        $this->previousInvoiceIdentifier = $previousInvoiceIdentifier;
+
+        return $this;
+    }
+
+    public function setPreviousHash(string $previousHash): self
+    {
+        $this->previousHash = $previousHash;
+
+        return $this;
     }
 
     public function getPreviousHash(): string

@@ -41,13 +41,20 @@ final class QrCodeHandlerTest extends TestCase
 
     protected function setUp(): void
     {
+        $this->handler = $this->makeHandler();
+    }
+
+    private function makeHandler(bool $isVerifactuMode = true): QrCodeHandler
+    {
         $validator = new ContractsValidator(
             Validation::createValidatorBuilder()
                 ->enableAttributeMapping()
                 ->getValidator()
         );
-        $this->handler = new QrCodeHandler(
-            ['is_prod_environment' => false],
+
+        return new QrCodeHandler(
+            ['is_prod_environment' => false, 'is_verifactu_mode' => $isVerifactuMode],
+            new InvoiceIdentifierFactory(new InvoiceIdentifierTransformer(), $validator),
             new RegistrationRecordFactory(
                 new InvoiceIdentifierFactory(new InvoiceIdentifierTransformer(), $validator),
                 new BreakdownDetailFactory(new BreakdownDetailTransformer(), $validator),
@@ -93,6 +100,57 @@ final class QrCodeHandlerTest extends TestCase
             $this->makeRegistrationRecordDto(),
             $this->makeAeatResponseDto(ResponseStatus::Correct, null)
         );
+    }
+
+    public function testBuildsVerifactuQrCodeUrlFromRegistrationRecord(): void
+    {
+        $this->assertSame(
+            'https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR?nif=12345678Z&numserie=FA-2026-001&fecha=01-08-2026&importe=121.00',
+            $this->handler->buildQrCodeUrlFromRegistrationRecordDto($this->makeRegistrationRecordDto())
+        );
+    }
+
+    public function testBuildsNoVerifactuQrCodeUrlWhenVerifactuModeIsDisabled(): void
+    {
+        $this->assertSame(
+            'https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQRNoVerifactu?nif=12345678Z&numserie=FA-2026-001&fecha=01-08-2026&importe=121.00',
+            $this->makeHandler(false)->buildQrCodeUrlFromRegistrationRecordDto($this->makeRegistrationRecordDto())
+        );
+    }
+
+    public function testBuildsQrCodeUrlFromInvoiceIdentifierAlone(): void
+    {
+        $this->assertSame(
+            'https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR?nif=12345678Z&numserie=FA-2026-001&fecha=01-08-2026&importe=121.00',
+            $this->handler->buildQrCodeUrlFromInvoiceIdentifierInterface(
+                new InvoiceIdentifierDto('12345678Z', 'FA-2026-001', new \DateTimeImmutable('2026-08-01')),
+                '121.00'
+            )
+        );
+    }
+
+    public function testMalformedTotalAmountIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The QR code total amount "121,00" must be a decimal');
+        $this->handler->buildQrCodeUrl('12345678Z', 'FA-2026-001', new \DateTimeImmutable('2026-08-01'), '121,00');
+    }
+
+    public function testBuildsValidatedQrCodePngImageWithoutAnAeatResponse(): void
+    {
+        $result = $this->handler->buildQrCodeAsPngImageFromInvoiceIdentifierInterface(
+            new InvoiceIdentifierDto('12345678Z', 'FA-2026-001', new \DateTimeImmutable('2026-08-01')),
+            '121.00'
+        );
+        $this->assertSame('image/png', $result->getMimeType());
+        $this->assertStringStartsWith("\x89PNG", $result->getString());
+    }
+
+    public function testBuildsValidatedNoVerifactuQrCodePngImage(): void
+    {
+        $result = $this->makeHandler(false)->buildQrCodeAsPngImageFromRegistrationRecordDto($this->makeRegistrationRecordDto());
+        $this->assertSame('image/png', $result->getMimeType());
+        $this->assertStringStartsWith("\x89PNG", $result->getString());
     }
 
     private function makeRegistrationRecordDto(): RegistrationRecordDto

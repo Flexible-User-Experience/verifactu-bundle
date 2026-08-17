@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace FlexibleUx\VerifactuBundle\Dto;
 
 use FlexibleUx\VerifactuBundle\Contract\BreakdownDetailInterface;
+use FlexibleUx\VerifactuBundle\Contract\ChainableRecordInterface;
 use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
 use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
 use josemmo\Verifactu\Models\Records\CorrectiveType;
 use josemmo\Verifactu\Models\Records\InvoiceType;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class RegistrationRecordDto implements RegistrationRecordInterface
+final class RegistrationRecordDto implements RegistrationRecordInterface, ChainableRecordInterface
 {
     private string $hash;
     private \DateTimeInterface $hashedAt;
@@ -21,9 +22,9 @@ final class RegistrationRecordDto implements RegistrationRecordInterface
         #[Assert\Valid]
         private readonly InvoiceIdentifierInterface $invoiceIdentifier,
         #[Assert\Valid]
-        private readonly ?InvoiceIdentifierInterface $previousInvoiceIdentifier,
+        private ?InvoiceIdentifierInterface $previousInvoiceIdentifier,
         #[Assert\Regex(pattern: '/^[0-9A-F]{64}$/')]
-        private readonly ?string $previousHash,
+        private ?string $previousHash,
         #[Assert\NotNull]
         #[Assert\Type('boolean')]
         private readonly bool $isCorrection,
@@ -70,6 +71,20 @@ final class RegistrationRecordDto implements RegistrationRecordInterface
     public function getPreviousInvoiceIdentifier(): ?InvoiceIdentifierInterface
     {
         return $this->previousInvoiceIdentifier;
+    }
+
+    public function setPreviousInvoiceIdentifier(InvoiceIdentifierInterface $previousInvoiceIdentifier): self
+    {
+        $this->previousInvoiceIdentifier = $previousInvoiceIdentifier;
+
+        return $this;
+    }
+
+    public function setPreviousHash(string $previousHash): self
+    {
+        $this->previousHash = $previousHash;
+
+        return $this;
     }
 
     public function getPreviousHash(): ?string

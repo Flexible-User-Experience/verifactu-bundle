@@ -26,6 +26,9 @@ final class FlexibleUxVerifactuBundle extends AbstractBundle
     public function loadExtension(array $config, ContainerConfigurator $configurator, ContainerBuilder $container): void
     {
         $configurator->import('../config/services.php');
+        $container->getDefinition('flexible_ux_verifactu.aeat_client_handler')
+            ->setArgument(0, $config[self::AEAT_CLIENT_KEY])
+        ;
         $container->getDefinition('flexible_ux_verifactu.aeat_client_factory')
             ->setArgument(0, $config[self::AEAT_CLIENT_KEY])
         ;
