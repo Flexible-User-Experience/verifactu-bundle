@@ -1,6 +1,23 @@
 CHANGELOG
 =========
 
+0.4.0
+-----
+ 
+ * **BC break:** `AeatClientHandler` takes the AEAT client config array as its first constructor argument, so any manual instantiation of the service must pass it
+ * **BC break:** `QrCodeHandler` takes an `InvoiceIdentifierFactory` as its second constructor argument, so any manual instantiation of the service must pass it
+ * **BC break:** Rename the unused `QrCodeHandler::QR_CODE_TOP_LEGAL_LABEL` constant to `QR_CODE_TRIBUTARY_LEGAL_LABEL`, which is now actually rendered in "No Veri*Factu" mode
+ * Add `AeatClientHandler::sendRecords()` & `sendRecordsUponRequirement()` to send a batch mixing registration & cancellation records in a single AEAT API call, chaining across record types, since `AeatClient::send()` always accepted mixed remissions while the bundle forced two calls (and two 1000 record windows) for them
+ * **BC break:** Every record after the first one of a batch must implement the new `ChainableRecordInterface` contract, otherwise the batch is rejected before anything is sent
+ * Fix batch sending dropping the chaining it computes: the previous invoice identifier & hash of records 2..N were never written back to the entities (the record contracts only exposed `setHash()` & `setHashedAt()`) although the record hash is calculated over them, so those records could not be rebuilt from the persisted data and their `XmlRecordHandler` export or requirement answer failed the hash validation with an "Invalid hash" error
+ * Add `AeatClientHandler::sendRegistrationRecordsUponRequirement()` & `sendCancellationRecordsUponRequirement()` to answer an AEAT requirement ("remisión por requerimiento") page by page with a per-call reference & "FinRequerimiento" flag, which so far could only be set through the static `aeat_client.requirement_reference` config option (changing the app configuration and clearing the cache between pages, and with no way to mark the closing page within the same process)
+ * Send the records of a requirement answer verbatim, keeping their stored hash & hashedAt values instead of re-chaining & re-hashing them like a new remission does, since a requirement remits the records exactly as they were recorded
+ * Add `AeatClientHandler::sendVoluntaryRemissionEndNotification()` to notify the AEAT of the end of the Veri*Factu voluntary remission ("baja de la remisión voluntaria") with an empty remission (`AeatClient::send([])`), which the batch size assert made unreachable until now, accepting a per-call end date & incident flag and restoring the configured header afterwards
+ * Add `is_verifactu_mode` AEAT client config option to support SIFs operating in "No Veri*Factu" mode: the generated QR codes point to the AEAT `ValidarQRNoVerifactu` endpoint (`QrGenerator::setOnlineMode()`, never exposed until now, so far every QR code was built for the Veri*Factu endpoint) and the rendered PNG drops the `VERI*FACTU` legend, only lawful for invoices remitted under the voluntary remission
+ * Add QR code generation without an AEAT response (`buildQrCodeAsPngImageFromRegistrationRecordInterface()`, `buildQrCodeAsPngImageFromRegistrationRecordDto()` & `buildQrCodeAsPngImageFromInvoiceIdentifierInterface()`): the QR code content only depends on the invoice identifier & total amount, so requiring an accepted response made it impossible to print the QR before submitting the record, to reprint an invoice without keeping its response or to generate it at all in "No Veri*Factu" mode
+ * Add QR code URL builders (`buildQrCodeUrlFromRegistrationRecordInterface()`, `buildQrCodeUrlFromRegistrationRecordDto()`, `buildQrCodeUrlFromInvoiceIdentifierInterface()` & `buildQrCodeUrl()`) exposing `QrGenerator::fromInvoiceId()` & `QrGenerator::from()`, to render the code with any other writer (PDF, SVG) than the bundled PNG one
+ * Document the QR code generation options & the "No Veri*Factu" mode in the README
+
 0.3.0
 -----
  

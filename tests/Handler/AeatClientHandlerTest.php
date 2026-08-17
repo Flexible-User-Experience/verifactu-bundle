@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FlexibleUx\VerifactuBundle\Tests\Handler;
 
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
 use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
 use FlexibleUx\VerifactuBundle\Dto\BreakdownDetailDto;
 use FlexibleUx\VerifactuBundle\Dto\CancellationRecordDto;
@@ -54,7 +55,22 @@ final class AeatClientHandlerTest extends TestCase
      */
     private array $sentRecords = [];
 
+    /**
+     * @var array<array{0: ?\DateTimeImmutable, 1: bool}>
+     */
+    private array $voluntaryRemissionEndDateCalls = [];
+
+    /**
+     * @var array<array{0: ?string, 1: bool}>
+     */
+    private array $requirementReferenceCalls = [];
+
     protected function setUp(): void
+    {
+        $this->handler = $this->makeHandler();
+    }
+
+    private function makeHandler(?string $configuredVoluntaryRemissionEndDate = null, ?string $configuredRequirementReference = null): AeatClientHandler
     {
         $validator = new ContractsValidator(
             Validation::createValidatorBuilder()
@@ -64,6 +80,18 @@ final class AeatClientHandlerTest extends TestCase
         $invoiceIdentifierFactory = new InvoiceIdentifierFactory(new InvoiceIdentifierTransformer(), $validator);
         $this->aeatClient = $this->createMock(AeatClient::class);
         $this->sentRecords = [];
+        $this->voluntaryRemissionEndDateCalls = [];
+        $this->requirementReferenceCalls = [];
+        $this->aeatClient->method('setRequirementReference')->willReturnCallback(function (?string $requirementReference, bool $isLastRequirementSubmission): AeatClient {
+            $this->requirementReferenceCalls[] = [$requirementReference, $isLastRequirementSubmission];
+
+            return $this->aeatClient;
+        });
+        $this->aeatClient->method('setVoluntaryRemissionEndDate')->willReturnCallback(function (?\DateTimeImmutable $endDate, bool $isAffectedByIncident): AeatClient {
+            $this->voluntaryRemissionEndDateCalls[] = [$endDate, $isAffectedByIncident];
+
+            return $this->aeatClient;
+        });
         $this->aeatClient->method('send')->willReturnCallback(function (array $records): FulfilledPromise {
             $this->sentRecords = $records;
             $aeatResponse = new AeatResponse();
@@ -75,7 +103,14 @@ final class AeatClientHandlerTest extends TestCase
 
             return new FulfilledPromise($aeatResponse);
         });
-        $this->handler = new AeatClientHandler(
+
+        return new AeatClientHandler(
+            [
+                'requirement_is_last_submission' => false,
+                'requirement_reference' => $configuredRequirementReference,
+                'voluntary_remission_end_date' => $configuredVoluntaryRemissionEndDate,
+                'voluntary_remission_is_affected_by_incident' => false,
+            ],
             $this->aeatClient,
             new RegistrationRecordFactory(
                 $invoiceIdentifierFactory,
@@ -143,6 +178,152 @@ final class AeatClientHandlerTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->handler->sendCancellationRecords(array_fill(0, 1001, $this->makeCancellationRecordDto()));
+    }
+
+    public function testSendRecordsChainsAcrossRecordTypes(): void
+    {
+        $first = $this->makeRegistrationRecordDto('FA-2026-001');
+        $second = $this->makeCancellationRecordDto();
+        $third = $this->makeRegistrationRecordDto('FA-2026-003');
+        $this->handler->sendRecords([$first, $second, $third]);
+        $this->assertCount(3, $this->sentRecords);
+        $this->assertInstanceOf(RegistrationRecord::class, $this->sentRecords[0]);
+        $this->assertInstanceOf(CancellationRecord::class, $this->sentRecords[1]);
+        $this->assertInstanceOf(RegistrationRecord::class, $this->sentRecords[2]);
+        $this->assertSame($this->sentRecords[0]->invoiceId, $this->sentRecords[1]->previousInvoiceId);
+        $this->assertSame($this->sentRecords[0]->hash, $this->sentRecords[1]->previousHash);
+        $this->assertSame($this->sentRecords[1]->invoiceId, $this->sentRecords[2]->previousInvoiceId);
+        $this->assertSame($this->sentRecords[1]->hash, $this->sentRecords[2]->previousHash);
+        $this->assertSame($this->sentRecords[0]->hash, $first->getHash());
+        $this->assertSame($this->sentRecords[1]->hash, $second->getHash());
+        $this->assertSame($this->sentRecords[2]->hash, $third->getHash());
+    }
+
+    public function testSendRecordsWritesBackTheComputedChaining(): void
+    {
+        $first = $this->makeRegistrationRecordDto('FA-2026-001');
+        $second = $this->makeCancellationRecordDto();
+        $third = $this->makeRegistrationRecordDto('FA-2026-003');
+        $this->handler->sendRecords([$first, $second, $third]);
+        $this->assertSame($first->getInvoiceIdentifier(), $second->getPreviousInvoiceIdentifier());
+        $this->assertSame($first->getHash(), $second->getPreviousHash());
+        $this->assertSame($second->getInvoiceIdentifier(), $third->getPreviousInvoiceIdentifier());
+        $this->assertSame($second->getHash(), $third->getPreviousHash());
+    }
+
+    public function testBatchedRecordsCanBeRebuiltVerbatimAfterwards(): void
+    {
+        $first = $this->makeRegistrationRecordDto('FA-2026-001');
+        $second = $this->makeRegistrationRecordDto('FA-2026-002');
+        $this->handler->sendRecords([$first, $second]);
+        $storedHashes = [$first->getHash(), $second->getHash()];
+        // the persisted data of every batched record must still reproduce the hash the AEAT holds
+        $this->handler->sendRecordsUponRequirement([$first, $second], 'REF00001ABDEAF1234', true);
+        $this->assertSame($storedHashes, [$this->sentRecords[0]->hash, $this->sentRecords[1]->hash]);
+    }
+
+    public function testSendRecordsRejectsANonChainableRecordAfterTheFirstOne(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The record #2 of a batch is chained to the preceding one');
+        $this->handler->sendRecords([
+            $this->makeRegistrationRecordDto('FA-2026-001'),
+            $this->createMock(RegistrationRecordInterface::class),
+        ]);
+        $this->assertSame([], $this->sentRecords);
+    }
+
+    public function testSendRecordsRejectsAnUnsupportedRecord(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('A records batch only accepts');
+        $this->handler->sendRecords([$this->makeRegistrationRecordDto('FA-2026-001'), new \stdClass()]);
+    }
+
+    public function testRequirementSubmissionSendsMixedRecordsVerbatim(): void
+    {
+        $registrationRecord = $this->makeRegistrationRecordDto('FA-2026-001');
+        $cancellationRecord = $this->makeCancellationRecordDto();
+        $this->handler->sendRecords([$registrationRecord, $cancellationRecord]);
+        $storedHashes = [$registrationRecord->getHash(), $cancellationRecord->getHash()];
+        $this->handler->sendRecordsUponRequirement([$registrationRecord, $cancellationRecord], 'REF00001ABDEAF1234', true);
+        $this->assertCount(2, $this->sentRecords);
+        $this->assertInstanceOf(RegistrationRecord::class, $this->sentRecords[0]);
+        $this->assertInstanceOf(CancellationRecord::class, $this->sentRecords[1]);
+        $this->assertSame($storedHashes, [$this->sentRecords[0]->hash, $this->sentRecords[1]->hash]);
+        $this->assertSame($storedHashes, [$registrationRecord->getHash(), $cancellationRecord->getHash()]);
+    }
+
+    public function testRequirementSubmissionSendsRecordsWithTheirStoredHashAndRestoresTheConfiguredReference(): void
+    {
+        $dto = $this->makeRegistrationRecordDto('FA-2026-001');
+        $this->handler->sendRegistrationRecord($dto);
+        $storedHash = $dto->getHash();
+        $storedHashedAt = $dto->getHashedAt();
+        $this->handler->sendRegistrationRecordsUponRequirement([$dto], 'REF00001ABDEAF1234', true);
+        $this->assertCount(1, $this->sentRecords);
+        $this->assertSame($storedHash, $this->sentRecords[0]->hash);
+        $this->assertSame($storedHash, $dto->getHash());
+        $this->assertSame($storedHashedAt, $dto->getHashedAt());
+        $this->assertSame([['REF00001ABDEAF1234', true], [null, false]], $this->requirementReferenceCalls);
+    }
+
+    public function testRequirementSubmissionRestoresTheConfiguredReference(): void
+    {
+        $handler = $this->makeHandler(configuredRequirementReference: 'REF00000CONFIGURED');
+        $dto = $this->makeCancellationRecordDto();
+        $handler->sendCancellationRecord($dto);
+        $handler->sendCancellationRecordsUponRequirement([$dto], 'REF00001ABDEAF1234');
+        $this->assertInstanceOf(CancellationRecord::class, $this->sentRecords[0]);
+        $this->assertSame([['REF00001ABDEAF1234', false], ['REF00000CONFIGURED', false]], $this->requirementReferenceCalls);
+    }
+
+    public function testBlankRequirementReferenceIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('can not be blank');
+        $this->handler->sendRegistrationRecordsUponRequirement([$this->makeRegistrationRecordDto('FA-2026-001')], '   ');
+    }
+
+    public function testEmptyRequirementBatchIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->handler->sendRegistrationRecordsUponRequirement([], 'REF00001ABDEAF1234');
+    }
+
+    public function testVoluntaryRemissionEndNotificationSendsAnEmptyRemission(): void
+    {
+        $response = $this->handler->sendVoluntaryRemissionEndNotification(new \DateTimeImmutable('2026-12-31'), true);
+        $this->assertSame([], $this->sentRecords);
+        $this->assertSame(ResponseStatus::Correct, $response->getStatus());
+        $this->assertCount(2, $this->voluntaryRemissionEndDateCalls);
+        $this->assertSame('2026-12-31', $this->voluntaryRemissionEndDateCalls[0][0]?->format('Y-m-d'));
+        $this->assertTrue($this->voluntaryRemissionEndDateCalls[0][1]);
+    }
+
+    public function testVoluntaryRemissionEndNotificationFallsBackToTheConfiguredEndDateAndRestoresIt(): void
+    {
+        $handler = $this->makeHandler('2026-12-31');
+        $handler->sendVoluntaryRemissionEndNotification();
+        $this->assertSame([], $this->sentRecords);
+        $this->assertCount(2, $this->voluntaryRemissionEndDateCalls);
+        $this->assertSame('2026-12-31', $this->voluntaryRemissionEndDateCalls[0][0]?->format('Y-m-d'));
+        $this->assertSame('2026-12-31', $this->voluntaryRemissionEndDateCalls[1][0]?->format('Y-m-d'));
+    }
+
+    public function testVoluntaryRemissionEndNotificationRestoresTheConfiguredHeaderAfterAnOverride(): void
+    {
+        $handler = $this->makeHandler('2026-12-31');
+        $handler->sendVoluntaryRemissionEndNotification(new \DateTimeImmutable('2026-11-30'));
+        $this->assertSame('2026-11-30', $this->voluntaryRemissionEndDateCalls[0][0]?->format('Y-m-d'));
+        $this->assertSame('2026-12-31', $this->voluntaryRemissionEndDateCalls[1][0]?->format('Y-m-d'));
+    }
+
+    public function testVoluntaryRemissionEndNotificationWithoutAnyEndDateIsRejected(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('A voluntary remission end date is mandatory');
+        $this->handler->sendVoluntaryRemissionEndNotification();
     }
 
     public function testGetJsonArrayFromAeatResponseDto(): void

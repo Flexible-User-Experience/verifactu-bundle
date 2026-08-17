@@ -43,6 +43,7 @@ return static function (ContainerConfigurator $container): void {
         // handlers
         ->set('flexible_ux_verifactu.aeat_client_handler', AeatClientHandler::class)
             ->args([
+                abstract_arg(FlexibleUxVerifactuBundle::AEAT_CLIENT_KEY),
                 service(AeatClient::class),
                 service(RegistrationRecordFactory::class),
                 service(CancellationRecordFactory::class),
@@ -53,6 +54,7 @@ return static function (ContainerConfigurator $container): void {
         ->set('flexible_ux_verifactu.qr_code_handler', QrCodeHandler::class)
             ->args([
                 abstract_arg(FlexibleUxVerifactuBundle::AEAT_CLIENT_KEY),
+                service(InvoiceIdentifierFactory::class),
                 service(RegistrationRecordFactory::class),
                 service(AeatResponseFactory::class),
             ])

@@ -29,6 +29,7 @@ flexible_ux_verifactu:
     aeat_client:
         is_entity_seal_certificate: false # only set to true if your PFX certificate is an entity seal ("certificado de sello de entidad")
         is_prod_environment: false # only set to true to make real AEAT API calls, be careful here
+        is_verifactu_mode: true # only set to false if your SIF operates in "No Veri*Factu" mode, it changes the generated QR codes
         pfx_certificate_filepath: '%your_pfx_certificate_filepath%'
         pfx_certificate_password: '%pfx_certificate_password%'
         representative: # optional ("Representante"), remove if not applicable
@@ -170,6 +171,87 @@ $result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
 ```
 
 Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
+
+A batch can also mix both record types in a single remission, keeping the given order and chaining across types:
+
+```php
+$result = $aeatClientHandler->sendRecords([$registrationRecord, $cancellationRecord, $anotherRegistrationRecord]);
+```
+
+**Batched records must be chainable.** The record hash is calculated over the chaining, so the computed previous invoice identifier & hash are written back to every chained record together with its `hash` and `hashedAt` values — and **all four must be persisted**, or your stored record will no longer reproduce the hash the AEAT holds (breaking its XML export and any later remission of it). To receive them, every record after the first one of a batch must implement `FlexibleUx\VerifactuBundle\Contract\ChainableRecordInterface`:
+
+```php
+use FlexibleUx\VerifactuBundle\Contract\ChainableRecordInterface;
+use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
+
+class Invoice implements RegistrationRecordInterface, ChainableRecordInterface
+{
+    public function setPreviousInvoiceIdentifier(InvoiceIdentifierInterface $previousInvoiceIdentifier): self { /* ... */ }
+
+    public function setPreviousHash(string $previousHash): self { /* ... */ }
+}
+```
+
+A batch holding a chained record which does not implement it is rejected with an `\InvalidArgumentException` before anything is sent, instead of silently dropping the chaining. Records sent one by one are never chained by the bundle, so they do not need the contract.
+
+### Answering an AEAT requirement
+
+A SIF operating in "No Veri\*Factu" mode does not remit its records, but the AEAT can request them through a requirement ("remisión por requerimiento"). Send the requested records page by page, marking the page that closes the requirement:
+
+```php
+// first page(s) of the requirement
+$result = $aeatClientHandler->sendRegistrationRecordsUponRequirement($registrationRecords, 'REF00001ABDEAF1234');
+
+// the page that closes it ("FinRequerimiento")
+$result = $aeatClientHandler->sendRegistrationRecordsUponRequirement($lastRegistrationRecords, 'REF00001ABDEAF1234', true);
+
+// same for cancellation records
+$result = $aeatClientHandler->sendCancellationRecordsUponRequirement($cancellationRecords, 'REF00001ABDEAF1234', true);
+```
+
+These records are sent **verbatim**, keeping the `hash` and `hashedAt` values you persisted: they are neither re-chained nor re-hashed, because a requirement answer remits the records exactly as they were recorded — so nothing is written back to your entities, and any tampering with the persisted data is detected before anything is sent. The batch limit of 1000 records per call also applies here.
+
+The requirement reference only applies to the call, the configured `aeat_client.requirement_reference` one is restored afterwards, so a requirement can be answered without touching the app configuration.
+
+### Ending the Veri*Factu voluntary remission
+
+A SIF operating in Veri\*Factu mode that wants to stop remitting its records must notify the AEAT of the end of the voluntary remission ("baja de la remisión voluntaria"). The notification travels in the `RemisionVoluntaria` header of a remission carrying **no record at all**:
+
+```php
+// with the configured aeat_client.voluntary_remission_end_date
+$result = $aeatClientHandler->sendVoluntaryRemissionEndNotification();
+
+// or overriding it at call time ("YYYY-MM-DD" end date, technical incident flag)
+$result = $aeatClientHandler->sendVoluntaryRemissionEndNotification(new \DateTimeImmutable('2026-12-31'), false);
+```
+
+The end date is mandatory: an `\InvalidArgumentException` is thrown when neither the argument nor the config option provides one. An overridden date only applies to this call, the configured header is restored afterwards for the following remissions.
+
+Since this response carries no record, `isAccepted()` is always `false` for it (a response with no record is never a record acceptance): read `$result->getStatus()` to tell whether the AEAT accepted the notification.
+
+### QR codes without an AEAT response
+
+The legal QR code only carries the invoice issuer NIF, invoice number, issue date and total amount, so it does **not** depend on the AEAT response. Besides the `...AndAeatResponse...` methods shown above, `QrCodeHandler` can build it from the record alone, from the invoice identifier plus the total amount, or from raw values — useful to print the QR before submitting the record, to reprint an already sent invoice without keeping its response, or to operate in "No Veri*Factu" mode:
+
+```php
+// PNG images
+$qrCodePngImage = $qrCodeHandler->buildQrCodeAsPngImageFromRegistrationRecordInterface($registrationRecord);
+$qrCodePngImage = $qrCodeHandler->buildQrCodeAsPngImageFromInvoiceIdentifierInterface($invoiceIdentifier, '121.00');
+
+// URLs only, to render the QR code yourself (PDF, SVG, another writer...)
+$url = $qrCodeHandler->buildQrCodeUrlFromRegistrationRecordInterface($registrationRecord);
+$url = $qrCodeHandler->buildQrCodeUrlFromInvoiceIdentifierInterface($invoiceIdentifier, '121.00');
+$url = $qrCodeHandler->buildQrCodeUrl('12345678Z', 'FA-2026-001', new \DateTimeImmutable('2026-08-01'), '121.00');
+```
+
+The total amount must be a `-?0.00` formatted decimal, an `\InvalidArgumentException` is thrown otherwise.
+
+### "No Veri*Factu" mode
+
+If your SIF does not remit its records to the AEAT (it signs them and keeps an event log instead, only answering AEAT requirements), set `aeat_client.is_verifactu_mode: false`. Every generated QR code then points to the AEAT `ValidarQRNoVerifactu` endpoint instead of `ValidarQR`, and the rendered PNG label drops the `VERI*FACTU` legend — which is only lawful for invoices actually remitted under the Veri*Factu voluntary remission — in favour of `QR tributario:`.
+
+Both label texts are exposed as `QrCodeHandler::QR_CODE_VERI_FACTU_LEGAL_LABEL` and `QrCodeHandler::QR_CODE_TRIBUTARY_LEGAL_LABEL`. The bundle renders the label **below** the QR code image; if your invoice layout needs the AEAT recommended placement (the `QR tributario:` text above the code), build the URL instead and render the code with your own layout.
 
 ### XML record storage
 
