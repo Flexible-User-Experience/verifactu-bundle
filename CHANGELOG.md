@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+0.3.0
+-----
+ 
+ * **BC break:** Add `getRegisteredItems()`, `getRejectedItems()`, `isAccepted()` & `getErrorDescription()` to the `AeatResponseInterface` contract, so any custom implementation of it must provide them too
+ * Move the response reading rules into the bundle instead of leaving every consumer to rediscover them: which `ItemStatus` values count as registered (`AceptadoConErrores` does), that the envelope `ResponseStatus` does not tell which record of a batch failed, and that a response carrying no record is never an acceptance
+ * Fix the README recommending to persist the record hash whenever the envelope status is `Correcto` or `ParcialmenteCorrecto`, which on a partially correct submission persists a refused record and chains the next invoice to a hash AEAT never stored
+ * Document the batch flow to tell registered and refused records apart through `getRegisteredItems()` & `getRejectedItems()`
+
 0.2.0
 -----
  

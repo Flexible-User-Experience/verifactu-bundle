@@ -66,7 +66,6 @@ For now, you must generate the QR code image at same time, so inject `QrCodeHand
 ```php
 use FlexibleUx\VerifactuBundle\Handler\AeatClientHandler;
 use FlexibleUx\VerifactuBundle\Handler\QrCodeHandler;
-use josemmo\Verifactu\Models\Responses\ResponseStatus;
 
 class AppTestController
 {
@@ -76,13 +75,15 @@ class AppTestController
         // is up to you to create an `InvoiceManager` (or whatever) to transform your Invoice model into a data value object that implements the `RegistrationRecordInterface` contract.
         // to keep traceability you must include a reference to the previous registered invoice, only can be null for the very first invoice.
         $result = $aeatClientHandler->sendRegistrationRecord($registrationRecord);
-        // $result is an `AeatResponseInterface` contract, you must check the response status received and manage it accordingly.
-        // you must decide what to do with the response status, and check $result->getStatus() against ResponseStatus::Correct, ResponseStatus::PartiallyCorrect or ResponseStatus::Incorrect possible values 
-        // you must read Veri*Factu documentation to handle Invoice integrity and traceability, this is out of the scope of this bundle! 
+        // $result is an `AeatResponseInterface` contract. Ask it whether AEAT registered the record instead of reading the envelope status yourself, see "Reading the response" below.
+        if (!$result->isAccepted()) {
+            // a refused record never entered the chain: do NOT persist its hash, or the next invoice would chain to a record AEAT does not hold.
+            throw new \RuntimeException($result->getErrorDescription());
+        }
         $aeatJsonArrayResponse = $aeatClientHandler->getJsonArrayFromAeatResponseDto($result);
         // we recommend you to always store the result array or a JSON serialized version into your Invoice entity
         $invoice->setAeatJsonResponse($aeatJsonArrayResponse);
-        // if $result->getStatus() is equals to ResponseStatus::Correct or ResponseStatus::PartiallyCorrect you must persist the `hash` and `hashedAt` values into your Invoice because it is mandatory to attach with the previous invoice traceability information and to keep the current Invoice integrity.
+        // persist the `hash` and `hashedAt` values into your Invoice because it is mandatory to attach with the previous invoice traceability information and to keep the current Invoice integrity.
         // this values has been updated into the `$registrationRecord` object during the `sendRegistrationRecord` method call.
         $invoice
             ->setAeatHash($registrationRecord->getHash())
@@ -96,6 +97,30 @@ class AppTestController
         // save QR PNG image to disk.
         // read `endroid/qr-code` documentation to handle the image file.
     }
+}
+```
+
+### Reading the response
+
+The envelope status returned by `getStatus()` describes the whole submission, not your record: `ResponseStatus::PartiallyCorrect` means *some* record failed, without saying which one. Deciding on it alone is how a refused record ends up persisted and the chain gets a hash AEAT never stored.
+
+`AeatResponseInterface` answers that question for you:
+
+| Method | Answers |
+|---|---|
+| `isAccepted()` | did AEAT register **every** record of the submission? A response carrying no record is never an acceptance |
+| `getRegisteredItems()` | the records that entered the chain, so their hash must be persisted |
+| `getRejectedItems()` | the records AEAT refused, whose hash must **not** be persisted |
+| `getErrorDescription()` | description of the first refused record, or `null` when nothing was refused |
+
+Note that a record answered with `ItemStatus::AcceptedWithErrors` **is** registered by AEAT and belongs to the chain, errors notwithstanding, so it counts as registered.
+
+For a batch, iterate the two lists to tell which invoices to update:
+
+```php
+$result = $aeatClientHandler->sendRegistrationRecords($registrationRecords);
+foreach ($result->getRejectedItems() as $rejectedItem) {
+    // $rejectedItem->invoiceId identifies the invoice, $rejectedItem->errorDescription says why
 }
 ```
 
