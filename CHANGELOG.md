@@ -1,6 +1,16 @@
 CHANGELOG
 =========
 
+0.4.0
+-----
+ 
+ * **BC break:** `QrCodeHandler` takes an `InvoiceIdentifierFactory` as its second constructor argument, so any manual instantiation of the service must pass it
+ * **BC break:** Rename the unused `QrCodeHandler::QR_CODE_TOP_LEGAL_LABEL` constant to `QR_CODE_TRIBUTARY_LEGAL_LABEL`, which is now actually rendered in "No Veri*Factu" mode
+ * Add `is_verifactu_mode` AEAT client config option to support SIFs operating in "No Veri*Factu" mode: the generated QR codes point to the AEAT `ValidarQRNoVerifactu` endpoint (`QrGenerator::setOnlineMode()`, never exposed until now, so far every QR code was built for the Veri*Factu endpoint) and the rendered PNG drops the `VERI*FACTU` legend, only lawful for invoices remitted under the voluntary remission
+ * Add QR code generation without an AEAT response (`buildQrCodeAsPngImageFromRegistrationRecordInterface()`, `buildQrCodeAsPngImageFromRegistrationRecordDto()` & `buildQrCodeAsPngImageFromInvoiceIdentifierInterface()`): the QR code content only depends on the invoice identifier & total amount, so requiring an accepted response made it impossible to print the QR before submitting the record, to reprint an invoice without keeping its response or to generate it at all in "No Veri*Factu" mode
+ * Add QR code URL builders (`buildQrCodeUrlFromRegistrationRecordInterface()`, `buildQrCodeUrlFromRegistrationRecordDto()`, `buildQrCodeUrlFromInvoiceIdentifierInterface()` & `buildQrCodeUrl()`) exposing `QrGenerator::fromInvoiceId()` & `QrGenerator::from()`, to render the code with any other writer (PDF, SVG) than the bundled PNG one
+ * Document the QR code generation options & the "No Veri*Factu" mode in the README
+
 0.3.0
 -----
  

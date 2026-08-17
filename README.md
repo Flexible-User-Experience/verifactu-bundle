@@ -29,6 +29,7 @@ flexible_ux_verifactu:
     aeat_client:
         is_entity_seal_certificate: false # only set to true if your PFX certificate is an entity seal ("certificado de sello de entidad")
         is_prod_environment: false # only set to true to make real AEAT API calls, be careful here
+        is_verifactu_mode: true # only set to false if your SIF operates in "No Veri*Factu" mode, it changes the generated QR codes
         pfx_certificate_filepath: '%your_pfx_certificate_filepath%'
         pfx_certificate_password: '%pfx_certificate_password%'
         representative: # optional ("Representante"), remove if not applicable
@@ -170,6 +171,29 @@ $result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
 ```
 
 Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
+
+### QR codes without an AEAT response
+
+The legal QR code only carries the invoice issuer NIF, invoice number, issue date and total amount, so it does **not** depend on the AEAT response. Besides the `...AndAeatResponse...` methods shown above, `QrCodeHandler` can build it from the record alone, from the invoice identifier plus the total amount, or from raw values — useful to print the QR before submitting the record, to reprint an already sent invoice without keeping its response, or to operate in "No Veri*Factu" mode:
+
+```php
+// PNG images
+$qrCodePngImage = $qrCodeHandler->buildQrCodeAsPngImageFromRegistrationRecordInterface($registrationRecord);
+$qrCodePngImage = $qrCodeHandler->buildQrCodeAsPngImageFromInvoiceIdentifierInterface($invoiceIdentifier, '121.00');
+
+// URLs only, to render the QR code yourself (PDF, SVG, another writer...)
+$url = $qrCodeHandler->buildQrCodeUrlFromRegistrationRecordInterface($registrationRecord);
+$url = $qrCodeHandler->buildQrCodeUrlFromInvoiceIdentifierInterface($invoiceIdentifier, '121.00');
+$url = $qrCodeHandler->buildQrCodeUrl('12345678Z', 'FA-2026-001', new \DateTimeImmutable('2026-08-01'), '121.00');
+```
+
+The total amount must be a `-?0.00` formatted decimal, an `\InvalidArgumentException` is thrown otherwise.
+
+### "No Veri*Factu" mode
+
+If your SIF does not remit its records to the AEAT (it signs them and keeps an event log instead, only answering AEAT requirements), set `aeat_client.is_verifactu_mode: false`. Every generated QR code then points to the AEAT `ValidarQRNoVerifactu` endpoint instead of `ValidarQR`, and the rendered PNG label drops the `VERI*FACTU` legend — which is only lawful for invoices actually remitted under the Veri*Factu voluntary remission — in favour of `QR tributario:`.
+
+Both label texts are exposed as `QrCodeHandler::QR_CODE_VERI_FACTU_LEGAL_LABEL` and `QrCodeHandler::QR_CODE_TRIBUTARY_LEGAL_LABEL`. The bundle renders the label **below** the QR code image; if your invoice layout needs the AEAT recommended placement (the `QR tributario:` text above the code), build the URL instead and render the code with your own layout.
 
 ### XML record storage
 

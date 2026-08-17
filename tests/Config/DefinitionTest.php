@@ -50,6 +50,20 @@ final class DefinitionTest extends TestCase
         $this->assertTrue($processed['aeat_client']['is_entity_seal_certificate']);
     }
 
+    public function testMinimalConfigurationEnablesVerifactuModeByDefault(): void
+    {
+        $processed = $this->processConfiguration(self::MINIMAL_CONFIG);
+        $this->assertTrue($processed['aeat_client']['is_verifactu_mode']);
+    }
+
+    public function testVerifactuModeCanBeDisabled(): void
+    {
+        $config = self::MINIMAL_CONFIG;
+        $config['aeat_client']['is_verifactu_mode'] = false;
+        $processed = $this->processConfiguration($config);
+        $this->assertFalse($processed['aeat_client']['is_verifactu_mode']);
+    }
+
     public function testRemissionHeadersAndRepresentativeDefaults(): void
     {
         $processed = $this->processConfiguration(self::MINIMAL_CONFIG);
