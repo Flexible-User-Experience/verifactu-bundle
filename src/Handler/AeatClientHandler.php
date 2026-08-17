@@ -6,6 +6,7 @@ namespace FlexibleUx\VerifactuBundle\Handler;
 
 use FlexibleUx\VerifactuBundle\Contract\AeatResponseInterface;
 use FlexibleUx\VerifactuBundle\Contract\CancellationRecordInterface;
+use FlexibleUx\VerifactuBundle\Contract\ChainableRecordInterface;
 use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
 use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
 use FlexibleUx\VerifactuBundle\Factory\AeatResponseFactory;
@@ -100,17 +101,7 @@ final readonly class AeatClientHandler
      */
     public function sendRegistrationRecords(array $registrationRecordInterfaces): AeatResponseInterface
     {
-        $this->assertBatchSize($registrationRecordInterfaces);
-        $validatedRegistrationRecordModels = $this->registrationRecordFactory->makeValidatedChainedRegistrationRecordModelsFromInterfaces($registrationRecordInterfaces);
-        $aeatResponse = $this->aeatClient->send($validatedRegistrationRecordModels)->wait();
-        foreach (array_values($registrationRecordInterfaces) as $index => $registrationRecordInterface) {
-            $registrationRecordInterface
-                ->setHash($validatedRegistrationRecordModels[$index]->hash)
-                ->setHashedAt($validatedRegistrationRecordModels[$index]->hashedAt)
-            ;
-        }
-
-        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
+        return $this->sendRecords($registrationRecordInterfaces);
     }
 
     /**
@@ -145,14 +136,43 @@ final readonly class AeatClientHandler
      */
     public function sendCancellationRecords(array $cancellationRecordInterfaces): AeatResponseInterface
     {
-        $this->assertBatchSize($cancellationRecordInterfaces);
-        $validatedCancellationRecordModels = $this->cancellationRecordFactory->makeValidatedChainedCancellationRecordModelsFromInterfaces($cancellationRecordInterfaces);
-        $aeatResponse = $this->aeatClient->send($validatedCancellationRecordModels)->wait();
-        foreach (array_values($cancellationRecordInterfaces) as $index => $cancellationRecordInterface) {
-            $cancellationRecordInterface
-                ->setHash($validatedCancellationRecordModels[$index]->hash)
-                ->setHashedAt($validatedCancellationRecordModels[$index]->hashedAt)
+        return $this->sendRecords($cancellationRecordInterfaces);
+    }
+
+    /**
+     * Send a batch mixing registration & cancellation records in a single AEAT API call (up to 1000 records),
+     * keeping the given order: every record after the first one of the batch is chained to the preceding record
+     * whatever its type, so an invoice and the cancellation of a former one travel in the same remission.
+     *
+     * Since the record hash is calculated over that chaining, the computed previous invoice identifier & hash
+     * are written back to every chained record along with its hash & hashedAt values, and every record after
+     * the first one of the batch must implement ChainableRecordInterface to receive them: persist the four
+     * values, or the stored record will not reproduce the hash the AEAT holds.
+     *
+     * @param array<RegistrationRecordInterface|CancellationRecordInterface> $recordInterfaces
+     *
+     * @throws \InvalidArgumentException if the batch does not contain between 1 and 1000 records, holds an
+     *                                   unsupported record or a chained record which is not a
+     *                                   ChainableRecordInterface, see also sendRegistrationRecord() throws
+     */
+    public function sendRecords(array $recordInterfaces): AeatResponseInterface
+    {
+        $this->assertBatchSize($recordInterfaces);
+        $recordInterfaces = array_values($recordInterfaces);
+        $recordModels = $this->makeValidatedChainedRecordModels($recordInterfaces);
+        $aeatResponse = $this->aeatClient->send($recordModels)->wait();
+        foreach ($recordInterfaces as $index => $recordInterface) {
+            $recordInterface
+                ->setHash($recordModels[$index]->hash)
+                ->setHashedAt($recordModels[$index]->hashedAt)
             ;
+            if ($index > 0 && $recordInterface instanceof ChainableRecordInterface) {
+                // the chaining computed for this record is part of what its hash covers, so it must be persisted too
+                $recordInterface
+                    ->setPreviousInvoiceIdentifier($recordInterfaces[$index - 1]->getInvoiceIdentifier())
+                    ->setPreviousHash($recordModels[$index - 1]->hash)
+                ;
+            }
         }
 
         return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
@@ -176,14 +196,7 @@ final readonly class AeatClientHandler
      */
     public function sendRegistrationRecordsUponRequirement(array $registrationRecordInterfaces, string $requirementReference, bool $isLastRequirementSubmission = false): AeatResponseInterface
     {
-        $this->assertRequirementReference($requirementReference);
-        $this->assertBatchSize($registrationRecordInterfaces);
-        $registrationRecordModels = [];
-        foreach ($registrationRecordInterfaces as $registrationRecordInterface) {
-            $registrationRecordModels[] = $this->registrationRecordFactory->makeValidatedRegistrationRecordModelWithStoredHashFromInterface($registrationRecordInterface);
-        }
-
-        return $this->sendRecordModelsUponRequirement($registrationRecordModels, $requirementReference, $isLastRequirementSubmission);
+        return $this->sendRecordsUponRequirement($registrationRecordInterfaces, $requirementReference, $isLastRequirementSubmission);
     }
 
     /**
@@ -196,14 +209,35 @@ final readonly class AeatClientHandler
      */
     public function sendCancellationRecordsUponRequirement(array $cancellationRecordInterfaces, string $requirementReference, bool $isLastRequirementSubmission = false): AeatResponseInterface
     {
+        return $this->sendRecordsUponRequirement($cancellationRecordInterfaces, $requirementReference, $isLastRequirementSubmission);
+    }
+
+    /**
+     * Answer an AEAT requirement ("remisión por requerimiento") with a page mixing registration & cancellation
+     * records, see sendRegistrationRecordsUponRequirement() for the whole behaviour.
+     *
+     * @param array<RegistrationRecordInterface|CancellationRecordInterface> $recordInterfaces
+     *
+     * @throws \InvalidArgumentException if the requirement reference is blank, the batch does not contain between
+     *                                   1 and 1000 records or holds an unsupported record, see also
+     *                                   sendRegistrationRecord() throws
+     */
+    public function sendRecordsUponRequirement(array $recordInterfaces, string $requirementReference, bool $isLastRequirementSubmission = false): AeatResponseInterface
+    {
         $this->assertRequirementReference($requirementReference);
-        $this->assertBatchSize($cancellationRecordInterfaces);
-        $cancellationRecordModels = [];
-        foreach ($cancellationRecordInterfaces as $cancellationRecordInterface) {
-            $cancellationRecordModels[] = $this->cancellationRecordFactory->makeValidatedCancellationRecordModelWithStoredHashFromInterface($cancellationRecordInterface);
+        $this->assertBatchSize($recordInterfaces);
+        $recordModels = [];
+        foreach ($recordInterfaces as $recordInterface) {
+            if ($recordInterface instanceof RegistrationRecordInterface) {
+                $recordModels[] = $this->registrationRecordFactory->makeValidatedRegistrationRecordModelWithStoredHashFromInterface($recordInterface);
+            } elseif ($recordInterface instanceof CancellationRecordInterface) {
+                $recordModels[] = $this->cancellationRecordFactory->makeValidatedCancellationRecordModelWithStoredHashFromInterface($recordInterface);
+            } else {
+                throw $this->makeUnsupportedRecordException($recordInterface);
+            }
         }
 
-        return $this->sendRecordModelsUponRequirement($cancellationRecordModels, $requirementReference, $isLastRequirementSubmission);
+        return $this->sendRecordModelsUponRequirement($recordModels, $requirementReference, $isLastRequirementSubmission);
     }
 
     public function getJsonArrayFromAeatResponseDto(AeatResponseDto $dto): array
@@ -237,6 +271,52 @@ final readonly class AeatClientHandler
     private function makeConfiguredVoluntaryRemissionEndDate(): ?\DateTimeImmutable
     {
         return null !== $this->aeatClientConfig['voluntary_remission_end_date'] ? new \DateTimeImmutable($this->aeatClientConfig['voluntary_remission_end_date']) : null;
+    }
+
+    /**
+     * The batch content is only a promise of the caller, so the record types are asserted here before anything
+     * is built or sent.
+     *
+     * @param mixed[] $recordInterfaces
+     *
+     * @return array<RegistrationRecord|CancellationRecord>
+     */
+    private function makeValidatedChainedRecordModels(array $recordInterfaces): array
+    {
+        foreach (array_values($recordInterfaces) as $index => $recordInterface) {
+            if (!$recordInterface instanceof RegistrationRecordInterface && !$recordInterface instanceof CancellationRecordInterface) {
+                throw $this->makeUnsupportedRecordException($recordInterface);
+            }
+            if ($index > 0 && !$recordInterface instanceof ChainableRecordInterface) {
+                throw new \InvalidArgumentException(\sprintf('The record #%d of a batch is chained to the preceding one, so %s must implement %s to receive & persist the computed previous invoice identifier & hash its own hash is calculated over.', $index + 1, get_debug_type($recordInterface), ChainableRecordInterface::class));
+            }
+        }
+        $recordModels = [];
+        $previousRecordModel = null;
+        foreach ($recordInterfaces as $recordInterface) {
+            if ($recordInterface instanceof RegistrationRecordInterface) {
+                $recordModel = $this->registrationRecordFactory->makeValidatedRegistrationRecordModelFromDto(
+                    $this->registrationRecordFactory->makeValidatedRegistrationRecordDtoFromInterface($recordInterface),
+                    $previousRecordModel
+                );
+            } elseif ($recordInterface instanceof CancellationRecordInterface) {
+                $recordModel = $this->cancellationRecordFactory->makeValidatedCancellationRecordModelFromDto(
+                    $this->cancellationRecordFactory->makeValidatedCancellationRecordDtoFromInterface($recordInterface),
+                    $previousRecordModel
+                );
+            } else {
+                throw $this->makeUnsupportedRecordException($recordInterface);
+            }
+            $recordModels[] = $recordModel;
+            $previousRecordModel = $recordModel;
+        }
+
+        return $recordModels;
+    }
+
+    private function makeUnsupportedRecordException(mixed $recordInterface): \InvalidArgumentException
+    {
+        return new \InvalidArgumentException(\sprintf('A records batch only accepts %s or %s instances, %s given.', RegistrationRecordInterface::class, CancellationRecordInterface::class, get_debug_type($recordInterface)));
     }
 
     private function assertRequirementReference(string $requirementReference): void

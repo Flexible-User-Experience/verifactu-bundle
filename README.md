@@ -172,6 +172,29 @@ $result = $aeatClientHandler->sendCancellationRecords($cancellationRecords);
 
 Every record after the first one of the batch is chained to the preceding record automatically (its previous invoice identifier & hash are computed for you, so only the first record of the batch must reference the last previously registered record). The `hash` and `hashedAt` values of every record are updated during the call, and you can correlate per-record acceptance through `$result->getItems()`, which contains one response item per submitted record.
 
+A batch can also mix both record types in a single remission, keeping the given order and chaining across types:
+
+```php
+$result = $aeatClientHandler->sendRecords([$registrationRecord, $cancellationRecord, $anotherRegistrationRecord]);
+```
+
+**Batched records must be chainable.** The record hash is calculated over the chaining, so the computed previous invoice identifier & hash are written back to every chained record together with its `hash` and `hashedAt` values — and **all four must be persisted**, or your stored record will no longer reproduce the hash the AEAT holds (breaking its XML export and any later remission of it). To receive them, every record after the first one of a batch must implement `FlexibleUx\VerifactuBundle\Contract\ChainableRecordInterface`:
+
+```php
+use FlexibleUx\VerifactuBundle\Contract\ChainableRecordInterface;
+use FlexibleUx\VerifactuBundle\Contract\InvoiceIdentifierInterface;
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
+
+class Invoice implements RegistrationRecordInterface, ChainableRecordInterface
+{
+    public function setPreviousInvoiceIdentifier(InvoiceIdentifierInterface $previousInvoiceIdentifier): self { /* ... */ }
+
+    public function setPreviousHash(string $previousHash): self { /* ... */ }
+}
+```
+
+A batch holding a chained record which does not implement it is rejected with an `\InvalidArgumentException` before anything is sent, instead of silently dropping the chaining. Records sent one by one are never chained by the bundle, so they do not need the contract.
+
 ### Answering an AEAT requirement
 
 A SIF operating in "No Veri\*Factu" mode does not remit its records, but the AEAT can request them through a requirement ("remisión por requerimiento"). Send the requested records page by page, marking the page that closes the requirement:

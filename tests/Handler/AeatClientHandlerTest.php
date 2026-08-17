@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FlexibleUx\VerifactuBundle\Tests\Handler;
 
+use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
 use FlexibleUx\VerifactuBundle\Dto\AeatResponseDto;
 use FlexibleUx\VerifactuBundle\Dto\BreakdownDetailDto;
 use FlexibleUx\VerifactuBundle\Dto\CancellationRecordDto;
@@ -177,6 +178,80 @@ final class AeatClientHandlerTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->handler->sendCancellationRecords(array_fill(0, 1001, $this->makeCancellationRecordDto()));
+    }
+
+    public function testSendRecordsChainsAcrossRecordTypes(): void
+    {
+        $first = $this->makeRegistrationRecordDto('FA-2026-001');
+        $second = $this->makeCancellationRecordDto();
+        $third = $this->makeRegistrationRecordDto('FA-2026-003');
+        $this->handler->sendRecords([$first, $second, $third]);
+        $this->assertCount(3, $this->sentRecords);
+        $this->assertInstanceOf(RegistrationRecord::class, $this->sentRecords[0]);
+        $this->assertInstanceOf(CancellationRecord::class, $this->sentRecords[1]);
+        $this->assertInstanceOf(RegistrationRecord::class, $this->sentRecords[2]);
+        $this->assertSame($this->sentRecords[0]->invoiceId, $this->sentRecords[1]->previousInvoiceId);
+        $this->assertSame($this->sentRecords[0]->hash, $this->sentRecords[1]->previousHash);
+        $this->assertSame($this->sentRecords[1]->invoiceId, $this->sentRecords[2]->previousInvoiceId);
+        $this->assertSame($this->sentRecords[1]->hash, $this->sentRecords[2]->previousHash);
+        $this->assertSame($this->sentRecords[0]->hash, $first->getHash());
+        $this->assertSame($this->sentRecords[1]->hash, $second->getHash());
+        $this->assertSame($this->sentRecords[2]->hash, $third->getHash());
+    }
+
+    public function testSendRecordsWritesBackTheComputedChaining(): void
+    {
+        $first = $this->makeRegistrationRecordDto('FA-2026-001');
+        $second = $this->makeCancellationRecordDto();
+        $third = $this->makeRegistrationRecordDto('FA-2026-003');
+        $this->handler->sendRecords([$first, $second, $third]);
+        $this->assertSame($first->getInvoiceIdentifier(), $second->getPreviousInvoiceIdentifier());
+        $this->assertSame($first->getHash(), $second->getPreviousHash());
+        $this->assertSame($second->getInvoiceIdentifier(), $third->getPreviousInvoiceIdentifier());
+        $this->assertSame($second->getHash(), $third->getPreviousHash());
+    }
+
+    public function testBatchedRecordsCanBeRebuiltVerbatimAfterwards(): void
+    {
+        $first = $this->makeRegistrationRecordDto('FA-2026-001');
+        $second = $this->makeRegistrationRecordDto('FA-2026-002');
+        $this->handler->sendRecords([$first, $second]);
+        $storedHashes = [$first->getHash(), $second->getHash()];
+        // the persisted data of every batched record must still reproduce the hash the AEAT holds
+        $this->handler->sendRecordsUponRequirement([$first, $second], 'REF00001ABDEAF1234', true);
+        $this->assertSame($storedHashes, [$this->sentRecords[0]->hash, $this->sentRecords[1]->hash]);
+    }
+
+    public function testSendRecordsRejectsANonChainableRecordAfterTheFirstOne(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('The record #2 of a batch is chained to the preceding one');
+        $this->handler->sendRecords([
+            $this->makeRegistrationRecordDto('FA-2026-001'),
+            $this->createMock(RegistrationRecordInterface::class),
+        ]);
+        $this->assertSame([], $this->sentRecords);
+    }
+
+    public function testSendRecordsRejectsAnUnsupportedRecord(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('A records batch only accepts');
+        $this->handler->sendRecords([$this->makeRegistrationRecordDto('FA-2026-001'), new \stdClass()]);
+    }
+
+    public function testRequirementSubmissionSendsMixedRecordsVerbatim(): void
+    {
+        $registrationRecord = $this->makeRegistrationRecordDto('FA-2026-001');
+        $cancellationRecord = $this->makeCancellationRecordDto();
+        $this->handler->sendRecords([$registrationRecord, $cancellationRecord]);
+        $storedHashes = [$registrationRecord->getHash(), $cancellationRecord->getHash()];
+        $this->handler->sendRecordsUponRequirement([$registrationRecord, $cancellationRecord], 'REF00001ABDEAF1234', true);
+        $this->assertCount(2, $this->sentRecords);
+        $this->assertInstanceOf(RegistrationRecord::class, $this->sentRecords[0]);
+        $this->assertInstanceOf(CancellationRecord::class, $this->sentRecords[1]);
+        $this->assertSame($storedHashes, [$this->sentRecords[0]->hash, $this->sentRecords[1]->hash]);
+        $this->assertSame($storedHashes, [$registrationRecord->getHash(), $cancellationRecord->getHash()]);
     }
 
     public function testRequirementSubmissionSendsRecordsWithTheirStoredHashAndRestoresTheConfiguredReference(): void
