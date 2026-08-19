@@ -17,6 +17,7 @@ final class FlexibleUxVerifactuBundle extends AbstractBundle
     public const AEAT_CLIENT_KEY = 'aeat_client';
     public const COMPUTER_SYSTEM_CONFIG_KEY = 'computer_system';
     public const FISCAL_IDENTIFIER_CONFIG_KEY = 'fiscal_identifier';
+    public const STATEMENT_OF_RESPONSIBILITY_CONFIG_KEY = 'statement_of_responsibility';
 
     public function configure(DefinitionConfigurator $definition): void
     {
@@ -40,6 +41,7 @@ final class FlexibleUxVerifactuBundle extends AbstractBundle
         ;
         $container->getDefinition('flexible_ux_verifactu.generate_sif_statement_command')
             ->setArgument(0, $config[self::COMPUTER_SYSTEM_CONFIG_KEY])
+            ->setArgument(1, $config[self::STATEMENT_OF_RESPONSIBILITY_CONFIG_KEY])
         ;
         $container->getDefinition('flexible_ux_verifactu.fiscal_identifier_factory')
             ->setArgument(0, $config[self::FISCAL_IDENTIFIER_CONFIG_KEY])
