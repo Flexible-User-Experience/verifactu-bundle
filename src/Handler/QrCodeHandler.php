@@ -31,8 +31,12 @@ use Zxing\QrReader;
 
 final readonly class QrCodeHandler
 {
-    public const QR_CODE_TRIBUTARY_LEGAL_LABEL = 'QR tributario:'; // this is a mandatory, case-sensitive, legal text label
-    public const QR_CODE_VERI_FACTU_LEGAL_LABEL = 'VERI*FACTU'; // this is a mandatory, case-sensitive, legal text label, only allowed when the SIF operates in Veri*Factu mode
+    // Mandatory, case-sensitive legal text label. It must ALWAYS precede the code, placed above it,
+    // so it is never rendered into the image: laying it out is up to whoever prints the invoice.
+    public const QR_CODE_TRIBUTARY_LEGAL_LABEL = 'QR tributario:';
+    // Mandatory, case-sensitive legal text label, only allowed when the SIF operates in Veri*Factu
+    // mode. The law puts it right below the code, which is where the image itself carries it.
+    public const QR_CODE_VERI_FACTU_LEGAL_LABEL = 'VERI*FACTU';
     // the khanamiryan decoder cannot read renders bigger than ~500px, so validation runs on a downscaled copy of the generated image
     private const QR_CODE_VALIDATION_SIZE = 300;
     private const TOTAL_AMOUNT_PATTERN = '/^-?\d{1,12}\.\d{2}$/';
@@ -176,13 +180,18 @@ final readonly class QrCodeHandler
             foregroundColor: new Color(0, 0, 0),
             backgroundColor: new Color(255, 255, 255)
         );
-        $label = new Label(
-            text: $this->aeatClientConfig['is_verifactu_mode'] ? self::QR_CODE_VERI_FACTU_LEGAL_LABEL : self::QR_CODE_TRIBUTARY_LEGAL_LABEL,
+        // Only the Veri*Factu legend belongs inside the image, because it is the only one the law
+        // places below the code. A SIF that emits non verifiable invoices carries no legend at all
+        // there, and gets a bare code: its single label, "QR tributario:", goes above the code and
+        // is the caller's to draw, so rendering it under the code made the invoice illegal on both
+        // counts, misplaced here and duplicated by a caller doing it right.
+        $label = $this->aeatClientConfig['is_verifactu_mode'] ? new Label(
+            text: self::QR_CODE_VERI_FACTU_LEGAL_LABEL,
             font: new OpenSans(size: 96),
             alignment: LabelAlignment::Center,
             margin: new Margin(0, 0, 24, 0),
             textColor: new Color(0, 0, 0)
-        );
+        ) : null;
         $result = $writer->write(
             qrCode: $qrCode,
             label: $label,

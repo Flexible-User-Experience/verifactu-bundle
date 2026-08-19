@@ -94,6 +94,34 @@ final class DefinitionTest extends TestCase
         $this->processConfiguration($config);
     }
 
+    public function testStatementOfResponsibilityDefaultsToAnEmptyDocumentContent(): void
+    {
+        $processed = $this->processConfiguration(self::MINIMAL_CONFIG);
+        $this->assertSame([], $processed['statement_of_responsibility']['composition']);
+        $this->assertSame([], $processed['statement_of_responsibility']['functionalities']);
+        $this->assertSame([], $processed['statement_of_responsibility']['installation_characteristics']);
+        $this->assertNull($processed['statement_of_responsibility']['typology']);
+        $this->assertNull($processed['statement_of_responsibility']['vendor_address']);
+    }
+
+    public function testStatementOfResponsibilityCanBeConfigured(): void
+    {
+        $config = self::MINIMAL_CONFIG;
+        $config['statement_of_responsibility'] = [
+            'composition' => ['Módulo de facturación', 'Biblioteca josemmo/verifactu-php'],
+            'functionalities' => ['Generación del código QR tributario'],
+            'installation_characteristics' => ['Instalación SaaS sobre servidor propio en la UE'],
+            'typology' => 'Sistema informático de facturación de uso propio',
+            'vendor_address' => 'Carrer Major, 1 — 43870 Amposta (Tarragona), España',
+        ];
+        $processed = $this->processConfiguration($config);
+        $this->assertSame(['Módulo de facturación', 'Biblioteca josemmo/verifactu-php'], $processed['statement_of_responsibility']['composition']);
+        $this->assertSame(['Generación del código QR tributario'], $processed['statement_of_responsibility']['functionalities']);
+        $this->assertSame(['Instalación SaaS sobre servidor propio en la UE'], $processed['statement_of_responsibility']['installation_characteristics']);
+        $this->assertSame('Sistema informático de facturación de uso propio', $processed['statement_of_responsibility']['typology']);
+        $this->assertSame('Carrer Major, 1 — 43870 Amposta (Tarragona), España', $processed['statement_of_responsibility']['vendor_address']);
+    }
+
     private function processConfiguration(array $config): array
     {
         $treeBuilder = new TreeBuilder('flexible_ux_verifactu');

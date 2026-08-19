@@ -54,6 +54,17 @@ flexible_ux_verifactu:
     fiscal_identifier:
         name: '%your_name%'
         nif: '%your_nif%' # 9 digits (Spanish NIF or CIF)
+    # Statement of responsibility ("declaración responsable") content, only used by the generate-sif-statement command
+    statement_of_responsibility:
+        composition: # "composición": modules, components & third party software of your SIF
+            - '%your_first_component%'
+            - '%your_second_component%'
+        functionalities: # "funcionalidades", rendered together with the ones derived from the computer_system flags
+            - '%your_first_functionality%'
+        installation_characteristics: # "características de la instalación", rendered together with the computer_system.installation_number
+            - '%your_first_installation_characteristic%'
+        typology: '%your_typology%' # "tipología", e.g. 'Sistema informático de facturación de uso propio'
+        vendor_address: '%your_vendor_address%' # "datos de localización" of the producer: its full postal address
 ```
 
 ## Usage
@@ -269,11 +280,13 @@ Export keeps the **stored** `hash` and `hashedAt` values of the already sent rec
 
 ### SIF statement of responsibility
 
-Generate a draft of the legal "declaración responsable" document (Artículo 13 del RD 1007/2023) from your configured `computer_system` credentials:
+Generate a draft of the legal "declaración responsable" document (Artículo 13 del RD 1007/2023) as a Markdown file from your configured `computer_system` & `statement_of_responsibility` options:
 
 ```shell
-php bin/console flexible-ux:verifactu:generate-sif-statement "Barcelona" --output var/declaracion-responsable.txt
+php bin/console flexible-ux:verifactu:generate-sif-statement "Barcelona" --output var/declaracion-responsable.md
 ```
+
+The document carries the whole content the Art. 13 requires: the name, NIF & location data of the producer, the name, identifier code & version of the system, its typology, composition & functionalities, and the characteristics of the installation. Everything no AEAT record carries comes from the `statement_of_responsibility` config options: whatever you leave empty is rendered as a **[PENDIENTE DE COMPLETAR]** marker naming the option to fill, and the command lists the missing ones through its error output, so the document itself stays clean on `--output` files & shell redirections.
 
 The generated document is a **draft**: review it with your legal counsel before signing it and keeping it available to your clients and to the AEAT[^aeat].
 

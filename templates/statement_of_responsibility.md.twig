@@ -1,0 +1,78 @@
+{%- macro pending(option) -%}
+**[PENDIENTE DE COMPLETAR]** _rellene la opción de configuración `flexible_ux_verifactu.statement_of_responsibility.{{ option }}`._
+{%- endmacro -%}
+{%- import _self as draft -%}
+{%- autoescape false -%}
+{%- set vendor_address_block = statement.vendor_address|default(null) ? statement.vendor_address : draft.pending('vendor_address') -%}
+{%- set typology_block = statement.typology|default(null) ? statement.typology : draft.pending('typology') -%}
+{%- set composition_block = statement.composition|default([])|length
+    ? statement.composition|map(item => '- ' ~ item)|join("\n")
+    : draft.pending('composition') -%}
+{%- set functionalities = computer_system.only_supports_verifactu
+    ? ['Emisión de facturas verificables ("VERI*FACTU") como única modalidad de funcionamiento, remitiendo todos los registros de facturación a la Agencia Estatal de Administración Tributaria.']
+    : ['Emisión de facturas verificables ("VERI*FACTU") y funcionamiento en modalidad de no remisión de los registros de facturación a la Agencia Estatal de Administración Tributaria.'] -%}
+{%- set functionalities = functionalities|merge([computer_system.supports_multiple_taxpayers
+    ? 'Uso por varios obligados tributarios.'
+    : 'Uso por un único obligado tributario, el sistema no permite su uso por varios obligados tributarios.']) -%}
+{%- set functionalities_block = functionalities|merge(statement.functionalities|default([]))|map(item => '- ' ~ item)|join("\n") -%}
+{%- if statement.functionalities|default([])|length == 0 -%}
+{%- set functionalities_block = functionalities_block ~ "\n\n" ~ draft.pending('functionalities') -%}
+{%- endif -%}
+{%- set installation_characteristics = [
+    '**Número de instalación:** ' ~ computer_system.installation_number,
+    '**Obligados tributarios que la utilizan:** ' ~ (computer_system.has_multiple_taxpayers ? 'varios' : 'uno'),
+] -%}
+{%- set installation_block = installation_characteristics|merge(statement.installation_characteristics|default([]))|map(item => '- ' ~ item)|join("\n") -%}
+{%- if statement.installation_characteristics|default([])|length == 0 -%}
+{%- set installation_block = installation_block ~ "\n\n" ~ draft.pending('installation_characteristics') -%}
+{%- endif -%}
+# Declaración responsable del sistema informático de facturación
+
+> Emitida al amparo del artículo 13 del Real Decreto 1007/2023, de 5 de diciembre, y de la Orden HAC/1177/2024, de 17 de octubre.
+
+## 1. Productor del sistema informático de facturación
+
+- **Nombre o razón social:** {{ computer_system.vendor_name }}
+- **NIF:** {{ computer_system.vendor_nif }}
+- **Datos de localización:** {{ vendor_address_block }}
+
+## 2. Sistema informático de facturación
+
+- **Nombre del sistema:** {{ computer_system.name }}
+- **Código identificador:** {{ computer_system.id }}
+- **Versión:** {{ computer_system.version }}
+
+### 2.1. Tipología
+
+{{ typology_block }}
+
+### 2.2. Composición
+
+{{ composition_block }}
+
+### 2.3. Funcionalidades
+
+{{ functionalities_block }}
+
+## 3. Características de la instalación
+
+{{ installation_block }}
+
+## 4. Declaración
+
+El productor arriba identificado **DECLARA, BAJO SU RESPONSABILIDAD**, que el sistema informático de facturación indicado, en la versión señalada, cumple con lo dispuesto en el artículo 29.2.j) de la Ley 58/2003, de 17 de diciembre, General Tributaria, en el Reglamento que establece los requisitos de los sistemas y programas informáticos o electrónicos que soporten los procesos de facturación, aprobado por el Real Decreto 1007/2023, de 5 de diciembre (en particular, sus artículos 8 a 14), y en la Orden HAC/1177/2024, de 17 de octubre, que lo desarrolla, garantizando la integridad, conservación, accesibilidad, legibilidad, trazabilidad e inalterabilidad de los registros de facturación.
+
+## 5. Lugar, fecha y firma
+
+En {{ place }}, a {{ signed_at|date('d/m/Y') }}
+
+```text
+Fdo.: ______________________________________
+
+{{ computer_system.vendor_name }} — NIF {{ computer_system.vendor_nif }}
+```
+
+---
+
+> Documento generado con [flexible-ux/verifactu-bundle](https://github.com/Flexible-User-Experience/verifactu-bundle). Este documento es un **borrador**: revise su contenido con su asesoría legal antes de firmarlo y conservarlo a disposición de sus clientes y de la Administración tributaria.
+{% endautoescape %}
