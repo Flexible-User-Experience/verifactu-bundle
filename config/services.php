@@ -37,6 +37,7 @@ return static function (ContainerConfigurator $container): void {
         ->set('flexible_ux_verifactu.generate_sif_statement_command', GenerateSifStatementCommand::class)
             ->args([
                 abstract_arg(FlexibleUxVerifactuBundle::COMPUTER_SYSTEM_CONFIG_KEY),
+                abstract_arg(FlexibleUxVerifactuBundle::STATEMENT_OF_RESPONSIBILITY_CONFIG_KEY),
                 service('twig'),
             ])
             ->tag('console.command')
