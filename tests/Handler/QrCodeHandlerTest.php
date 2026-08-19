@@ -153,6 +153,35 @@ final class QrCodeHandlerTest extends TestCase
         $this->assertStringStartsWith("\x89PNG", $result->getString());
     }
 
+    public function testVerifactuQrCodePngImageCarriesTheLegendBelowTheCode(): void
+    {
+        [$width, $height] = $this->measurePngImage(
+            $this->handler->buildQrCodeAsPngImageFromRegistrationRecordDto($this->makeRegistrationRecordDto())->getString()
+        );
+        $this->assertGreaterThan($width, $height, 'the VERI*FACTU legend must add a band below the square code');
+    }
+
+    public function testNoVerifactuQrCodePngImageCarriesNoLegendAtAll(): void
+    {
+        [$width, $height] = $this->measurePngImage(
+            $this->makeHandler(false)->buildQrCodeAsPngImageFromRegistrationRecordDto($this->makeRegistrationRecordDto())->getString()
+        );
+        // "QR tributario:" is the only label a non verifiable invoice carries and it always goes
+        // above the code, so nothing may be rendered below it: the image stays a bare square.
+        $this->assertSame($width, $height);
+    }
+
+    /**
+     * @return array{int, int} the width and height of a rendered PNG image
+     */
+    private function measurePngImage(string $pngImage): array
+    {
+        $image = imagecreatefromstring($pngImage);
+        $this->assertNotFalse($image);
+
+        return [imagesx($image), imagesy($image)];
+    }
+
     private function makeRegistrationRecordDto(): RegistrationRecordDto
     {
         return new RegistrationRecordDto(
