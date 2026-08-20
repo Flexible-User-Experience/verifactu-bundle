@@ -92,6 +92,31 @@ final readonly class AeatClientHandler
     }
 
     /**
+     * Send a registration record this SIF already stamped, keeping the hash & hashedAt values it was
+     * stamped with instead of computing fresh ones.
+     *
+     * A SIF that generates the record when the invoice is issued and remits it afterwards must remit
+     * THAT record: re-stamping it at send time would hand the AEAT a different record than the one the
+     * chain, the stored XML copy and the invoice QR code were all built from. The stored hash is
+     * re-calculated before sending, so a record altered between being stamped and being remitted is
+     * rejected here rather than remitted.
+     *
+     * @throws ValidationFailedException if the record data does not fulfill the bundle DTO asserts (nothing is sent)
+     * @throws InvalidModelException     if the record data or its stored hash is not valid (nothing is sent)
+     * @throws AeatException             if the AEAT server returned a fault or an unparseable response (remission outcome unknown)
+     * @throws ClientExceptionInterface  if the request could not be sent (remission outcome unknown)
+     * @throws \InvalidArgumentException if the configured PFX certificate file does not exist or is not readable
+     */
+    public function sendStoredRegistrationRecord(RegistrationRecordInterface $registrationRecordInterface): AeatResponseInterface
+    {
+        $aeatResponse = $this->aeatClient->send([
+            $this->registrationRecordFactory->makeValidatedRegistrationRecordModelWithStoredHashFromInterface($registrationRecordInterface),
+        ])->wait();
+
+        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
+    }
+
+    /**
      * Send a batch of registration records in a single AEAT API call: every record after the first one
      * of the batch is chained to the preceding record automatically.
      *

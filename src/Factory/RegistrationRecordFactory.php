@@ -10,9 +10,11 @@ use FlexibleUx\VerifactuBundle\Contract\RegistrationRecordInterface;
 use FlexibleUx\VerifactuBundle\Dto\RegistrationRecordDto;
 use FlexibleUx\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Exceptions\InvalidModelException;
 use josemmo\Verifactu\Models\Records\InvoiceIdentifier;
 use josemmo\Verifactu\Models\Records\Record;
 use josemmo\Verifactu\Models\Records\RegistrationRecord;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 final readonly class RegistrationRecordFactory
 {
@@ -91,6 +93,28 @@ final readonly class RegistrationRecordFactory
         $registrationRecordModel->validate();
 
         return $registrationRecordModel;
+    }
+
+    /**
+     * Stamp a registration record with its hash & hashedAt values without sending it anywhere, and
+     * return the very same instance so the caller can persist them.
+     *
+     * This is what a SIF does at the moment the invoice is issued: from then on the record exists,
+     * is chained and backs the QR code printed on the invoice, whether or not it has already been
+     * remitted. Remit it afterwards with AeatClientHandler::sendStoredRegistrationRecord(), which
+     * keeps these values instead of stamping fresh ones.
+     *
+     * @throws ValidationFailedException if the record data does not fulfill the bundle DTO asserts
+     * @throws InvalidModelException     if the record data does not fulfill the library model validations
+     */
+    public function stampRegistrationRecordFromInterface(RegistrationRecordInterface $input): RegistrationRecordInterface
+    {
+        $registrationRecordModel = $this->makeValidatedRegistrationRecordModelFromDto($this->makeValidatedRegistrationRecordDtoFromInterface($input));
+
+        return $input
+            ->setHash($registrationRecordModel->hash)
+            ->setHashedAt($registrationRecordModel->hashedAt)
+        ;
     }
 
     /**

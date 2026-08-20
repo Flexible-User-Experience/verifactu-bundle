@@ -18,6 +18,7 @@ use FlexibleUx\VerifactuBundle\Transformer\ForeignFiscalIdentifierTransformer;
 use FlexibleUx\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
 use FlexibleUx\VerifactuBundle\Transformer\RegistrationRecordTransformer;
 use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Exceptions\InvalidModelException;
 use josemmo\Verifactu\Models\Records\InvoiceType;
 use josemmo\Verifactu\Models\Records\OperationType;
 use josemmo\Verifactu\Models\Records\RegimeType;
@@ -44,6 +45,45 @@ final class RegistrationRecordFactoryTest extends TestCase
             new RegistrationRecordTransformer(),
             $validator
         );
+    }
+
+    /**
+     * The stamp is what lets a SIF generate the record when the invoice is issued and remit it
+     * later: the hash and the timestamp are fixed here, and every later step, the stored XML copy,
+     * the chain and the remission itself, has to reproduce these very values.
+     */
+    public function testStampingARecordFixesItsHashAndTimestampWithoutSendingAnything(): void
+    {
+        $record = $this->makeRecordDto('FA-2026-001');
+        $this->assertSame('', $record->getHash());
+
+        $stamped = $this->factory->stampRegistrationRecordFromInterface($record);
+
+        $this->assertSame($record, $stamped, 'the very same instance is stamped, so the caller can persist it');
+        $this->assertMatchesRegularExpression('/^[0-9A-F]{64}$/', $stamped->getHash());
+    }
+
+    /**
+     * A stamped record must survive the round trip that a deferred remission puts it through, so
+     * that what is finally sent to the AEAT is the record the invoice was issued with.
+     */
+    public function testAStampedRecordReproducesItsOwnHashWhenRebuiltFromTheStoredValues(): void
+    {
+        $record = $this->factory->stampRegistrationRecordFromInterface($this->makeRecordDto('FA-2026-001'));
+
+        $model = $this->factory->makeValidatedRegistrationRecordModelWithStoredHashFromInterface($record);
+
+        $this->assertSame($record->getHash(), $model->hash);
+        $this->assertSame($record->getHashedAt()->format(\DATE_ATOM), $model->hashedAt->format(\DATE_ATOM));
+    }
+
+    public function testARecordAlteredAfterBeingStampedNoLongerReproducesItsHash(): void
+    {
+        $record = $this->factory->stampRegistrationRecordFromInterface($this->makeRecordDto('FA-2026-001'));
+        $record->setHash(str_repeat('A1B2C3D4', 8));
+
+        $this->expectException(InvalidModelException::class);
+        $this->factory->makeValidatedRegistrationRecordModelWithStoredHashFromInterface($record);
     }
 
     public function testChainedBatchModelsAreLinkedByInvoiceIdentifierAndHash(): void

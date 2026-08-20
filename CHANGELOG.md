@@ -1,6 +1,21 @@
 CHANGELOG
 =========
 
+0.6.0
+-----
+ 
+ * Add `AeatClientHandler::sendStoredRegistrationRecord()` to remit a registration record verbatim, keeping the hash & hashedAt values it was stamped with, which so far was only reachable through the requirement answer path (`sendRegistrationRecordsUponRequirement()`) and therefore only with a "RefRequerimiento" header: a SIF that generates the record when the invoice is issued and remits it afterwards, as Art. 7 RD 1007/2023 requires, had no way to remit THAT record, since `sendRegistrationRecord()` always re-stamps it and would hand the AEAT a different record than the one the chain, the stored XML copy and the invoice QR code were built from
+ * Add `RegistrationRecordFactory::stampRegistrationRecordFromInterface()` to fix the hash & generation timestamp of a record without sending it anywhere, the other half of generating the record at issue time, which so far meant reaching for `makeValidatedRegistrationRecordModelFromDto()` and copying both values back onto the record by hand
+
+0.5.0
+-----
+ 
+ * Add `statement_of_responsibility` config section (`composition`, `functionalities`, `installation_characteristics`, `typology` & `vendor_address`) to fill the Art. 13 RD 1007/2023 content that no AEAT record carries: the generated statement of responsibility only identified the producer by name & NIF and the system by name, code & version, so it missed the location data of the producer, the typology, composition & functionalities of the system and the characteristics of the installation (not even the configured `computer_system.installation_number` was printed), which made the document unusable as a "declaración responsable"
+ * Render every missing statement of responsibility content as a "[PENDIENTE DE COMPLETAR]" marker naming the config option to fill and list the missing ones through the command error output, so the document stays clean on `--output` files & shell redirections
+ * **BC break:** Generate the SIF statement of responsibility as a Markdown document (`templates/statement_of_responsibility.md.twig` replaces the removed `templates/statement_of_responsibility.txt.twig`), so any application overriding the template must port its copy
+ * **BC break:** `GenerateSifStatementCommand` takes the statement of responsibility config array as its second constructor argument, so any manual instantiation of the service must pass it
+ * Fix the mandatory "QR tributario:" label being rendered below the code in "No Veri*Factu" mode, where the law places it above the code and leaves it to whoever prints the invoice: the generated PNG now only carries the "VERI*FACTU" legend under the code in Veri*Factu mode and comes bare otherwise, instead of stamping a misplaced label that a caller drawing it right would duplicate
+
 0.4.0
 -----
  
@@ -17,10 +32,6 @@ CHANGELOG
  * Add QR code generation without an AEAT response (`buildQrCodeAsPngImageFromRegistrationRecordInterface()`, `buildQrCodeAsPngImageFromRegistrationRecordDto()` & `buildQrCodeAsPngImageFromInvoiceIdentifierInterface()`): the QR code content only depends on the invoice identifier & total amount, so requiring an accepted response made it impossible to print the QR before submitting the record, to reprint an invoice without keeping its response or to generate it at all in "No Veri*Factu" mode
  * Add QR code URL builders (`buildQrCodeUrlFromRegistrationRecordInterface()`, `buildQrCodeUrlFromRegistrationRecordDto()`, `buildQrCodeUrlFromInvoiceIdentifierInterface()` & `buildQrCodeUrl()`) exposing `QrGenerator::fromInvoiceId()` & `QrGenerator::from()`, to render the code with any other writer (PDF, SVG) than the bundled PNG one
  * Document the QR code generation options & the "No Veri*Factu" mode in the README
- * Add `statement_of_responsibility` config section (`composition`, `functionalities`, `installation_characteristics`, `typology` & `vendor_address`) to fill the Art. 13 RD 1007/2023 content that no AEAT record carries: the generated statement of responsibility only identified the producer by name & NIF and the system by name, code & version, so it missed the location data of the producer, the typology, composition & functionalities of the system and the characteristics of the installation (not even the configured `computer_system.installation_number` was printed), which made the document unusable as a "declaración responsable"
- * Render every missing statement of responsibility content as a "[PENDIENTE DE COMPLETAR]" marker naming the config option to fill and list the missing ones through the command error output, so the document stays clean on `--output` files & shell redirections
- * **BC break:** Generate the SIF statement of responsibility as a Markdown document (`templates/statement_of_responsibility.md.twig` replaces the removed `templates/statement_of_responsibility.txt.twig`), so any application overriding the template must port its copy
- * **BC break:** `GenerateSifStatementCommand` takes the statement of responsibility config array as its second constructor argument, so any manual instantiation of the service must pass it
 
 0.3.0
 -----
