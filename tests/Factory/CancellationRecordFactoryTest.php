@@ -11,6 +11,7 @@ use FlexibleUx\VerifactuBundle\Factory\InvoiceIdentifierFactory;
 use FlexibleUx\VerifactuBundle\Transformer\CancellationRecordTransformer;
 use FlexibleUx\VerifactuBundle\Transformer\InvoiceIdentifierTransformer;
 use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Exceptions\InvalidModelException;
 use josemmo\Verifactu\Models\Records\CancellationRecord;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
@@ -54,6 +55,41 @@ final class CancellationRecordFactoryTest extends TestCase
         $this->assertFalse($model->isPriorRejection);
         $this->assertMatchesRegularExpression('/^[0-9A-F]{64}$/', $model->hash);
         $this->assertSame($model->calculateHash(), $model->hash);
+    }
+
+    /**
+     * The annulment counterpart of stamping a registration record: fixing the hash and the timestamp
+     * without sending anything is what lets a SIF record the annulment when it is decided and remit
+     * it afterwards, and every later step has to reproduce these very values.
+     */
+    public function testStampingACancellationFixesItsHashAndTimestampWithoutSendingAnything(): void
+    {
+        $record = $this->makeDto('FA-2026-002', strtoupper(hash('sha256', 'previous-record')));
+        $this->assertSame('', $record->getHash());
+
+        $stamped = $this->factory->stampCancellationRecordFromInterface($record);
+
+        $this->assertSame($record, $stamped, 'the very same instance is stamped, so the caller can persist it');
+        $this->assertMatchesRegularExpression('/^[0-9A-F]{64}$/', $stamped->getHash());
+    }
+
+    public function testAStampedCancellationReproducesItsOwnHashWhenRebuiltFromTheStoredValues(): void
+    {
+        $record = $this->factory->stampCancellationRecordFromInterface($this->makeDto('FA-2026-002', strtoupper(hash('sha256', 'previous-record'))));
+
+        $model = $this->factory->makeValidatedCancellationRecordModelWithStoredHashFromInterface($record);
+
+        $this->assertSame($record->getHash(), $model->hash);
+        $this->assertSame($record->getHashedAt()->format(\DATE_ATOM), $model->hashedAt->format(\DATE_ATOM));
+    }
+
+    public function testACancellationAlteredAfterBeingStampedNoLongerReproducesItsHash(): void
+    {
+        $record = $this->factory->stampCancellationRecordFromInterface($this->makeDto('FA-2026-002', strtoupper(hash('sha256', 'previous-record'))));
+        $record->setHash(str_repeat('A1B2C3D4', 8));
+
+        $this->expectException(InvalidModelException::class);
+        $this->factory->makeValidatedCancellationRecordModelWithStoredHashFromInterface($record);
     }
 
     public function testChainedBatchModelsAreLinkedByInvoiceIdentifierAndHash(): void

@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+0.7.0
+-----
+ 
+ * Add `AeatClientHandler::sendStoredCancellationRecord()` & `CancellationRecordFactory::stampCancellationRecordFromInterface()`, the annulment counterparts of the two methods 0.6.0 added for registration records: a SIF that records an annulment when it is decided and remits it afterwards had no way to stamp that record without sending it, nor to remit the stamped one, so an annulment could only be generated and remitted in the same call and left no record at all when the remission failed
+
 0.6.0
 -----
  

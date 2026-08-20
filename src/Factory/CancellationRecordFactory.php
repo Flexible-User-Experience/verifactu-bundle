@@ -8,8 +8,10 @@ use FlexibleUx\VerifactuBundle\Contract\CancellationRecordInterface;
 use FlexibleUx\VerifactuBundle\Dto\CancellationRecordDto;
 use FlexibleUx\VerifactuBundle\Transformer\CancellationRecordTransformer;
 use FlexibleUx\VerifactuBundle\Validator\ContractsValidator;
+use josemmo\Verifactu\Exceptions\InvalidModelException;
 use josemmo\Verifactu\Models\Records\CancellationRecord;
 use josemmo\Verifactu\Models\Records\Record;
+use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 final readonly class CancellationRecordFactory
 {
@@ -68,6 +70,28 @@ final readonly class CancellationRecordFactory
         $cancellationRecordModel->validate();
 
         return $cancellationRecordModel;
+    }
+
+    /**
+     * Stamp a cancellation record with its hash & hashedAt values without sending it anywhere, and
+     * return the very same instance so the caller can persist them.
+     *
+     * The annulment counterpart of stampRegistrationRecordFromInterface(): the record of an
+     * annulment exists from the moment the annulment is decided, is chained from then on, and only
+     * reaches the AEAT afterwards. Remit it with AeatClientHandler::sendStoredCancellationRecord(),
+     * which keeps these values instead of stamping fresh ones.
+     *
+     * @throws ValidationFailedException if the record data does not fulfill the bundle DTO asserts
+     * @throws InvalidModelException     if the record data does not fulfill the library model validations
+     */
+    public function stampCancellationRecordFromInterface(CancellationRecordInterface $input): CancellationRecordInterface
+    {
+        $cancellationRecordModel = $this->makeValidatedCancellationRecordModelFromDto($this->makeValidatedCancellationRecordDtoFromInterface($input));
+
+        return $input
+            ->setHash($cancellationRecordModel->hash)
+            ->setHashedAt($cancellationRecordModel->hashedAt)
+        ;
     }
 
     /**
