@@ -152,6 +152,31 @@ final readonly class AeatClientHandler
     }
 
     /**
+     * Send a cancellation record this SIF already stamped, keeping the hash & hashedAt values it was
+     * stamped with instead of computing fresh ones.
+     *
+     * The annulment counterpart of sendStoredRegistrationRecord(), and it exists for the same
+     * reason: a SIF that records the annulment when it is decided and remits it afterwards must
+     * remit THAT record, not a freshly stamped one that the chain and the stored XML copy would
+     * both disagree with. The stored hash is re-calculated before sending, so a record altered
+     * between being stamped and being remitted is rejected here rather than remitted.
+     *
+     * @throws ValidationFailedException if the record data does not fulfill the bundle DTO asserts (nothing is sent)
+     * @throws InvalidModelException     if the record data or its stored hash is not valid (nothing is sent)
+     * @throws AeatException             if the AEAT server returned a fault or an unparseable response (remission outcome unknown)
+     * @throws ClientExceptionInterface  if the request could not be sent (remission outcome unknown)
+     * @throws \InvalidArgumentException if the configured PFX certificate file does not exist or is not readable
+     */
+    public function sendStoredCancellationRecord(CancellationRecordInterface $cancellationRecordInterface): AeatResponseInterface
+    {
+        $aeatResponse = $this->aeatClient->send([
+            $this->cancellationRecordFactory->makeValidatedCancellationRecordModelWithStoredHashFromInterface($cancellationRecordInterface),
+        ])->wait();
+
+        return $this->aeatResponseFactory->makeValidatedAeatResponseDtoFromModel($aeatResponse);
+    }
+
+    /**
      * Send a batch of cancellation records in a single AEAT API call: every record after the first one
      * of the batch is chained to the preceding record automatically.
      *
