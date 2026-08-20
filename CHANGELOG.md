@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+0.6.0
+-----
+ 
+ * Add `AeatClientHandler::sendStoredRegistrationRecord()` to remit a registration record verbatim, keeping the hash & hashedAt values it was stamped with, which so far was only reachable through the requirement answer path (`sendRegistrationRecordsUponRequirement()`) and therefore only with a "RefRequerimiento" header: a SIF that generates the record when the invoice is issued and remits it afterwards, as Art. 7 RD 1007/2023 requires, had no way to remit THAT record, since `sendRegistrationRecord()` always re-stamps it and would hand the AEAT a different record than the one the chain, the stored XML copy and the invoice QR code were built from
+ * Add `RegistrationRecordFactory::stampRegistrationRecordFromInterface()` to fix the hash & generation timestamp of a record without sending it anywhere, the other half of generating the record at issue time, which so far meant reaching for `makeValidatedRegistrationRecordModelFromDto()` and copying both values back onto the record by hand
+
 0.5.0
 -----
  
